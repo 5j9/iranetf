@@ -52,5 +52,10 @@ def funds_trade_price(set_index='companyId') -> _DF:
     return df
 
 
-def fund_price_and_nav_history(id_):
-    j = _api_json(f'bot/funds/fundPriceAndNavHistoryAdjust/{id_}')
+def get_company_stock_trade_info(id_: int, month: int) -> _DF:
+    j = _api_json(
+        'odata/stockTradeInfo/'
+        f'GetCompanyStockTradeInfo(companyId={id_},month={month})')
+    df = _DF(j['value'])
+    df['Date'] = _to_dt(df['Date'])
+    return df
