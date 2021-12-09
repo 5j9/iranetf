@@ -1,3 +1,5 @@
+__version__ = '0.0.1.dev0'
+
 from json import loads as _loads
 
 from requests import get as _get
