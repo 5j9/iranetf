@@ -29,6 +29,9 @@ def patch_get_content(filename):
 def test_get_funds():
     df = get_funds()
     assert len(df) == 75
+    # NameDisplay needs to be stripped
+    # noinspection PyUnresolvedReferences
+    assert (df.NameDisplay.str.strip() == df.NameDisplay).all()
 
 
 @patch_get_content('latestPortfolio1497.json')

@@ -20,6 +20,7 @@ def get_funds() -> _DF:
     j = _api_json('odata/company/GetFunds')['value']
     df = _DF(j)
     df[['UpdateDate', 'CreateDate']] = df[['UpdateDate', 'CreateDate']].apply(_to_dt)
+    df['NameDisplay'] = df['NameDisplay'].astype('string', copy=False).str.strip()
     return df
 
 
