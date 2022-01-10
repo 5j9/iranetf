@@ -43,21 +43,25 @@ def test_fund_portfolio_report_latest():
 @patch_get_content('fundPriceAndNavDeviation.json')
 def test_funds_deviation_week_month():
     week, month = funds_deviation_week_month()
-    assert week.columns.tolist() == [
-        'symbol', 'fundType', 'from', 'to', 'data']
+    assert [*week.dtypes.items()] == [
+        ('symbol', dtype('O')),
+        ('fundType', dtype('O')),
+        ('from', dtype('O')),
+        ('to', dtype('O')),
+        ('data', dtype('float64'))]
 
 
 @patch_get_content('tradePrice.json')
 def test_funds_trade_price():
     df = funds_trade_price()
-    assert df.dtypes.tolist() == [
-        dtype('O'),
-        dtype('uint32'),
-        dtype('float64'),
-        dtype('uint32'),
-        dtype('float64'),
-        dtype('float64'),
-        dtype('O')]
+    assert [*df.dtypes.items()] == [
+        ('symbol', dtype('O')),
+        ('tradePrice', dtype('uint32')),
+        ('priceDiff', dtype('float64')),
+        ('nav', dtype('uint32')),
+        ('navDiff', dtype('float64')),
+        ('priceAndNavDiff', dtype('float64')),
+        ('fundType', dtype('O'))]
 
 
 @patch_get_content('GetCompanyStockTradeInfo1437_1.json')
