@@ -1,13 +1,15 @@
 __version__ = '0.2.1.dev0'
 
 from json import loads as _loads
+from functools import partial as _partial
 
 from requests import get as _get
-from pandas import DataFrame as _DF, to_datetime as _to_dt, \
+from pandas import DataFrame as _DataFrame, to_datetime as _to_dt, \
     to_numeric as _to_num
 
 
 _YK = ''.maketrans('يك', 'یک')
+_DF = _partial(_DataFrame, copy=False)
 
 
 def _api_json(path) -> list | dict:
@@ -16,7 +18,7 @@ def _api_json(path) -> list | dict:
     )
 
 
-def funds() -> _DF:
+def funds() -> _DataFrame:
     j = _api_json('odata/company/GetFunds')['value']
     df = _DF(j)
     df[['UpdateDate', 'CreateDate']] = df[['UpdateDate', 'CreateDate']].apply(_to_dt)
@@ -24,7 +26,7 @@ def funds() -> _DF:
     return df
 
 
-def fund_portfolio_report_latest(id_: int) -> _DF:
+def fund_portfolio_report_latest(id_: int) -> _DataFrame:
     j = _api_json(
         'odata/FundPortfolioReport'
         f'?$top=1'
@@ -34,7 +36,9 @@ def fund_portfolio_report_latest(id_: int) -> _DF:
     return df
 
 
-def funds_deviation_week_month(set_index='companyId') -> tuple[_DF, _DF]:
+def funds_deviation_week_month(
+    set_index='companyId'
+) -> tuple[_DataFrame, _DataFrame]:
     j = _api_json('bot/funds/fundPriceAndNavDeviation')
     week = _DF(j['seven'])
     month = _DF(j['thirty'])
@@ -44,7 +48,7 @@ def funds_deviation_week_month(set_index='companyId') -> tuple[_DF, _DF]:
     return week, month
 
 
-def funds_trade_price(set_index='companyId') -> _DF:
+def funds_trade_price(set_index='companyId') -> _DataFrame:
     j = _api_json('bot/funds/allFundLastStatus/tradePrice')
     df = _DF(j)
     numeric_cols = [
@@ -55,10 +59,14 @@ def funds_trade_price(set_index='companyId') -> _DF:
     return df
 
 
-def trade_info(id_: int | str, month: int) -> _DF:
+def fund_trade_info(id_: int | str, month: int) -> _DataFrame:
     j = _api_json(
         'odata/stockTradeInfo/'
         f'GetCompanyStockTradeInfo(companyId={id_},month={month})')
     df = _DF(j['value'])
     df['Date'] = _to_dt(df['Date'])
     return df
+
+
+def companies() -> _DataFrame:
+    return _DF(_api_json('odata/company')['value'])
