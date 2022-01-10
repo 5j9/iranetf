@@ -2,8 +2,8 @@ from unittest.mock import patch
 
 from numpy import dtype
 # noinspection PyProtectedMember
-from iranetf import get_funds, _YK, _loads, fund_portfolio_report_latest,\
-    funds_deviation_week_month, funds_trade_price, get_company_stock_trade_info
+from iranetf import funds, _YK, _loads, fund_portfolio_report_latest,\
+    funds_deviation_week_month, funds_trade_price, trade_info
 
 
 get_patcher = patch(
@@ -27,7 +27,7 @@ def patch_get_content(filename):
 
 @patch_get_content('getFunds.json')
 def test_get_funds():
-    df = get_funds()
+    df = funds()
     assert len(df) == 75
     # NameDisplay needs to be stripped
     # noinspection PyUnresolvedReferences
@@ -62,7 +62,7 @@ def test_funds_trade_price():
 
 @patch_get_content('GetCompanyStockTradeInfo1437_1.json')
 def test_get_company_stock_trade_info():
-    df = get_company_stock_trade_info(1437, 1)
+    df = trade_info(1437, 1)
     assert df.dtypes.to_dict() == {
         'Id': dtype('int64'),
         'TsetmcId': dtype('O'),

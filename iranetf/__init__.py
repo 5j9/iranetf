@@ -16,7 +16,7 @@ def _api_json(path) -> list | dict:
     )
 
 
-def get_funds() -> _DF:
+def funds() -> _DF:
     j = _api_json('odata/company/GetFunds')['value']
     df = _DF(j)
     df[['UpdateDate', 'CreateDate']] = df[['UpdateDate', 'CreateDate']].apply(_to_dt)
@@ -55,7 +55,7 @@ def funds_trade_price(set_index='companyId') -> _DF:
     return df
 
 
-def get_company_stock_trade_info(id_: int, month: int) -> _DF:
+def trade_info(id_: int | str, month: int) -> _DF:
     j = _api_json(
         'odata/stockTradeInfo/'
         f'GetCompanyStockTradeInfo(companyId={id_},month={month})')
