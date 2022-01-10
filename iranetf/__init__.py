@@ -1,4 +1,4 @@
-__version__ = '0.1.1.dev0'
+__version__ = '0.2.0'
 
 from json import loads as _loads
 
