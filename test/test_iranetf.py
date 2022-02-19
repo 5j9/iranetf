@@ -14,18 +14,95 @@ def teardown_module():
 
 
 @get_patch('getFunds.json')
-def test_get_funds():
+def test_funds():
     df = funds()
-    assert len(df) == 75
+    assert len(df) > 80
     # NameDisplay needs to be stripped
-    # noinspection PyUnresolvedReferences
     assert (df.NameDisplay.str.strip() == df.NameDisplay).all()
+    assert [*df.dtypes.items()] == [
+        ('Id', dtype('int64')),
+        ('Name', dtype('O')),
+        ('NamePersian', dtype('O')),
+        ('NameDisplay', 'string[python]'),
+        ('SymbolLong', dtype('O')),
+        ('Symbol', dtype('O')),
+        ('SymbolCode', dtype('O')),
+        ('SymbolFiveCode', dtype('O')),
+        ('CompanyCode', dtype('O')),
+        ('CompanyFourCode', dtype('O')),
+        ('IndustryCode', dtype('O')),
+        ('IndustryName', dtype('O')),
+        ('SubIndustryCode', dtype('O')),
+        ('SubIndustryName', dtype('O')),
+        ('Market', dtype('O')),
+        ('BoardCode', dtype('O')),
+        ('TsetmcId', dtype('O')),
+        ('Url', dtype('O')),
+        ('StartDate', dtype('O')),
+        ('Manager', dtype('O')),
+        ('Labels', dtype('O')),
+        ('IndustryId', dtype('O')),
+        ('IsShare', dtype('bool')),
+        ('IsFund', dtype('bool')),
+        ('IsSpecial', dtype('O')),
+        ('IsETF', dtype('bool')),
+        ('FundType', dtype('int64')),
+        ('FundTypeDesc', dtype('O')),
+        ('TradeType', dtype('int64')),
+        ('TradeTypeDesc', dtype('O')),
+        ('SiteType', dtype('float64')),
+        ('SiteTypeDesc', dtype('O')),
+        ('hasReturn', dtype('O')),
+        ('CreateDate', 'datetime64[ns, UTC]'),
+        ('UpdateDate', 'datetime64[ns, UTC]'),
+        ('CreateBy', dtype('float64')),
+        ('UpdateBy', dtype('int64')),
+        ('IsActive', dtype('bool')),
+        ('IsArchive', dtype('bool'))]
 
 
 @get_patch('latestPortfolio1497.json')
 def test_fund_portfolio_report_latest():
     df = fund_portfolio_report_latest(1497)
-    assert len(df.columns) == 34
+    assert [*df.dtypes.items()] == [
+        ('Id', dtype('int64')),
+        ('CompanyId', dtype('int64')),
+        ('CompanySymbol', dtype('O')),
+        ('CompanyNamePersian', dtype('O')),
+        ('CompanyIndustryCode', dtype('O')),
+        ('CompanyIndustryName', dtype('O')),
+        ('CompanySubIndustryCode', dtype('O')),
+        ('CompanySubIndustryName', dtype('O')),
+        ('Type', dtype('int64')),
+        ('ChangeType', dtype('int64')),
+        ('TypeDesc', dtype('O')),
+        ('FundPortfolioReportId', dtype('int64')),
+        ('FundPortfolioReportFromDate', dtype('O')),
+        ('FundPortfolioReportToDate', dtype('O')),
+        ('FundPortfolioReportFundCompanySymbol', dtype('O')),
+        ('FundPortfolioReportCompanyId', dtype('int64')),
+        ('FundPortfolioReportFundCompanyNamePersian', dtype('O')),
+        ('BuyCount', dtype('int64')),
+        ('BuyValue', dtype('float64')),
+        ('BuyValuePercent', dtype('float64')),
+        ('SellCount', dtype('int64')),
+        ('SellValue', dtype('float64')),
+        ('SellValuePercent', dtype('float64')),
+        ('StartCount', dtype('int64')),
+        ('StartValue', dtype('float64')),
+        ('StartValuePercent', dtype('float64')),
+        ('EndCount', dtype('int64')),
+        ('EndValue', dtype('float64')),
+        ('EndValuePercent', dtype('float64')),
+        ('ChangeCount', dtype('int64')),
+        ('ChangePercent', dtype('float64')),
+        ('ReturnPercent', dtype('float64')),
+        ('BuyUnitValue', dtype('float64')),
+        ('SellUnitValue', dtype('float64')),
+        ('CreateDate', dtype('O')),
+        ('UpdateDate', dtype('O')),
+        ('CreateBy', dtype('int64')),
+        ('UpdateBy', dtype('O'))]
 
 
 @get_patch('fundPriceAndNavDeviation.json')
@@ -87,7 +164,7 @@ def test_get_company_stock_trade_info():
 @get_patch('company.json')
 def test_companies():
     df = companies()
-    assert len(df) == 2063
+    assert len(df) > 2000
     assert [*df.dtypes.items()] == [
         ('Id', dtype('int64')),
         ('Name', dtype('O')),
