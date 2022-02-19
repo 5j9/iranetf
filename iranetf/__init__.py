@@ -3,11 +3,12 @@ __version__ = '0.3.1.dev0'
 from json import loads as _loads
 from functools import partial as _partial
 
-from requests import get as _get
+from httpx import Client as _Client
 from pandas import DataFrame as _DataFrame, to_datetime as _to_dt, \
     to_numeric as _to_num
 
 
+_get = _Client().get
 _YK = ''.maketrans('يك', 'یک')
 _DF = _partial(_DataFrame, copy=False)
 

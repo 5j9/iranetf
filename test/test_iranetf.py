@@ -1,31 +1,19 @@
-from unittest.mock import patch
-
 from numpy import dtype
-# noinspection PyProtectedMember
-from iranetf import funds, _YK, _loads, fund_portfolio_report_latest,\
+
+from iranetf import funds, fund_portfolio_report_latest,\
     funds_deviation_week_month, funds_trade_price, fund_trade_info, companies
-
-
-get_patcher = patch(
-    'iranetf._api_json', side_effect=NotImplementedError(
-        'tests should not call get_content without patching'))
+from test import offline_mode, get_patch
 
 
 def setup_module():
-    get_patcher.start()
+    offline_mode.start()
 
 
 def teardown_module():
-    get_patcher.stop()
+    offline_mode.stop()
 
 
-def patch_get_content(filename):
-    with open(f'{__file__}/../testdata/{filename}', 'r', encoding='utf8') as f:
-        text = f.read()
-    return patch('iranetf._api_json', lambda _: _loads(text.translate(_YK)))
-
-
-@patch_get_content('getFunds.json')
+@get_patch('getFunds.json')
 def test_get_funds():
     df = funds()
     assert len(df) == 75
@@ -34,13 +22,13 @@ def test_get_funds():
     assert (df.NameDisplay.str.strip() == df.NameDisplay).all()
 
 
-@patch_get_content('latestPortfolio1497.json')
+@get_patch('latestPortfolio1497.json')
 def test_fund_portfolio_report_latest():
     df = fund_portfolio_report_latest(1497)
     assert len(df.columns) == 34
 
 
-@patch_get_content('fundPriceAndNavDeviation.json')
+@get_patch('fundPriceAndNavDeviation.json')
 def test_funds_deviation_week_month():
     week, month = funds_deviation_week_month()
     assert [*week.dtypes.items()] == [
@@ -51,7 +39,7 @@ def test_funds_deviation_week_month():
         ('data', dtype('float64'))]
 
 
-@patch_get_content('tradePrice.json')
+@get_patch('tradePrice.json')
 def test_funds_trade_price():
     df = funds_trade_price()
     assert [*df.dtypes.items()] == [
@@ -64,7 +52,7 @@ def test_funds_trade_price():
         ('fundType', dtype('O'))]
 
 
-@patch_get_content('GetCompanyStockTradeInfo1437_1.json')
+@get_patch('GetCompanyStockTradeInfo1437_1.json')
 def test_get_company_stock_trade_info():
     df = fund_trade_info(1437, 1)
     assert [*df.dtypes.items()] == [
@@ -96,7 +84,7 @@ def test_get_company_stock_trade_info():
         ('UpdateBy', dtype('O'))]
 
 
-@patch_get_content('company.json')
+@get_patch('company.json')
 def test_companies():
     df = companies()
     assert len(df) == 2063
