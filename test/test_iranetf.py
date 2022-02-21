@@ -2,20 +2,12 @@ from numpy import dtype
 
 from iranetf import funds, fund_portfolio_report_latest,\
     funds_deviation_week_month, funds_trade_price, fund_trade_info, companies
-from test import offline_mode, get_patch
+from test import session_patch
 
 
-def setup_module():
-    offline_mode.start()
-
-
-def teardown_module():
-    offline_mode.stop()
-
-
-@get_patch('getFunds.json')
-def test_funds():
-    df = funds()
+@session_patch('getFunds.json')
+async def test_funds():
+    df = await funds()
     assert len(df) > 80
     # NameDisplay needs to be stripped
     assert (df.NameDisplay.str.strip() == df.NameDisplay).all()
@@ -61,9 +53,9 @@ def test_funds():
         ('IsArchive', dtype('bool'))]
 
 
-@get_patch('latestPortfolio1497.json')
-def test_fund_portfolio_report_latest():
-    df = fund_portfolio_report_latest(1497)
+@session_patch('latestPortfolio1497.json')
+async def test_fund_portfolio_report_latest():
+    df = await fund_portfolio_report_latest(1497)
     assert [*df.dtypes.items()] == [
         ('Id', dtype('int64')),
         ('CompanyId', dtype('int64')),
@@ -105,9 +97,9 @@ def test_fund_portfolio_report_latest():
         ('UpdateBy', dtype('O'))]
 
 
-@get_patch('fundPriceAndNavDeviation.json')
-def test_funds_deviation_week_month():
-    week, month = funds_deviation_week_month()
+@session_patch('fundPriceAndNavDeviation.json')
+async def test_funds_deviation_week_month():
+    week, month = await funds_deviation_week_month()
     assert [*week.dtypes.items()] == [
         ('symbol', dtype('O')),
         ('fundType', dtype('O')),
@@ -116,9 +108,9 @@ def test_funds_deviation_week_month():
         ('data', dtype('float64'))]
 
 
-@get_patch('tradePrice.json')
-def test_funds_trade_price():
-    df = funds_trade_price()
+@session_patch('tradePrice.json')
+async def test_funds_trade_price():
+    df = await funds_trade_price()
     assert [*df.dtypes.items()] == [
         ('symbol', dtype('O')),
         ('tradePrice', dtype('uint32')),
@@ -129,9 +121,9 @@ def test_funds_trade_price():
         ('fundType', dtype('O'))]
 
 
-@get_patch('GetCompanyStockTradeInfo1437_1.json')
-def test_get_company_stock_trade_info():
-    df = fund_trade_info(1437, 1)
+@session_patch('GetCompanyStockTradeInfo1437_1.json')
+async def test_get_company_stock_trade_info():
+    df = await fund_trade_info(1437, 1)
     assert [*df.dtypes.items()] == [
         ('Id', dtype('int64')),
         ('TsetmcId', dtype('O')),
@@ -161,9 +153,9 @@ def test_get_company_stock_trade_info():
         ('UpdateBy', dtype('O'))]
 
 
-@get_patch('company.json')
-def test_companies():
-    df = companies()
+@session_patch('company.json')
+async def test_companies():
+    df = await companies()
     assert len(df) > 2000
     assert [*df.dtypes.items()] == [
         ('Id', dtype('int64')),

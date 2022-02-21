@@ -3,44 +3,65 @@ __version__ = '0.4.1.dev0'
 from json import loads as _loads
 from functools import partial as _partial
 
-from httpx import Client as _Client
+from aiohttp import ClientSession as _ClientSession, \
+    ClientTimeout as _ClientTimeout
 from pandas import DataFrame as _DataFrame, to_datetime as _to_dt, \
     to_numeric as _to_num
 
 
-_get = _Client().get
 _YK = ''.maketrans('يك', 'یک')
 _DF = _partial(_DataFrame, copy=False)
 
 
-def _api_json(path) -> list | dict:
-    return _loads(
-        _get('https://api.iranetf.org/' + path).content.decode().translate(_YK)
-    )
+SESSION : _ClientSession | None = None
 
 
-def funds() -> _DataFrame:
-    j = _api_json('odata/company/GetFunds')['value']
+class Session(_ClientSession):
+
+    def __init__(self, **kwargs):
+        if 'timeout' not in kwargs:
+            kwargs['timeout'] = _ClientTimeout(
+                total=60, sock_connect=10, sock_read=10)
+        super().__init__(**kwargs)
+
+    async def __aenter__(self) -> _ClientSession:
+        global SESSION
+        SESSION = await super().__aenter__()
+        return SESSION
+
+
+# this function should only be called from _get below
+async def _session_get(url: str) -> bytes:
+    return await (await SESSION.get(url)).read()
+
+
+async def _api_json(path) -> list | dict:
+    content = await _session_get('https://api.iranetf.org/' + path)
+    return _loads(content.decode().translate(_YK))
+
+
+async def funds() -> _DataFrame:
+    j = (await _api_json('odata/company/GetFunds'))['value']
     df = _DF(j)
     df[['UpdateDate', 'CreateDate']] = df[['UpdateDate', 'CreateDate']].apply(_to_dt)
     df['NameDisplay'] = df['NameDisplay'].astype('string', copy=False).str.strip()
     return df
 
 
-def fund_portfolio_report_latest(id_: int) -> _DataFrame:
-    j = _api_json(
+async def fund_portfolio_report_latest(id_: int) -> _DataFrame:
+    j = (await _api_json(
         'odata/FundPortfolioReport'
         f'?$top=1'
         f'&$orderby=FromDate desc'
-        f'&$filter=CompanyId eq {id_}&$expand=trades')['value']
+        f'&$filter=CompanyId eq {id_}&$expand=trades'))['value']
     df = _DF(j[0]['Trades'])
     return df
 
 
-def funds_deviation_week_month(
+async def funds_deviation_week_month(
     set_index='companyId'
 ) -> tuple[_DataFrame, _DataFrame]:
-    j = _api_json('bot/funds/fundPriceAndNavDeviation')
+    j = await _api_json('bot/funds/fundPriceAndNavDeviation')
     week = _DF(j['seven'])
     month = _DF(j['thirty'])
     if set_index:
@@ -49,8 +70,8 @@ def funds_deviation_week_month(
     return week, month
 
 
-def funds_trade_price(set_index='companyId') -> _DataFrame:
-    j = _api_json('bot/funds/allFundLastStatus/tradePrice')
+async def funds_trade_price(set_index='companyId') -> _DataFrame:
+    j = await _api_json('bot/funds/allFundLastStatus/tradePrice')
     df = _DF(j)
     numeric_cols = [
         'tradePrice', 'priceDiff', 'nav', 'navDiff', 'priceAndNavDiff']
@@ -60,8 +81,8 @@ def funds_trade_price(set_index='companyId') -> _DataFrame:
     return df
 
 
-def fund_trade_info(id_: int | str, month: int) -> _DataFrame:
-    j = _api_json(
+async def fund_trade_info(id_: int | str, month: int) -> _DataFrame:
+    j = await _api_json(
         'odata/stockTradeInfo/'
         f'GetCompanyStockTradeInfo(companyId={id_},month={month})')
     df = _DF(j['value'])
@@ -69,5 +90,5 @@ def fund_trade_info(id_: int | str, month: int) -> _DataFrame:
     return df
 
 
-def companies() -> _DataFrame:
-    return _DF(_api_json('odata/company')['value'])
+async def companies() -> _DataFrame:
+    return _DF((await _api_json('odata/company'))['value'])
