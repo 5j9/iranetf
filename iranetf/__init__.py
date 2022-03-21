@@ -45,6 +45,7 @@ async def funds() -> _DataFrame:
     df = _DF(j)
     df[['UpdateDate', 'CreateDate']] = df[['UpdateDate', 'CreateDate']].apply(_to_datetime)
     df['NameDisplay'] = df['NameDisplay'].astype('string', copy=False).str.strip()
+    df['Url'] = df['Url'].astype('string', copy=False)
     return df
 
 

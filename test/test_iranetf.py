@@ -29,7 +29,7 @@ async def test_funds():
         ('Market', dtype('O')),
         ('BoardCode', dtype('O')),
         ('TsetmcId', dtype('O')),
-        ('Url', dtype('O')),
+        ('Url', 'string'),
         ('StartDate', dtype('O')),
         ('Manager', dtype('O')),
         ('Labels', dtype('O')),
