@@ -5,8 +5,7 @@ from functools import partial as _partial
 
 from aiohttp import ClientSession as _ClientSession, \
     ClientTimeout as _ClientTimeout
-from pandas import DataFrame as _DataFrame, to_datetime as _to_datetime, \
-    to_numeric as _to_num
+from pandas import DataFrame as _DataFrame, to_numeric as _to_num
 
 
 _YK = ''.maketrans('يك', 'یک')
@@ -43,9 +42,12 @@ async def _api_json(path) -> list | dict:
 async def funds() -> _DataFrame:
     j = (await _api_json('odata/company/GetFunds'))['value']
     df = _DF(j)
-    df[['UpdateDate', 'CreateDate']] = df[['UpdateDate', 'CreateDate']].apply(_to_datetime)
     df['NameDisplay'] = df['NameDisplay'].astype('string', copy=False).str.strip()
-    df['Url'] = df['Url'].astype('string', copy=False)
+    df = df.astype({
+        'Url': 'string',
+        'UpdateDate': 'datetime64',
+        'CreateDate': 'datetime64',
+    }, copy=False)
     return df
 
 
@@ -87,7 +89,7 @@ async def fund_trade_info(id_: int | str, month: int) -> _DataFrame:
         'odata/stockTradeInfo/'
         f'GetCompanyStockTradeInfo(companyId={id_},month={month})')
     df = _DF(j['value'])
-    df['Date'] = _to_datetime(df['Date'])
+    df['Date'] = df['Date'].astype('datetime64')
     return df
 
 
