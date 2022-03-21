@@ -42,12 +42,13 @@ async def _api_json(path) -> list | dict:
 async def funds() -> _DataFrame:
     j = (await _api_json('odata/company/GetFunds'))['value']
     df = _DF(j)
-    df['NameDisplay'] = df['NameDisplay'].astype('string', copy=False).str.strip()
     df = df.astype({
         'Url': 'string',
+        'NameDisplay': 'string',
         'UpdateDate': 'datetime64',
         'CreateDate': 'datetime64',
     }, copy=False)
+    df['NameDisplay'] = df['NameDisplay'].str.strip()
     return df
 
 
