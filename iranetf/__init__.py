@@ -5,7 +5,7 @@ from functools import partial as _partial
 
 from aiohttp import ClientSession as _ClientSession, \
     ClientTimeout as _ClientTimeout
-from pandas import DataFrame as _DataFrame, to_datetime as _to_dt, \
+from pandas import DataFrame as _DataFrame, to_datetime as _to_datetime, \
     to_numeric as _to_num
 
 
@@ -43,7 +43,7 @@ async def _api_json(path) -> list | dict:
 async def funds() -> _DataFrame:
     j = (await _api_json('odata/company/GetFunds'))['value']
     df = _DF(j)
-    df[['UpdateDate', 'CreateDate']] = df[['UpdateDate', 'CreateDate']].apply(_to_dt)
+    df[['UpdateDate', 'CreateDate']] = df[['UpdateDate', 'CreateDate']].apply(_to_datetime)
     df['NameDisplay'] = df['NameDisplay'].astype('string', copy=False).str.strip()
     return df
 
@@ -86,7 +86,7 @@ async def fund_trade_info(id_: int | str, month: int) -> _DataFrame:
         'odata/stockTradeInfo/'
         f'GetCompanyStockTradeInfo(companyId={id_},month={month})')
     df = _DF(j['value'])
-    df['Date'] = _to_dt(df['Date'])
+    df['Date'] = _to_datetime(df['Date'])
     return df
 
 
