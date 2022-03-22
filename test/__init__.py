@@ -7,10 +7,22 @@ RECORD_MODE = False
 OFFLINE_MODE = True and not RECORD_MODE
 
 
-def session_patch(filename):
+class FakeResponse:
 
-    async def _fake_session_get(url: str) -> str | bytes:
-        file = f'{__file__}/../testdata/{filename}'
+    def __init__(self, content):
+        self.content = content
+
+    async def read(self):
+        return self.content
+
+
+class FakeSession:
+
+    def __init__(self, filename):
+        self.filename = filename
+
+    async def get(self, url):
+        file = f'{__file__}/../testdata/{self.filename}'
 
         if OFFLINE_MODE:
             with open(file, 'rb') as f:
@@ -22,6 +34,8 @@ def session_patch(filename):
                 with open(file, 'wb') as f:
                     f.write(content)
 
-        return content
+        return FakeResponse(content)
 
-    return patch('iranetf._session_get', _fake_session_get)
+
+def session_patch(filename):
+    return patch('iranetf.SESSION', FakeSession(filename))
