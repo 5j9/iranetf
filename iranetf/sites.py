@@ -46,13 +46,13 @@ class RayanHamafza(_BaseSite):
     async def navps_history(self) -> _DataFrame:
         df = await self._json('NAVPerShare', df=True)
         df.columns = ['date', 'issue', 'cancel', 'statistical']
-        df['date'] = df['date'].apply(_j2g)
+        df['date'] = df['date'].map(_j2g)
         return df
 
     async def nav_history(self) -> _DataFrame:
         df = await self._json('PureAsset', df=True)
         df.columns = ['nav', 'date', 'cancel_navps']
-        df['date'] = df['date'].apply(_j2g)
+        df['date'] = df['date'].map(_j2g)
         return df
 
     async def portfolio_industries(self) -> _DataFrame:

@@ -183,7 +183,7 @@ async def test_companies():
         ('BoardCode', dtype('O')),
         ('TsetmcId', Int64),
         ('Url', dtype('O')),
-        ('StartDate', dtype('O')),
+        ('StartDate', dtype('<M8[ns]')),
         ('Manager', dtype('O')),
         ('Labels', string),
         ('IndustryId', dtype('O')),

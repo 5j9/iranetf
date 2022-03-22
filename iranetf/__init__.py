@@ -42,17 +42,13 @@ async def _api_json(path) -> list | dict:
 
 
 def _j2g(s: str) -> _datetime:
-    try:
-        return _jdatetime(*[int(i) for i in s.split('/')]).togregorian()
-    except AttributeError:
-        assert not s
-        return _NaT
+    return _jdatetime(*[int(i) for i in s.split('/')]).togregorian()
 
 
 async def funds() -> _DataFrame:
     j = (await _api_json('odata/company/GetFunds'))['value']
     df = _DF(j)
-    df['StartDate'] = df['StartDate'].apply(_j2g)
+    df['StartDate'] = df['StartDate'].map(_j2g, na_action='ignore')
     df = df.astype({
         'Url': 'string',
         'NameDisplay': 'string',
@@ -115,5 +111,6 @@ async def companies() -> _DataFrame:
     df = df.astype({
         'Labels': 'string',
     }, copy=False)
+    df['StartDate'] = df['StartDate'].replace('', _NaT).map(_j2g, na_action='ignore')
     df['TsetmcId'] = df['TsetmcId'].replace('', _NA).astype('Int64', copy=False)
     return df
