@@ -14,6 +14,8 @@ async def test_funds():
     df = await funds()
     assert len(df) > 80
     # NameDisplay needs to be stripped
+    # Pycharm false positive:
+    # noinspection PyUnresolvedReferences
     assert (df.NameDisplay.str.strip() == df.NameDisplay).all()
     assert [*df.dtypes.items()] == [
         ('Id', dtype('int64')),
