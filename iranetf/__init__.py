@@ -7,7 +7,8 @@ from datetime import datetime as _datetime
 from jdatetime import datetime as _jdatetime
 from aiohttp import ClientSession as _ClientSession, \
     ClientTimeout as _ClientTimeout
-from pandas import DataFrame as _DataFrame, to_numeric as _to_num, NaT as _NaT
+from pandas import DataFrame as _DataFrame, to_numeric as _to_num, \
+    NaT as _NaT, NA as _NA
 
 
 _YK = ''.maketrans('يك', 'یک')
@@ -59,6 +60,7 @@ async def funds() -> _DataFrame:
         'Labels': 'string',
         'UpdateDate': 'datetime64',
         'CreateDate': 'datetime64',
+        'TsetmcId': 'int64',
     }, copy=False)
     df['NameDisplay'] = df['NameDisplay'].str.strip()
     return df
@@ -102,7 +104,10 @@ async def fund_trade_info(id_: int | str, month: int) -> _DataFrame:
         'odata/stockTradeInfo/'
         f'GetCompanyStockTradeInfo(companyId={id_},month={month})')
     df = _DF(j['value'])
-    df['Date'] = df['Date'].astype('datetime64')
+    df = df.astype({
+        'Date': 'datetime64',
+        'TsetmcId': 'Int64',
+    }, copy=False)
     return df
 
 
@@ -111,4 +116,5 @@ async def companies() -> _DataFrame:
     df = df.astype({
         'Labels': 'string',
     }, copy=False)
+    df['TsetmcId'] = df['TsetmcId'].replace('', _NA).astype('Int64', copy=False)
     return df

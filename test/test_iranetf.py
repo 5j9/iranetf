@@ -1,5 +1,5 @@
 from numpy import dtype
-from pandas import StringDtype
+from pandas import Int64Dtype, StringDtype
 
 from iranetf import funds, fund_portfolio_report_latest,\
     funds_deviation_week_month, funds_trade_price, fund_trade_info, companies
@@ -7,6 +7,7 @@ from test import session_patch
 
 
 string = StringDtype()
+Int64 = Int64Dtype()
 
 
 @session_patch('getFunds.json')
@@ -34,7 +35,7 @@ async def test_funds():
         ('SubIndustryName', dtype('O')),
         ('Market', dtype('O')),
         ('BoardCode', dtype('O')),
-        ('TsetmcId', dtype('O')),
+        ('TsetmcId', dtype('int64')),
         ('Url', string),
         ('StartDate', dtype('<M8[ns]')),
         ('Manager', dtype('O')),
@@ -132,7 +133,7 @@ async def test_get_company_stock_trade_info():
     df = await fund_trade_info(1437, 1)
     assert [*df.dtypes.items()] == [
         ('Id', dtype('int64')),
-        ('TsetmcId', dtype('O')),
+        ('TsetmcId', Int64),
         ('IrCode', dtype('O')),
         ('Symbol', dtype('O')),
         ('CompanyName', dtype('O')),
@@ -151,7 +152,7 @@ async def test_get_company_stock_trade_info():
         ('MinAllowedPrice', dtype('float64')),
         ('NAV', dtype('float64')),
         ('IndustryCode', dtype('O')),
-        ('Date', 'datetime64[ns]'),
+        ('Date', dtype('<M8[ns]')),
         ('CompanyId', dtype('int64')),
         ('CreateDate', dtype('O')),
         ('UpdateDate', dtype('O')),
@@ -180,7 +181,7 @@ async def test_companies():
         ('SubIndustryName', dtype('O')),
         ('Market', dtype('O')),
         ('BoardCode', dtype('O')),
-        ('TsetmcId', dtype('O')),
+        ('TsetmcId', Int64),
         ('Url', dtype('O')),
         ('StartDate', dtype('O')),
         ('Manager', dtype('O')),
