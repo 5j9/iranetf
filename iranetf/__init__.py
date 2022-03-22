@@ -2,10 +2,12 @@ __version__ = '0.5.1.dev0'
 
 from json import loads as _loads
 from functools import partial as _partial
+from datetime import datetime as _datetime
 
+from jdatetime import datetime as _jdatetime
 from aiohttp import ClientSession as _ClientSession, \
     ClientTimeout as _ClientTimeout
-from pandas import DataFrame as _DataFrame, to_numeric as _to_num
+from pandas import DataFrame as _DataFrame, to_numeric as _to_num, NaT as _NaT
 
 
 _YK = ''.maketrans('يك', 'یک')
@@ -39,12 +41,22 @@ async def _api_json(path) -> list | dict:
     return _loads(content.decode().translate(_YK))
 
 
+def _j2g(s: str) -> _datetime:
+    try:
+        return _jdatetime(*[int(i) for i in s.split('/')]).togregorian()
+    except AttributeError:
+        assert not s
+        return _NaT
+
+
 async def funds() -> _DataFrame:
     j = (await _api_json('odata/company/GetFunds'))['value']
     df = _DF(j)
+    df['StartDate'] = df['StartDate'].apply(_j2g)
     df = df.astype({
         'Url': 'string',
         'NameDisplay': 'string',
+        'Labels': 'string',
         'UpdateDate': 'datetime64',
         'CreateDate': 'datetime64',
     }, copy=False)
@@ -95,4 +107,8 @@ async def fund_trade_info(id_: int | str, month: int) -> _DataFrame:
 
 
 async def companies() -> _DataFrame:
-    return _DF((await _api_json('odata/company'))['value'])
+    df = _DataFrame((await _api_json('odata/company'))['value'], copy=False)
+    df = df.astype({
+        'Labels': 'string',
+    }, copy=False)
+    return df

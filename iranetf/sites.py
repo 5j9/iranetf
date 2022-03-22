@@ -1,10 +1,8 @@
 from typing import TypedDict as _TypedDict
-from datetime import datetime as _datetime
 
-from jdatetime import datetime as _jdatetime
 from pandas import to_datetime as _to_datetime
 
-from iranetf import _session_get, _loads, _DataFrame
+from iranetf import _session_get, _loads, _DataFrame, _jdatetime, _j2g, _datetime
 
 
 class _LiveNAV(_TypedDict, total=True):
@@ -28,10 +26,6 @@ class _BaseSite:
         return j
 
 
-def j2g(s: str) -> _datetime:
-    return _jdatetime(*[int(i) for i in s.split('/')]).togregorian()
-
-
 class RayanHamafza(_BaseSite):
 
     async def _json(
@@ -52,13 +46,13 @@ class RayanHamafza(_BaseSite):
     async def navps_history(self) -> _DataFrame:
         df = await self._json('NAVPerShare', df=True)
         df.columns = ['date', 'issue', 'cancel', 'statistical']
-        df['date'] = df['date'].apply(j2g)
+        df['date'] = df['date'].apply(_j2g)
         return df
 
     async def nav_history(self) -> _DataFrame:
         df = await self._json('PureAsset', df=True)
         df.columns = ['nav', 'date', 'cancel_navps']
-        df['date'] = df['date'].apply(j2g)
+        df['date'] = df['date'].apply(_j2g)
         return df
 
     async def portfolio_industries(self) -> _DataFrame:

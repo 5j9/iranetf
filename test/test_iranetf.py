@@ -1,8 +1,12 @@
 from numpy import dtype
+from pandas import StringDtype
 
 from iranetf import funds, fund_portfolio_report_latest,\
     funds_deviation_week_month, funds_trade_price, fund_trade_info, companies
 from test import session_patch
+
+
+string = StringDtype()
 
 
 @session_patch('getFunds.json')
@@ -15,7 +19,7 @@ async def test_funds():
         ('Id', dtype('int64')),
         ('Name', dtype('O')),
         ('NamePersian', dtype('O')),
-        ('NameDisplay', 'string[python]'),
+        ('NameDisplay', string),
         ('SymbolLong', dtype('O')),
         ('Symbol', dtype('O')),
         ('SymbolCode', dtype('O')),
@@ -29,10 +33,10 @@ async def test_funds():
         ('Market', dtype('O')),
         ('BoardCode', dtype('O')),
         ('TsetmcId', dtype('O')),
-        ('Url', 'string'),
-        ('StartDate', dtype('O')),
+        ('Url', string),
+        ('StartDate', dtype('<M8[ns]')),
         ('Manager', dtype('O')),
-        ('Labels', dtype('O')),
+        ('Labels', string),
         ('IndustryId', dtype('O')),
         ('IsShare', dtype('bool')),
         ('IsFund', dtype('bool')),
@@ -45,8 +49,8 @@ async def test_funds():
         ('SiteType', dtype('float64')),
         ('SiteTypeDesc', dtype('O')),
         ('hasReturn', dtype('O')),
-        ('CreateDate', 'datetime64[ns]'),
-        ('UpdateDate', 'datetime64[ns]'),
+        ('CreateDate', dtype('<M8[ns]')),
+        ('UpdateDate', dtype('<M8[ns]')),
         ('CreateBy', dtype('float64')),
         ('UpdateBy', dtype('int64')),
         ('IsActive', dtype('bool')),
@@ -178,7 +182,7 @@ async def test_companies():
         ('Url', dtype('O')),
         ('StartDate', dtype('O')),
         ('Manager', dtype('O')),
-        ('Labels', dtype('O')),
+        ('Labels', string),
         ('IndustryId', dtype('O')),
         ('IsShare', dtype('bool')),
         ('IsFund', dtype('bool')),
