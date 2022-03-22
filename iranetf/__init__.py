@@ -32,7 +32,6 @@ class Session(_ClientSession):
         return SESSION
 
 
-# this function should only be called from _get below
 async def _session_get(url: str) -> bytes:
     return await (await SESSION.get(url)).read()
 
