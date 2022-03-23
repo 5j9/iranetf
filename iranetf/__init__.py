@@ -17,18 +17,23 @@ _DF = _partial(_DataFrame, copy=False)
 SESSION : _ClientSession | None = None
 
 
-class Session(_ClientSession):
+class Session:
+
+    __slots__ = '_session'
 
     def __init__(self, **kwargs):
         if 'timeout' not in kwargs:
             kwargs['timeout'] = _ClientTimeout(
                 total=60, sock_connect=10, sock_read=10)
-        super().__init__(**kwargs)
+        self._session = _ClientSession(**kwargs)
 
     async def __aenter__(self) -> _ClientSession:
         global SESSION
-        SESSION = await super().__aenter__()
+        SESSION = self._session
         return SESSION
+
+    async def __aexit__(self, exc_type, exc_val, exc_tb):
+        await self._session.close()
 
 
 async def _session_get(url: str) -> bytes:
