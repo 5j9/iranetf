@@ -7,8 +7,7 @@ from datetime import datetime as _datetime
 from jdatetime import datetime as _jdatetime
 from aiohttp import ClientSession as _ClientSession, \
     ClientTimeout as _ClientTimeout
-from pandas import DataFrame as _DataFrame, to_numeric as _to_num, \
-    NaT as _NaT, NA as _NA
+from pandas import DataFrame as _DataFrame, NaT as _NaT, NA as _NA
 
 
 _YK = ''.maketrans('يك', 'یک')
