@@ -15,7 +15,7 @@ def assert_live(live):
 
 
 tadbir = TadbirPardaz('https://modirfund.ir/')
-ryan = RayanHamafza('http://fardaetf.tadbirfunds.com/')
+rayan = RayanHamafza('http://fardaetf.tadbirfunds.com/')
 
 
 @file('modir_live.json')
@@ -26,7 +26,7 @@ async def test_tadbir_live_navps():
 
 @file('almas_live.json')
 async def test_rayan_live_navps():
-    live = await ryan.live_navps()
+    live = await rayan.live_navps()
     assert_live(live)
 
 
@@ -46,5 +46,5 @@ async def test_navps_history_tadbir():
 
 @file('almas_navps_history.json')
 async def test_navps_history_tadbir():
-    df = await ryan.navps_history()
+    df = await rayan.navps_history()
     assert_navps_history(df)
