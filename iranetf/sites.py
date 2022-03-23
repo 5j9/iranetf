@@ -72,9 +72,9 @@ class TadbirPardaz(_BaseSite):
         d = _loads(d)
         d['issue'] = int(d.pop('subNav').replace(',', ''))
         d['cancel'] = int(d.pop('cancelNav').replace(',', ''))
-        ymd, hms = d.pop('publishDate').split(' ')
-        d['date'] = _jdatetime(
-            *[int(i) for i in ymd.split('/') + hms.split(':')]
+        d['date'] = _jdatetime.strptime(
+            d.pop('publishDate'),
+            '%Y/%m/%d %H:%M:%S'
         ).togregorian()
         return d
 
