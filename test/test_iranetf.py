@@ -3,14 +3,14 @@ from pandas import CategoricalDtype, Int64Dtype, StringDtype
 
 from iranetf import funds, fund_portfolio_report_latest,\
     funds_deviation_week_month, funds_trade_price, fund_trade_info, companies
-from test import session_patch
+from test import file
 
 
 string = StringDtype()
 Int64 = Int64Dtype()
 
 
-@session_patch('getFunds.json')
+@file('getFunds.json')
 async def test_funds():
     df = await funds()
     assert len(df) > 80
@@ -60,7 +60,7 @@ async def test_funds():
         ('IsArchive', dtype('bool'))]
 
 
-@session_patch('latestPortfolio1497.json')
+@file('latestPortfolio1497.json')
 async def test_fund_portfolio_report_latest():
     df = await fund_portfolio_report_latest(1497)
     assert [*df.dtypes.items()] == [
@@ -104,7 +104,7 @@ async def test_fund_portfolio_report_latest():
         ('UpdateBy', dtype('O'))]
 
 
-@session_patch('fundPriceAndNavDeviation.json')
+@file('fundPriceAndNavDeviation.json')
 async def test_funds_deviation_week_month():
     week, month = await funds_deviation_week_month()
     assert [*week.dtypes.items()] == [
@@ -115,7 +115,7 @@ async def test_funds_deviation_week_month():
         ('data', dtype('float64'))]
 
 
-@session_patch('tradePrice.json')
+@file('tradePrice.json')
 async def test_funds_trade_price():
     df = await funds_trade_price()
     assert [*df.dtypes.items()] == [
@@ -130,7 +130,7 @@ async def test_funds_trade_price():
         ))]
 
 
-@session_patch('GetCompanyStockTradeInfo1437_1.json')
+@file('GetCompanyStockTradeInfo1437_1.json')
 async def test_get_company_stock_trade_info():
     df = await fund_trade_info(1437, 1)
     assert [*df.dtypes.items()] == [
@@ -162,7 +162,7 @@ async def test_get_company_stock_trade_info():
         ('UpdateBy', dtype('O'))]
 
 
-@session_patch('company.json')
+@file('company.json')
 async def test_companies():
     df = await companies()
     assert len(df) > 2000

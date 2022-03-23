@@ -4,7 +4,7 @@ from pandas import DataFrame
 from numpy import dtype
 
 from iranetf.sites import RayanHamafza, TadbirPardaz
-from test import session_patch
+from test import file
 
 
 def assert_live(live):
@@ -18,13 +18,13 @@ tadbir = TadbirPardaz('https://modirfund.ir/')
 ryan = RayanHamafza('http://fardaetf.tadbirfunds.com/')
 
 
-@session_patch('modir_live.json')
+@file('modir_live.json')
 async def test_tadbir_live_navps():
     live = await tadbir.live_navps()
     assert_live(live)
 
 
-@session_patch('almas_live.json')
+@file('almas_live.json')
 async def test_rayan_live_navps():
     live = await ryan.live_navps()
     assert_live(live)
@@ -38,13 +38,13 @@ def assert_navps_history(df: DataFrame):
         ('statistical', dtype('int64'))]
 
 
-@session_patch('modir_navps_history.json')
+@file('modir_navps_history.json')
 async def test_navps_history_tadbir():
     df = await tadbir.navps_history()
     assert_navps_history(df)
 
 
-@session_patch('almas_navps_history.json')
+@file('almas_navps_history.json')
 async def test_navps_history_tadbir():
     df = await ryan.navps_history()
     assert_navps_history(df)

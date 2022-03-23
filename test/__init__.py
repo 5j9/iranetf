@@ -15,6 +15,5 @@ class FakeResponse:
         return content
 
 
-# todo: rename to file?
-def session_patch(filename):
+def file(filename):
     return patch.object(FakeResponse, 'file', f'{__file__}/../testdata/{filename}')
