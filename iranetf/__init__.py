@@ -85,10 +85,16 @@ async def funds_deviation_week_month(
 
 async def funds_trade_price(set_index='companyId') -> _DataFrame:
     j = await _api_json('bot/funds/allFundLastStatus/tradePrice')
-    df = _DF(j)
-    numeric_cols = [
-        'tradePrice', 'priceDiff', 'nav', 'navDiff', 'priceAndNavDiff']
-    df[numeric_cols] = df[numeric_cols].apply(_to_num, downcast='unsigned')
+    df = _DataFrame(j, copy=False)
+    df = df.astype({
+        'fundType': 'category',
+        'symbol': 'string',
+        'tradePrice': 'float64',
+        'priceDiff': 'float64',
+        'nav': 'float64',
+        'navDiff': 'float64',
+        'priceAndNavDiff': 'float64',
+    }, copy=False)
     if set_index:
         df.set_index(set_index, inplace=True)
     return df

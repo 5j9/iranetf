@@ -1,5 +1,5 @@
 from numpy import dtype
-from pandas import Int64Dtype, StringDtype
+from pandas import CategoricalDtype, Int64Dtype, StringDtype
 
 from iranetf import funds, fund_portfolio_report_latest,\
     funds_deviation_week_month, funds_trade_price, fund_trade_info, companies
@@ -119,13 +119,15 @@ async def test_funds_deviation_week_month():
 async def test_funds_trade_price():
     df = await funds_trade_price()
     assert [*df.dtypes.items()] == [
-        ('symbol', dtype('O')),
-        ('tradePrice', dtype('uint32')),
+        ('symbol', string),
+        ('tradePrice', dtype('float64')),
         ('priceDiff', dtype('float64')),
-        ('nav', dtype('uint32')),
+        ('nav', dtype('float64')),
         ('navDiff', dtype('float64')),
         ('priceAndNavDiff', dtype('float64')),
-        ('fundType', dtype('O'))]
+        ('fundType', CategoricalDtype(
+            categories=['ETC', 'ETF', 'FixedIncome', 'Mix'], ordered=False
+        ))]
 
 
 @session_patch('GetCompanyStockTradeInfo1437_1.json')
