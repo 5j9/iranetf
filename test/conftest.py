@@ -1,4 +1,4 @@
-from asyncio import get_event_loop
+from asyncio import new_event_loop
 
 from pytest import fixture
 
@@ -8,7 +8,7 @@ from test import RECORD_MODE, OFFLINE_MODE, FakeResponse
 
 @fixture(scope='session')
 def event_loop():
-    loop = get_event_loop()
+    loop = new_event_loop()
     yield loop
     loop.close()
 
