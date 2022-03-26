@@ -26,7 +26,7 @@ async def session():
         yield
         return
 
-    session = iranetf.SESSION = iranetf.Session()
+    session = iranetf.Session()
 
     if RECORD_MODE:
 

@@ -19,21 +19,13 @@ SESSION : _ClientSession | None = None
 
 class Session:
 
-    __slots__ = '_session'
-
-    def __init__(self, **kwargs):
+    def __new__(cls, *args, **kwargs) -> _ClientSession:
+        global SESSION
         if 'timeout' not in kwargs:
             kwargs['timeout'] = _ClientTimeout(
-                total=60, sock_connect=10, sock_read=10)
-        self._session = _ClientSession(**kwargs)
-
-    async def __aenter__(self) -> _ClientSession:
-        global SESSION
-        SESSION = self._session
+                total=60., sock_connect=10., sock_read=10.)
+        SESSION = _ClientSession(**kwargs)
         return SESSION
-
-    async def __aexit__(self, exc_type, exc_val, exc_tb):
-        await self._session.close()
 
 
 async def _session_get(url: str) -> bytes:
