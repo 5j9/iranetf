@@ -4,7 +4,7 @@ from pandas import DataFrame
 from numpy import dtype
 
 from iranetf.sites import RayanHamafza, TadbirPardaz
-from test import file
+from test.aiohttp_test_utils import file
 
 
 def assert_live(live):

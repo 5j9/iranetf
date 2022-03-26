@@ -3,7 +3,7 @@ from pandas import CategoricalDtype, Int64Dtype, StringDtype
 
 from iranetf import funds, fund_portfolio_report_latest,\
     funds_deviation_week_month, funds_trade_price, fund_trade_info, companies
-from test import file
+from test.aiohttp_test_utils import file
 
 
 string = StringDtype()
