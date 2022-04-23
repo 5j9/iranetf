@@ -44,7 +44,8 @@ def _j2g(s: str) -> _datetime:
 async def funds() -> _DataFrame:
     j = (await _api_json('odata/company/GetFunds'))['value']
     df = _DF(j)
-    df['StartDate'] = df['StartDate'].map(_j2g, na_action='ignore')
+    start_date = df['StartDate'].replace('', _NaT)
+    df['StartDate'] = start_date.map(_j2g, na_action='ignore')
     df = df.astype({
         'Url': 'string',
         'NameDisplay': 'string',
