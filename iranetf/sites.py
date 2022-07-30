@@ -1,8 +1,9 @@
 from typing import TypedDict as _TypedDict
+from json import loads as _loads
 
-from pandas import to_datetime as _to_datetime
+from pandas import to_datetime as _to_datetime, DataFrame as _DataFrame
 
-from iranetf import _session_get, _loads, _DataFrame, _jdatetime, _j2g, _datetime
+from iranetf import _session_get, _jdatetime, _j2g, _datetime
 
 
 class _LiveNAV(_TypedDict, total=True):

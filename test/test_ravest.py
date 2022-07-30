@@ -1,7 +1,7 @@
 from numpy import dtype
 from pandas import CategoricalDtype, Int64Dtype, StringDtype
 
-from iranetf import funds, fund_portfolio_report_latest,\
+from iranetf.ravest import funds, fund_portfolio_report_latest,\
     funds_deviation_week_month, funds_trade_price, fund_trade_info, companies
 from test.aiohttp_test_utils import file
 
@@ -65,7 +65,7 @@ async def test_fund_portfolio_report_latest():
     df = await fund_portfolio_report_latest(1497)
     assert [*df.dtypes.items()] == [
         ('Id', dtype('int64')),
-        ('CompanyId', dtype('int64')),
+        ('CompanyId', 'Int64'),
         ('CompanySymbol', dtype('O')),
         ('CompanyNamePersian', dtype('O')),
         ('CompanyIndustryCode', dtype('O')),
