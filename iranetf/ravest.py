@@ -3,7 +3,7 @@ from functools import partial as _partial
 
 from pandas import DataFrame as _DataFrame, NaT as _NaT, NA as _NA
 
-from iranetf import _session_get, _j2g
+from iranetf import _read, _j2g
 
 
 _DF = _partial(_DataFrame, copy=False)
@@ -20,7 +20,7 @@ _FUNDS_DTYPE = {
 
 
 async def _api_json(path) -> list | dict:
-    content = await _session_get('https://api.ravest.ir/' + path)
+    content = await _read('https://api.ravest.ir/' + path)
     return _loads(content.decode().translate(_YK))
 
 

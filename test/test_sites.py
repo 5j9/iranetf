@@ -48,3 +48,9 @@ async def test_navps_history_tadbir():
 async def test_navps_history_tadbir():
     df = await rayan.navps_history()
     assert_navps_history(df)
+
+
+@file('icpfvc_navps_date_space.json')
+async def test_navps_date_ends_with_space():
+    d = await TadbirPardaz('http://www.icpfvc.ir/').live_navps()
+    assert isinstance(d['date'], datetime)

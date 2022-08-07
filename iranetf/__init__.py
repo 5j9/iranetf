@@ -4,7 +4,7 @@ from datetime import datetime as _datetime
 
 from jdatetime import datetime as _jdatetime
 from aiohttp import ClientSession as _ClientSession, \
-    ClientTimeout as _ClientTimeout
+    ClientTimeout as _ClientTimeout, ClientResponse as _ClientResponse
 
 
 SESSION : _ClientSession | None = None
@@ -21,8 +21,12 @@ class Session:
         return SESSION
 
 
-async def _session_get(url: str) -> bytes:
-    return await (await SESSION.get(url)).read()
+async def _get(url: str) -> _ClientResponse:
+    return await SESSION.get(url)
+
+
+async def _read(url: str) -> bytes:
+    return await (await _get(url)).read()
 
 
 def _j2g(s: str) -> _datetime:
