@@ -128,16 +128,21 @@ async def _site_type_url(url: str) -> tuple[str, str]:
                 continue
 
 
-async def _update_known_sites():
+async def _update_using_ravest():
     from iranetf.ravest import funds
     fdf = await funds()
     df = fdf[['Symbol', 'TsetmcId', 'Url']].copy()
     df.columns = df.columns.str.lower()
+
     df['url'] = df.url.str.rstrip('/') + '/'
     site_url = await _gather(*[_site_type_url(url) for url in df.url])
     site_url_df = _DataFrame(site_url, columns=['site_type', 'url'])
     site_url_df['url'].fillna(df['url'], inplace=True)
     df[['site_type', 'url']] = site_url_df
+
+    df['type'] = fdf.FundType.replace(
+        {0: 'Stock', 1: 'Fixed', 2: 'Mixed', 3: 'PE', 4: 'Commodity', 5: 'VC'},
+    )
 
     df.to_csv(
         _CSV_PATH, line_terminator='\n', encoding='utf-8-sig', index=False)
