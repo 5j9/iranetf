@@ -104,7 +104,7 @@ class TadbirPardaz(_BaseSite):
         return df
 
 
-_DATASET_PATH = _Path(__file__).parent / 'etf_dataset.csv'
+_DATASET_PATH = _Path(__file__).parent / 'dataset.csv'
 
 
 def _load_known_sites() -> _DataFrame:
