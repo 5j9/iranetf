@@ -107,7 +107,7 @@ class TadbirPardaz(_BaseSite):
 _DATASET_PATH = _Path(__file__).parent / 'dataset.csv'
 
 
-def _load_known_sites() -> _DataFrame:
+def load_dataset() -> _DataFrame:
     df = _read_csv(
         _DATASET_PATH, encoding='utf-8-sig', low_memory=False, memory_map=True,
         lineterminator='\n',
