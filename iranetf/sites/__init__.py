@@ -142,28 +142,6 @@ async def _url_type_columns(domains):
     return zip(*list_of_tuples)
 
 
-async def _update_dataset_using_ravest():
-    import iranetf.ravest
-    ravest_df = await iranetf.ravest.funds()
-
-    df1 = ravest_df[['Symbol', 'TsetmcId', 'Url']]
-    df1.columns = df1.columns.str.lower()
-
-    domains = df1.url.str.extract(r'/([^/]+)')
-
-    url, site_type = _url_type_columns(domains)
-    df1['url'].update(url)
-    df1['site_type'] = site_type
-
-    df1['type'] = ravest_df.FundType.replace(
-        {0: 'Stock', 1: 'Fixed', 2: 'Mixed', 3: 'PE', 4: 'Commodity', 5: 'VC'},
-    )
-
-    df = df1.reindex(columns=['symbol', 'tsetmcid', 'type', 'url', 'site_type'])
-    df.to_csv(
-        _DATASET_PATH, line_terminator='\n', encoding='utf-8-sig', index=False)
-
-
 async def _inscodes(names_without_tsetmc_id) -> _Series:
     import tsetmc.instruments
     search = tsetmc.instruments.search
