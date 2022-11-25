@@ -225,7 +225,7 @@ async def _update_dataset():
     new_dataset = _concat([ds, new_ids_with_tsetmcid]).sort_values('symbol')
     new_dataset.to_csv(
         _DATASET_PATH,
-        line_terminator='\n',
+        lineterminator='\n',
         encoding='utf-8-sig',
         index=False
     )
