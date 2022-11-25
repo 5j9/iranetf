@@ -2,9 +2,10 @@ from pathlib import Path as _Path
 from typing import TypedDict as _TypedDict
 from json import loads as _loads, JSONDecodeError as _JSONDecodeError
 from asyncio import gather as _gather
+from logging import warning
 
 from pandas import to_datetime as _to_datetime, DataFrame as _DataFrame, \
-    read_csv as _read_csv, Series as _Series
+    read_csv as _read_csv, Series as _Series, concat as _concat
 from aiohttp import ClientConnectorError as _ClientConnectorError, \
     ServerTimeoutError as _ServerTimeoutError
 
@@ -153,16 +154,6 @@ async def _inscodes(names_without_tsetmc_id) -> _Series:
     return _Series(results, index=names_without_tsetmc_id.index, dtype='Int64')
 
 
-async def _add_ravest_tsetmc_id(df: _DataFrame) -> _DataFrame:
-    import iranetf.ravest
-    ravest_df = await iranetf.ravest.funds()
-    ravest_df['domain'] = ravest_df.Url.str.extract(r'/([^/]+)')
-    # early conversion to Int64 prevents data loss due to conversion to floats
-    ravest_df['tsetmc_id'] = ravest_df.TsetmcId.astype('Int64')
-    merged_df = df.merge(ravest_df[['domain', 'tsetmc_id']], 'left', on='domain')
-    return merged_df
-
-
 async def _fipiran_data():
     import fipiran.funds
     async with fipiran.Session():
@@ -203,9 +194,13 @@ async def _update_dataset():
     df['url'] = url
     df['site_type'] = site_type
 
-    df = await _add_ravest_tsetmc_id(df)
-    names_without_tsetmc_id = df[df['tsetmc_id'].isna()].name
-    df['tsetmc_id'].update(await _inscodes(names_without_tsetmc_id))
+    ds = load_dataset()
+    new_fipiran_ids = df[~df.fipiran_id.isin(ds.fipiran_id)].copy()
+    new_fipiran_ids['tsetmc_id'] = await _inscodes(new_fipiran_ids.name)
+
+    dataset_ids_not_on_fiprian = ds[~ds.fipiran_id.isin(df.fipiran_id)]
+    if not dataset_ids_not_on_fiprian.empty:
+        warning('some dataset rows were not found on fipiran')
 
     import tsetmc.dataset
 
@@ -219,13 +214,18 @@ async def _update_dataset():
         copy=False,
     ).drop(columns='l30')
 
-    df_notna_tsetmc_id = df[df.tsetmc_id.notna()]
-    symbols = df_notna_tsetmc_id.merge(
+    new_ids_with_tsetmcid = new_fipiran_ids[new_fipiran_ids.tsetmc_id.notna()]
+    new_ids_with_tsetmcid = new_ids_with_tsetmcid.merge(
         tsetmc_df, 'left', on='tsetmc_id'
-    ).symbol
-    symbols.index = df_notna_tsetmc_id.index
-    df['symbol'] = symbols
+    )
+    new_ids_with_tsetmcid = new_ids_with_tsetmcid[[
+        'symbol', 'name', 'type', 'tsetmc_id', 'fipiran_id', 'url', 'site_type'
+    ]]
 
-    df = df[['symbol', 'name', 'type', 'tsetmc_id', 'fipiran_id', 'url', 'site_type']].sort_values('symbol')
-    df.to_csv(
-        _DATASET_PATH, line_terminator='\n', encoding='utf-8-sig', index=False)
+    new_dataset = _concat([ds, new_ids_with_tsetmcid]).sort_values('symbol')
+    new_dataset.to_csv(
+        _DATASET_PATH,
+        line_terminator='\n',
+        encoding='utf-8-sig',
+        index=False
+    )
