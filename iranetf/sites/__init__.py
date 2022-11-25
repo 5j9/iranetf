@@ -154,10 +154,14 @@ async def _inscodes(names_without_tsetmc_id) -> _Series:
     return _Series(results, index=names_without_tsetmc_id.index, dtype='Int64')
 
 
-async def _fipiran_data():
+async def _fipiran_data(ds):
     import fipiran.funds
     async with fipiran.Session():
         fipiran_df = await fipiran.funds.funds()
+
+    dataset_ids_not_on_fiprian = ds[~ds.fipiran_id.isin(fipiran_df.regNo)]
+    if not dataset_ids_not_on_fiprian.empty:
+        warning('some dataset rows were not found on fipiran')
 
     df = fipiran_df[
         (fipiran_df['typeOfInvest'] == 'Negotiable')
@@ -187,34 +191,34 @@ async def _fipiran_data():
     return df
 
 
-async def _update_dataset():
-    df = await _fipiran_data()
-
-    url, site_type = await _url_type_columns(df['domain'])
-    df['url'] = url
-    df['site_type'] = site_type
-
-    ds = load_dataset()
-    new_fipiran_ids = df[~df.fipiran_id.isin(ds.fipiran_id)].copy()
-    new_fipiran_ids['tsetmc_id'] = await _inscodes(new_fipiran_ids.name)
-
-    dataset_ids_not_on_fiprian = ds[~ds.fipiran_id.isin(df.fipiran_id)]
-    if not dataset_ids_not_on_fiprian.empty:
-        warning('some dataset rows were not found on fipiran')
-
+async def _tsetmc_dataset() -> _DataFrame:
     import tsetmc.dataset
 
     async with tsetmc.Session():
         await tsetmc.dataset.update()
 
     # noinspection PyProtectedMember
-    tsetmc_df = _DataFrame(
+    return _DataFrame(
         tsetmc.dataset._L18S.values(),
         columns=['tsetmc_id', 'symbol', 'l30'],
         copy=False,
     ).drop(columns='l30')
 
-    new_ids_with_tsetmcid = new_fipiran_ids[new_fipiran_ids.tsetmc_id.notna()]
+
+async def _update_dataset():
+    ds = load_dataset()
+    df = await _fipiran_data(ds)
+
+    url, site_type = await _url_type_columns(df['domain'])
+    df['url'] = url
+    df['site_type'] = site_type
+
+    new_ids = df[~df.fipiran_id.isin(ds.fipiran_id)].copy()
+    new_ids['tsetmc_id'] = await _inscodes(new_ids.name)
+
+    new_ids_with_tsetmcid = new_ids[new_ids.tsetmc_id.notna()]
+
+    tsetmc_df = await _tsetmc_dataset()
     new_ids_with_tsetmcid = new_ids_with_tsetmcid.merge(
         tsetmc_df, 'left', on='tsetmc_id'
     )
