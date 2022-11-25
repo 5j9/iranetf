@@ -163,7 +163,7 @@ async def _add_ravest_tsetmc_id(df: _DataFrame) -> _DataFrame:
     return merged_df
 
 
-async def _update_dataset():
+async def _fipiran_data():
     import fipiran.funds
     async with fipiran.Session():
         fipiran_df = await fipiran.funds.funds()
@@ -178,16 +178,26 @@ async def _update_dataset():
 
     df = df[['regNo', 'name', 'fundType', 'websiteAddress']]
 
-    df.rename(columns={
-        'regNo': 'fipiran_id',
-        'fundType': 'type',
-        'websiteAddress': 'domain',
-    }, copy=False, inplace=True, errors='raise')
+    df.rename(
+        columns={
+            'regNo': 'fipiran_id',
+            'fundType': 'type',
+            'websiteAddress': 'domain',
+        }, copy=False, inplace=True, errors='raise'
+    )
 
-    df.type.replace({
-        6: 'Stock', 4: 'Fixed', 7: 'Mixed',
-        5: 'Commodity', 17: 'FOF'
-    }, inplace=True)
+    df.type.replace(
+        {
+            6: 'Stock', 4: 'Fixed', 7: 'Mixed',
+            5: 'Commodity', 17: 'FOF'
+        }, inplace=True
+    )
+
+    return df
+
+
+async def _update_dataset():
+    df = await _fipiran_data()
 
     url, site_type = await _url_type_columns(df['domain'])
     df['url'] = url
