@@ -105,6 +105,7 @@ class TadbirPardaz(_BaseSite):
         return df
 
 
+# todo: add tests for LeveragedTadbirPardaz
 class LeveragedTadbirPardaz(_BaseSite):
 
     async def navps_history(self) -> _DataFrame:
