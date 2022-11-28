@@ -77,7 +77,7 @@ class TadbirPardaz(_BaseSite):
 
     async def live_navps(self) -> _LiveNAV:
         d = await self._json('Fund/GetETFNAV')
-        # the json is escaped twice, so it need to be loaded again
+        # the json is escaped twice, so it needs to be loaded again
         d = _loads(d)
         d['issue'] = int(d.pop('subNav').replace(',', ''))
         d['cancel'] = int(d.pop('cancelNav').replace(',', ''))
@@ -103,6 +103,38 @@ class TadbirPardaz(_BaseSite):
         })
         df['date'] = _to_datetime(df.date)
         return df
+
+
+class LeveragedTadbirPardaz(_BaseSite):
+
+    async def navps_history(self) -> _DataFrame:
+        j: list = await self._json('Chart/TotalNAV?type=getnavtotal')
+
+        frames = []
+        for i, name in zip(j, ('issue', 'statistical', 'cancel', 'super_issue', 'super_cancel', 'normal')):
+            df = _DataFrame(i['List']).drop(columns='name')
+            df['x'] = _to_datetime(df['x'])
+            df.rename(columns={'y': name}, inplace=True)
+            df.set_index('x', inplace=True)
+            frames.append(df)
+
+        return _concat(frames, axis=1)
+
+    async def live_navps(self):
+        d = await self._json('Fund/GetLeveragedNAV')
+        # the json is escaped twice, so it needs to be loaded again
+        d = _loads(d)
+        d['issue'] = int(d.pop('SuperUnitsSubscriptionNAV').replace(',', ''))
+        d['cancel'] = int(d.pop('SuperUnitsCancelNAV').replace(',', ''))
+
+        date = d.pop('PublishDate')
+        try:
+            date = _jdatetime.strptime(date, '%Y/%m/%d %H:%M:%S')
+        except ValueError:
+            date = _jdatetime.strptime(date, '%Y/%m/%d ')
+        d['date'] = date.togregorian()
+
+        return d
 
 
 _DATASET_PATH = _Path(__file__).parent / 'dataset.csv'
