@@ -3,6 +3,7 @@ from typing import TypedDict as _TypedDict
 from json import loads as _loads, JSONDecodeError as _JSONDecodeError
 from asyncio import gather as _gather
 from logging import warning
+from abc import ABC as _ABC, abstractmethod as _abstractmethod
 
 from pandas import to_datetime as _to_datetime, DataFrame as _DataFrame, \
     read_csv as _read_csv, Series as _Series, concat as _concat
@@ -18,7 +19,7 @@ class _LiveNAV(_TypedDict, total=True):
     date: _datetime
 
 
-class _BaseSite:
+class BaseSite(_ABC):
 
     __slots__ = 'url', 'last_response'
 
@@ -38,8 +39,16 @@ class _BaseSite:
             return _DataFrame(j, copy=False)
         return j
 
+    @_abstractmethod
+    async def live_navps(self) -> _LiveNAV:
+        ...
 
-class MabnaDP(_BaseSite):
+    @_abstractmethod
+    async def navps_history(self) -> _DataFrame:
+        ...
+
+
+class MabnaDP(BaseSite):
 
     async def _json(
         self, path: str, df: bool = False
@@ -63,7 +72,7 @@ class MabnaDP(_BaseSite):
         return df
 
 
-class RayanHamafza(_BaseSite):
+class RayanHamafza(BaseSite):
 
     async def _json(
         self, path: str, df: bool = False
@@ -99,7 +108,7 @@ class RayanHamafza(_BaseSite):
         return await self._json('MixAsset')
 
 
-class TadbirPardaz(_BaseSite):
+class TadbirPardaz(BaseSite):
 
     # version = '9.2.0'
 
@@ -133,8 +142,7 @@ class TadbirPardaz(_BaseSite):
         return df
 
 
-# todo: add tests for LeveragedTadbirPardaz
-class LeveragedTadbirPardaz(_BaseSite):
+class LeveragedTadbirPardaz(BaseSite):
 
     async def navps_history(self) -> _DataFrame:
         j: list = await self._json('Chart/TotalNAV?type=getnavtotal')
@@ -142,12 +150,14 @@ class LeveragedTadbirPardaz(_BaseSite):
         frames = []
         for i, name in zip(j, ('issue', 'statistical', 'cancel', 'super_issue', 'super_cancel', 'normal')):
             df = _DataFrame(i['List']).drop(columns='name')
-            df['x'] = _to_datetime(df['x'])
+            df['date'] = _to_datetime(df['x'])
             df.rename(columns={'y': name}, inplace=True)
-            df.set_index('x', inplace=True)
+            df.set_index('date', inplace=True)
             frames.append(df)
 
-        return _concat(frames, axis=1)
+        df = _concat(frames, axis=1)
+        df.reset_index(inplace=True)
+        return df
 
     async def live_navps(self):
         d = await self._json('Fund/GetLeveragedNAV')
@@ -169,7 +179,7 @@ class LeveragedTadbirPardaz(_BaseSite):
 _DATASET_PATH = _Path(__file__).parent / 'dataset.csv'
 
 
-def _make_site(row) -> _BaseSite:
+def _make_site(row) -> BaseSite:
     type_str = row['site_type']
     site_class = globals()[type_str]
     return site_class(row['url'])
