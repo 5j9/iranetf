@@ -141,7 +141,17 @@ class LeveragedTadbirPardaz(_BaseSite):
 _DATASET_PATH = _Path(__file__).parent / 'dataset.csv'
 
 
-def load_dataset() -> _DataFrame:
+def _make_site_object(row) -> _BaseSite:
+    type_str = row['site_type']
+    site_class = globals()[type_str]
+    return site_class(row['url'])
+
+
+def load_dataset(*, site=True) -> _DataFrame:
+    """Load dataset.csv as a DataFrame.
+
+    If site is True, convert url and site_type columns to site object.
+    """
     df = _read_csv(
         _DATASET_PATH, encoding='utf-8-sig', low_memory=False, memory_map=True,
         lineterminator='\n',
@@ -155,6 +165,9 @@ def load_dataset() -> _DataFrame:
             'site_type': 'category',
         }
     )
+    if site:
+        df['site_object'] = df[df.site_type.notna()].apply(_make_site_object, axis=1)
+        df.drop(columns=['url', 'site_type'], inplace=True)
     return df
 
 
