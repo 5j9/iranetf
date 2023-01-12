@@ -1,9 +1,10 @@
 from datetime import datetime
 
 from pandas import DataFrame
+from pandas.api.types import is_numeric_dtype
 from numpy import dtype
 
-from iranetf.sites import RayanHamafza, TadbirPardaz
+from iranetf.sites import RayanHamafza, TadbirPardaz, MabnaDP
 from test.aiohttp_test_utils import file
 
 
@@ -31,11 +32,10 @@ async def test_rayan_live_navps():
 
 
 def assert_navps_history(df: DataFrame):
-    assert [*df.dtypes.items()] == [
-        ('date', dtype('<M8[ns]')),
-        ('issue', dtype('int64')),
-        ('cancel', dtype('int64')),
-        ('statistical', dtype('int64'))]
+    assert df['date'].dtype ==  dtype('<M8[ns]')
+    assert is_numeric_dtype(df['issue'])
+    assert is_numeric_dtype(df['cancel'])
+    assert is_numeric_dtype(df['statistical'])
 
 
 @file('modir_navps_history.json')
@@ -54,3 +54,20 @@ async def test_navps_history_tadbir():
 async def test_navps_date_ends_with_space():
     d = await TadbirPardaz('http://www.icpfvc.ir/').live_navps()
     assert isinstance(d['date'], datetime)
+
+
+mabna_dp = MabnaDP('https://kianfunds6.ir/')
+
+
+@file('hamvasn_live.json')
+async def test_mabnadp_live_navps():
+    d = await mabna_dp.live_navps()
+    assert isinstance(d['date'], datetime)
+    assert isinstance(d['issue'], int)
+    assert isinstance(d['cancel'], int)
+
+
+@file('hamvazn_navps_history.json')
+async def test_navps_history_tadbir():
+    df = await mabna_dp.navps_history()
+    assert_navps_history(df)

@@ -32,10 +32,35 @@ class _BaseSite:
     async def _json(self, path: str, df: bool = False) -> list | dict | str | _DataFrame:
         r = await _get(self.url + path)
         self.last_response = r
-        j = _loads(await r.read())
+        content = await r.read()
+        j = _loads(content)
         if df is True:
             return _DataFrame(j, copy=False)
         return j
+
+
+class MabnaDP(_BaseSite):
+
+    async def _json(
+        self, path: str, df: bool = False
+    ) -> list | dict | _DataFrame:
+        return await super()._json(f'api/v1/overall/{path}', df)
+
+    async def live_navps(self) -> _LiveNAV:
+        j = await self._json('navetf.json')
+        j['date'] = _jdatetime.strptime(j['date_time'], '%H:%M %Y/%m/%d').togregorian()
+        j['issue'] = int(j.pop('purchase_price').replace(',', ''))
+        j['cancel'] = int(j.pop('redemption_price').replace(',', ''))
+        return j
+
+    async def navps_history(self) -> _DataFrame:
+        j = await self._json('navps.json')
+        df = _DataFrame(j[0]['values'])
+        df['date'] = df['date'].astype(str).apply(lambda i: _jdatetime.strptime(i, format='%Y%m%d000000').togregorian())
+        df['issue'] = df.pop('purchase_price')
+        df['cancel'] = df.pop('redeption_price')
+        df['statistical'] = df.pop('statistical_value')
+        return df
 
 
 class RayanHamafza(_BaseSite):
@@ -144,7 +169,7 @@ class LeveragedTadbirPardaz(_BaseSite):
 _DATASET_PATH = _Path(__file__).parent / 'dataset.csv'
 
 
-def _make_site_object(row) -> _BaseSite:
+def _make_site(row) -> _BaseSite:
     type_str = row['site_type']
     site_class = globals()[type_str]
     return site_class(row['url'])
@@ -169,7 +194,7 @@ def load_dataset(*, site=True) -> _DataFrame:
         }
     )
     if site:
-        df['site_object'] = df[df.site_type.notna()].apply(_make_site_object, axis=1)
+        df['site'] = df[df.site_type.notna()].apply(_make_site, axis=1)
         df.drop(columns=['url', 'site_type'], inplace=True)
     return df
 
