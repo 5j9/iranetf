@@ -26,6 +26,9 @@ class _BaseSite:
         assert url[-1] == '/', 'the url must end with `/`'
         self.url = url
 
+    def __repr__(self):
+        return f'{type(self).__name__}({self.url})'
+
     async def _json(self, path: str, df: bool = False) -> list | dict | str | _DataFrame:
         r = await _get(self.url + path)
         self.last_response = r
