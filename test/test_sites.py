@@ -14,7 +14,7 @@ async def assert_live(site: BaseSite):
 
 
 tadbir = TadbirPardaz('https://modirfund.ir/')
-rayan = RayanHamafza('http://fardaetf.tadbirfunds.com/')
+rayan = RayanHamafza('https://yaghootfund.ir/')
 
 
 @file('modir_live.json')
