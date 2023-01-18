@@ -290,7 +290,7 @@ async def _tsetmc_dataset() -> _DataFrame:
 
 
 async def _update_dataset():
-    ds = load_dataset()
+    ds = load_dataset(site=False)
     df = await _fipiran_data(ds)
 
     url, site_type = await _url_type_columns(df['domain'])
