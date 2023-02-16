@@ -3,7 +3,7 @@ from datetime import datetime
 from numpy import dtype
 
 from iranetf.sites import RayanHamafza, TadbirPardaz, MabnaDP, LeveragedTadbirPardaz, BaseSite
-from test.aiohttp_test_utils import file
+from aiohttp_test_utils import file
 
 
 async def assert_live(site: BaseSite):
