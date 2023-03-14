@@ -148,9 +148,10 @@ class LeveragedTadbirPardaz(BaseSite):
         j: list = await self._json('Chart/TotalNAV?type=getnavtotal')
 
         frames = []
-        for i, name in zip(j, ('issue', 'statistical', 'cancel', 'super_issue', 'super_cancel', 'normal')):
+        for i, name in zip(j, ('normal_issue', 'normal_statistical', 'normal_cancel', 'issue', 'cancel', 'normal')):
             df = _DataFrame(i['List']).drop(columns='name')
             df['date'] = _to_datetime(df['x'])
+            df.drop(columns='x', inplace=True)
             df.rename(columns={'y': name}, inplace=True)
             df.set_index('date', inplace=True)
             frames.append(df)
