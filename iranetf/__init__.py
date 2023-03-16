@@ -2,10 +2,12 @@ __version__ = '0.7.2.dev0'
 
 from datetime import datetime as _datetime
 
+from aiohttp import (
+    ClientResponse as _ClientResponse,
+    ClientSession as _ClientSession,
+    ClientTimeout as _ClientTimeout,
+)
 from jdatetime import datetime as _jdatetime
-from aiohttp import ClientSession as _ClientSession, \
-    ClientTimeout as _ClientTimeout, ClientResponse as _ClientResponse
-
 
 SESSION : _ClientSession | None = None
 

@@ -1,9 +1,15 @@
 from datetime import datetime
 
+from aiohttp_test_utils import file
 from numpy import dtype
 
-from iranetf.sites import RayanHamafza, TadbirPardaz, MabnaDP, LeveragedTadbirPardaz, BaseSite
-from aiohttp_test_utils import file
+from iranetf.sites import (
+    BaseSite,
+    LeveragedTadbirPardaz,
+    MabnaDP,
+    RayanHamafza,
+    TadbirPardaz,
+)
 
 
 async def assert_live(site: BaseSite):
