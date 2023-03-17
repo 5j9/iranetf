@@ -8,6 +8,7 @@ from typing import TypedDict as _TypedDict
 from aiohttp import (
     ClientConnectorError as _ClientConnectorError,
     ServerTimeoutError as _ServerTimeoutError,
+    ClientOSError as _ClientOSError,
 )
 from pandas import (
     DataFrame as _DataFrame,
@@ -220,14 +221,20 @@ def load_dataset(*, site=True) -> _DataFrame:
 async def _url_type(domain: str) -> tuple:
     for protocol in ('https', 'http'):
         for SiteType in (RayanHamafza, TadbirPardaz):
-            site = SiteType(f'{protocol}://{domain}/')
+            url = f'{protocol}://{domain}/'
+            site = SiteType(url)
             try:
                 await site.live_navps()
                 domain = site.last_response.url
                 return f'{domain.scheme}://{domain.host}/', SiteType.__name__
-            except (_JSONDecodeError, _ClientConnectorError, _ServerTimeoutError):
+            except (
+                _JSONDecodeError,
+                _ClientConnectorError,
+                _ServerTimeoutError,
+                _ClientOSError,
+            ):
                 continue
-    return f'http://{domain}/', None
+    return None, None
 
 
 async def _url_type_columns(domains):
@@ -251,8 +258,8 @@ async def _fipiran_data(ds):
     async with fipiran.Session():
         fipiran_df = await fipiran.funds.funds()
 
-    dataset_ids_not_on_fiprian = ds[~ds.fipiran_id.isin(fipiran_df.regNo)]
-    if not dataset_ids_not_on_fiprian.empty:
+    dataset_ids_not_on_fipiran = ds[~ds.fipiran_id.isin(fipiran_df.regNo)]
+    if not dataset_ids_not_on_fipiran.empty:
         warning('some dataset rows were not found on fipiran')
 
     df = fipiran_df[
@@ -297,28 +304,31 @@ async def _tsetmc_dataset() -> _DataFrame:
     ).drop(columns='l30')
 
 
-async def _update_dataset():
+async def update_dataset():
     ds = load_dataset(site=False)
-    df = await _fipiran_data(ds)
+    fipiran_df = await _fipiran_data(ds)
 
-    url, site_type = await _url_type_columns(df['domain'])
-    df['url'] = url
-    df['site_type'] = site_type
+    url, site_type = await _url_type_columns(fipiran_df['domain'])
+    fipiran_df['url'] = url
+    fipiran_df['site_type'] = site_type
 
-    new_ids = df[~df.fipiran_id.isin(ds.fipiran_id)].copy()
-    new_ids['tsetmc_id'] = await _inscodes(new_ids.name)
+    fipiran_ids_existing_in_ds = fipiran_df.fipiran_id.isin(ds.fipiran_id)
 
-    new_ids_with_tsetmcid = new_ids[new_ids.tsetmc_id.notna()]
+    new_fipiran_df = fipiran_df[~fipiran_ids_existing_in_ds].copy()
+
+    new_fipiran_df['tsetmc_id'] = await _inscodes(new_fipiran_df.name)
+
+    new_with_tsetmcid = new_fipiran_df[new_fipiran_df.tsetmc_id.notna()]
 
     tsetmc_df = await _tsetmc_dataset()
-    new_ids_with_tsetmcid = new_ids_with_tsetmcid.merge(
+    new_with_tsetmcid = new_with_tsetmcid.merge(
         tsetmc_df, 'left', on='tsetmc_id'
     )
-    new_ids_with_tsetmcid = new_ids_with_tsetmcid[[
+    new_with_tsetmcid = new_with_tsetmcid[[
         'symbol', 'name', 'type', 'tsetmc_id', 'fipiran_id', 'url', 'site_type'
     ]]
 
-    new_dataset = _concat([ds, new_ids_with_tsetmcid]).sort_values('symbol')
+    new_dataset = _concat([ds, new_with_tsetmcid]).sort_values('symbol')
     new_dataset.to_csv(
         _DATASET_PATH,
         lineterminator='\n',
