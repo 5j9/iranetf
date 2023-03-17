@@ -1,5 +1,5 @@
 ﻿symbol,name,type,tsetmc_id,fipiran_id,url,site_type
-آتیمس,آرمان آتیه درخشان مس,Stock,22839330962768817,11378,http://armanmesetf.com/,RayanHamafza
+آتیمس,آرمان آتیه درخشان مس,Stock,22839330962768817,11378,http://armanmesetf.ir/,RayanHamafza
 آرام,شاخصی آرام مفید,Stock,14230681955555738,11939,https://arametf.com/,TadbirPardaz
 آساس,آسمان آرمانی سهام,Stock,66682662312253625,11195,https://asasfund.ir/,TadbirPardaz
 آسام,آرمان سپهر آشنا,Mixed,36592972482259020,11172,https://asaetf.ir/,TadbirPardaz
@@ -10,26 +10,26 @@
 آگاس,هستی بخش آگاه,Stock,33887145736684266,11341,https://hbagahfund.com/,RayanHamafza
 ارزش,ارزش آفرین بیدار,Stock,43443105991896600,11712,http://arzesh.ebb.ir/,RayanHamafza
 ارمغان,ارمغان ایرانیان,Fixed,31366347648583654,10920,http://armaghanfund.ir/,RayanHamafza
-اطلس,توسعه اندوخته آینده,Stock,11427939669935844,11215,https://atlasetf.com/,TadbirPardaz
+اطلس,توسعه اطلس مفید,Stock,11427939669935844,11215,https://atlasetf.com/,TadbirPardaz
 اعتبار,نوع دوم اعتبار,Fixed,35163287528816137,12031,http://etebaretf2.com/,RayanHamafza
 اعتماد,اعتماد آفرین پارسیان,Fixed,66818022341772870,11315,http://eap-fund.com/,RayanHamafza
 افران,افرا نماد پایدار,Fixed,3846143218462419,11692,https://afra.fund/,RayanHamafza
 افق ملت,افق ملت,Stock,15451317146134956,11233,https://ofoghmellat.ir/,TadbirPardaz
-الماس,امین تدبیرگران فردا,Stock,28788598290160782,11260,http://fardaetf.tadbirfunds.com/,RayanHamafza
+الماس,امین تدبیرگران فردا,Stock,28788598290160782,11260,http://fardaetf.tadbirfunds.ir/,RayanHamafza
 امین یکم,امین یکم فردا,Fixed,45728383369147894,11460,http://aminfarda.com/,
-انار,انار نماد ارزش,Stock,30215634246748564,11900,http://anar.fund/,RayanHamafza
+انار,انار نماد ارزش,Stock,30215634246748564,11900,https://anar.fund/,RayanHamafza
 اهرم,سهامی اهرمی کاریزما,Stock,17914401175772326,11912,http://ahrom.charisma.ir/,LeveragedTadbirPardaz
 اوج,اوج دماوند,Stock,62575434414985179,11886,http://oujdamavandfund.ir/,RayanHamafza
 اوصتا,اندیشه ورزان صبا تامین,Fixed,57761388729898548,11588,https://sast.sabaamc.ir/,RayanHamafza
 اکسیژن,سهامی اکسیژن,Stock,50094941173290382,12035,http://oxygen.o2am.ir/,
 بذر,بذر امید آفرین,Stock,37222720235819361,11197,http://bazreomidfund.ir/,RayanHamafza
 تاراز,آوای تاراز زاگرس,Stock,24651394045981418,11922,http://tarazfund.ir/,RayanHamafza
-تصمیم,با درآمد ثابت تصمیم,Fixed,53419976284977130,11569,http://tasmim-sabet.ir/,RayanHamafza
-تمشک,تمشک نماد رشد,FOF,53145304508578701,12057,http://tameshk.fund/,
+تصمیم,در اوراق بهادار با درآمد ثابت تصمیم,Fixed,53419976284977130,11569,http://tasmim-sabet.ir/,RayanHamafza
+تمشک,تمشک نماد رشد,FOF,53145304508578701,12057,https://tameshk.fund/,RayanHamafza
 توان,سهامی اهرمی مفید,Stock,41927452991671109,12033,https://tavanfund.com/,LeveragedTadbirPardaz
 ثبات,ثبات ویستا,Fixed,26780282166315918,11874,http://sobatvista.ir/,RayanHamafza
 ثروتم,ثروت آفرین پارسیان,Stock,71672399601682259,11327,http://sap-fund.com/,RayanHamafza
-ثمین,ثروت افزون ثمین,Stock,66721204145017523,11889,https://saminfund.ir/,RayanHamafza
+ثمین,ثروت افزون ثمین,Stock,66721204145017523,11889,http://saminfund.ir/,RayanHamafza
 ثنا,زرین نهال ثنا,Stock,32112121249636248,12023,https://zarinnahal.sanaamc.com/,
 ثهام,ثروت هامرز,Stock,38713440086361985,11823,https://servat.hummers.ir/,TadbirPardaz
 خاتم,خاتم ایساتیس پویا,Fixed,18865325633315847,11753,http://etf.isatispm.com/,RayanHamafza
@@ -40,7 +40,7 @@
 درسا,قابل معامله سهامی درسا,Stock,34581754264880199,11962,http://dorsaetf.com/,RayanHamafza
 دریا,دریای آبی فیروزه,Stock,11285885633824855,12039,https://daryaetf.ir/,TadbirPardaz
 رایکا,نوع دوم رایکا,Fixed,66105959479616770,12024,http://raykaetf.com/,RayanHamafza
-رشد,رشد پایدار,Fixed,48287767791629523,11667,https://rpfund.ir/,TadbirPardaz
+رشد,رشد پایدار آبان,Fixed,48287767791629523,11667,https://rpfund.ir/,TadbirPardaz
 رماس,راهبرد ممتاز ابن سینا,Stock,22002589755112021,11803,http://emacofund.ir/,RayanHamafza
 زر,پشتوانه سکه طلای زرافشان امید ایرانیان,Commodity,33254899395816171,11530,http://omidgoldfund.ir/,RayanHamafza
 زرفام,زرفام آشنا,Commodity,33144542989832366,11967,https://goldfund.ir/,RayanHamafza
@@ -61,14 +61,14 @@
 عیار,طلای عیار مفید,Commodity,34144395039913458,11586,https://ayaretf.com/,TadbirPardaz
 فراز,فراز داریک,Stock,13666407494621646,11773,http://farazdarik.ir/,RayanHamafza
 فردا,آوای فردای زاگرس,Fixed,65249046611427924,11776,https://afzfund.ir/,TadbirPardaz
-فیروزا,ارمغان فیروزه آسیا,Fixed,10795723506538053,11518,http://firouzehfixetf.com/,RayanHamafza
+فیروزا,ارمغان فیروزه آسیا,Fixed,10795723506538053,11518,https://firouzehfixetf.com/,TadbirPardaz
 فیروزه,شاخص سی شرکت بزرگ فیروزه,Stock,66036975502302203,11308,https://iranetf.ir/,TadbirPardaz
 لبخند,لبخند فارابی,Fixed,31569200988534548,12002,https://labkhand.irfarabi.ir/,TadbirPardaz
 مانی,ثابت مانی,Fixed,61265100181977543,11859,https://manifunds.ir/,TadbirPardaz
 مثقال,در اوراق بهادار مبتنی بر طلای زرین آگاه,Commodity,32469128621155736,11899,http://zarinagahfund.com/,RayanHamafza
 مدیر,مدیریت ثروت صندوق بازنشستگی کشوری,Stock,65576885779918210,11736,https://modirfund.ir/,TadbirPardaz
 مروارید,مروارید بها بازار,Stock,31248540252187559,11929,http://morvaridfund.ir/,RayanHamafza
-نخل,در اوراق بهادار با درآمد ثابت خلیج فارس,Fixed,27797446447955609,11989,http://nakhl.pgibc.ir/,
+نخل,در اوراق بهادار با درآمد ثابت خلیج فارس,Fixed,27797446447955609,11989,http://nakhl.pgibc.ir/,RayanHamafza
 نهال,طلای سرخ نو ویرا,Commodity,12913156843322499,11772,http://ngmf.ir/,RayanHamafza
 هامرز,اعتماد هامرز,Fixed,50503654866742146,11920,https://hummersfund.ir/,TadbirPardaz
 هم وزن,قابل معامله شاخصی کیان,Stock,47041908051542008,11924,http://kianfunds6.ir/,MabnaDP
@@ -83,7 +83,7 @@
 پرتو,پرتو پایش پیشرو,Stock,48818952524587858,12048,http://partofund.ir/,
 کارا,نوع دوم کارا,Fixed,71843282162462661,11883,http://kara.charisma.ir/,RayanHamafza
 کاردان,تجارت شاخصی کاردان,Stock,65023851436340574,11312,https://iran-kfunds3.ir/,TadbirPardaz
-کاریس,سپهر کاریزما,Stock,69067576215760005,11183,http://scetf.ir/,RayanHamafza
+کاریس,سهامی سپند کاریزما,Stock,69067576215760005,11183,http://scetf.ir/,RayanHamafza
 کارین,با درآمد ثابت نگین سامان,Fixed,16056283141617755,11500,https://iran-kfunds4.ir/,TadbirPardaz
 کامیاب,کامیاب آشنا,Fixed,16040900750729921,11838,http://kamyabfund.ir/,RayanHamafza
 کمند,با درآمد ثابت کمند,Fixed,34718633636164421,11513,http://kamandfixedincome.com/,RayanHamafza
@@ -93,5 +93,5 @@
 گنجین,گنجینه یکم آوید,Fixed,57728534324022361,11499,https://ganjinehavid.ir/,TadbirPardaz
 گنجینه,گنجینه داریوش,Fixed,47101579271117172,11673,http://ganjineh.dariush.fund/,RayanHamafza
 گوهر,در اوراق بهادار مبتنی بر سکه طلای کیان,Commodity,12390706505809150,11556,https://kianfunds3.ir/,RayanHamafza
-یارا,با درآمد ثابت آریا,Fixed,45284811973404357,11916,https://fund1.ariaamc.ir/,RayanHamafza
+یارا,در اوراق بهادار با درآمد ثابت آریا,Fixed,45284811973404357,11916,https://fund1.ariaamc.ir/,RayanHamafza
 یاقوت,یاقوت آگاه,Fixed,1438514795814416,11698,https://yaghootfund.ir/,RayanHamafza

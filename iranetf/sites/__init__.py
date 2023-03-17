@@ -312,6 +312,11 @@ async def update_dataset():
     fipiran_df['url'] = url
     fipiran_df['site_type'] = site_type
 
+    # to update existing urls and names
+    ds.set_index('fipiran_id', inplace=True)
+    ds.update(fipiran_df.set_index('fipiran_id'))
+    ds.reset_index(inplace=True)
+
     fipiran_ids_existing_in_ds = fipiran_df.fipiran_id.isin(ds.fipiran_id)
 
     new_fipiran_df = fipiran_df[~fipiran_ids_existing_in_ds].copy()
@@ -324,12 +329,11 @@ async def update_dataset():
     new_with_tsetmcid = new_with_tsetmcid.merge(
         tsetmc_df, 'left', on='tsetmc_id'
     )
-    new_with_tsetmcid = new_with_tsetmcid[[
-        'symbol', 'name', 'type', 'tsetmc_id', 'fipiran_id', 'url', 'site_type'
-    ]]
 
     new_dataset = _concat([ds, new_with_tsetmcid]).sort_values('symbol')
-    new_dataset.to_csv(
+    new_dataset[[  # resort columns (order was changed by the ds.reset_index)
+        'symbol', 'name', 'type', 'tsetmc_id', 'fipiran_id', 'url', 'site_type'
+    ]].to_csv(
         _DATASET_PATH,
         lineterminator='\n',
         encoding='utf-8-sig',
