@@ -1,4 +1,4 @@
-__version__ = '0.7.2.dev0'
+__version__ = '0.8.0'
 
 from datetime import datetime as _datetime
 
