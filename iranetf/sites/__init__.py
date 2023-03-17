@@ -225,8 +225,6 @@ async def _url_type(domain: str) -> tuple:
             site = SiteType(url)
             try:
                 await site.live_navps()
-                domain = site.last_response.url
-                return f'{domain.scheme}://{domain.host}/', SiteType.__name__
             except (
                 _JSONDecodeError,
                 _ClientConnectorError,
@@ -234,6 +232,8 @@ async def _url_type(domain: str) -> tuple:
                 _ClientOSError,
             ):
                 continue
+            last_url = site.last_response.url  # to avoid redirected URLs
+            return f'{last_url.scheme}://{last_url.host}/', SiteType.__name__
     return None, None
 
 
