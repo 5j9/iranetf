@@ -7,8 +7,8 @@ from typing import TypedDict as _TypedDict
 
 from aiohttp import (
     ClientConnectorError as _ClientConnectorError,
-    ServerTimeoutError as _ServerTimeoutError,
     ClientOSError as _ClientOSError,
+    ServerTimeoutError as _ServerTimeoutError,
 )
 from pandas import (
     DataFrame as _DataFrame,
