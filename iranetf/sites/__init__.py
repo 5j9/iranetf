@@ -304,7 +304,8 @@ async def _tsetmc_dataset() -> _DataFrame:
     ).drop(columns='l30')
 
 
-async def update_dataset():
+async def update_dataset() -> _DataFrame:
+    """Update dataset and return newly found that could not be added."""
     ds = load_dataset(site=False)
     fipiran_df = await _fipiran_data(ds)
 
@@ -339,3 +340,5 @@ async def update_dataset():
         encoding='utf-8-sig',
         index=False
     )
+
+    return new_fipiran_df[new_fipiran_df.tsetmc_id.notna()]
