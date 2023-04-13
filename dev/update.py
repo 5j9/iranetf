@@ -1,11 +1,12 @@
 from asyncio import run
 
-from iranetf import Session
+import iranetf
 from iranetf.sites import update_dataset
 
 
 async def main():
-    async with Session():
+    iranetf.SSL = False  # tolerate week ssl certs
+    async with iranetf.Session():
         return await update_dataset()
 
 

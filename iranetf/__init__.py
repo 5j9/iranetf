@@ -23,8 +23,11 @@ class Session:
         return SESSION
 
 
+SSL = None
+
+
 async def _get(url: str) -> _ClientResponse:
-    return await SESSION.get(url)
+    return await SESSION.get(url, ssl=SSL)
 
 
 async def _read(url: str) -> bytes:
