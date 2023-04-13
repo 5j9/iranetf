@@ -346,15 +346,16 @@ async def update_dataset() -> _DataFrame:
             tsetmc_df, 'left', on='tsetmc_id'
         )
 
-        new_dataset = _concat([ds, new_with_tsetmcid]).sort_values('symbol')
-        new_dataset[[  # resort columns (order was changed by the ds.reset_index)
-            'symbol', 'name', 'type', 'tsetmc_id', 'fipiran_id', 'url', 'site_type'
-        ]].to_csv(
-            _DATASET_PATH,
-            lineterminator='\n',
-            encoding='utf-8-sig',
-            index=False
-        )
+        ds = _concat([ds, new_with_tsetmcid]).sort_values('symbol')
+
+    ds[[  # resort columns (order was changed by the ds.reset_index)
+        'symbol', 'name', 'type', 'tsetmc_id', 'fipiran_id', 'url', 'site_type'
+    ]].to_csv(
+        _DATASET_PATH,
+        lineterminator='\n',
+        encoding='utf-8-sig',
+        index=False
+    )
 
     return new_fipiran_df[new_fipiran_df.tsetmc_id.isna()]
 
