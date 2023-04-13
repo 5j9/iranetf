@@ -1,11 +1,50 @@
 [build-system]
-requires = [
-    # cthe minimum version that supports `attr` in setup.cfg
-    "setuptools>=46.4.0",
-    "wheel"
-]
+requires = ["setuptools>=66.1.0"]
 build-backend = "setuptools.build_meta"
+
+
+[project]
+name = "iranetf"
+description = "a library to fetch data from iranetf.org"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
+    "Operating System :: OS Independent",
+]
+requires-python = ">= 3.10"
+dependencies = [
+    "aiohttp[speedups]",
+    "pandas",
+    "jdatetime >= 4.1.0",
+]
+dynamic = ["version"]
+
+[[project.authors]]
+name = "5j9"
+email = "5j9@users.noreply.github.com"
+
+[project.readme]
+file = "README.rst"
+content-type = "text/x-rst"
+
+[project.urls]
+Homepage = "https://github.com/5j9/fipiran"
+"Bug Tracker" = "https://github.com/5j9/fipiran/issues"
+
+[project.optional-dependencies]
+tests = ["aiohttp_test_utils"]
+
+
+[tool.setuptools]
+zip-safe = false
+include-package-data = true
+[tool.setuptools.packages.find]
+namespaces = false
+[tool.setuptools.dynamic.version]
+attr = "iranetf.__version__"
+
 
 [tool.isort]
 profile = "black"
+line_length = 79
 combine_as_imports = true
