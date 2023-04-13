@@ -3,6 +3,7 @@ from asyncio import run
 from iranetf import Session
 from iranetf.sites import update_dataset
 
+
 async def main():
     async with Session():
         return await update_dataset()
