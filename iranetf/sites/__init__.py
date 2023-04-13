@@ -1,5 +1,5 @@
 from abc import ABC as _ABC, abstractmethod as _abstractmethod
-from asyncio import as_completed as _as_completed, gather as _gather
+from asyncio import gather as _gather
 from json import JSONDecodeError as _JSONDecodeError, loads as _loads
 from logging import error, warning
 from pathlib import Path as _Path
@@ -19,7 +19,7 @@ from pandas import (
     to_datetime as _to_datetime,
 )
 
-from iranetf import Session as _Session, _datetime, _get, _j2g, _jdatetime
+from iranetf import _datetime, _get, _j2g, _jdatetime
 
 _ETF_TYPES = {  # numbers are according to fipiran
     6: 'Stock', 4: 'Fixed', 7: 'Mixed',
@@ -242,14 +242,15 @@ SITE_TYPES = (RayanHamafza, TadbirPardaz, MabnaDP, LeveragedTadbirPardaz)
 
 
 async def _url_type(domain: str) -> tuple:
-    aws = [
+    coros = [
         _check_validity(SiteType(f'{protocol}://{domain}/'))
         for protocol in ('https', 'http')
         for SiteType in SITE_TYPES
     ]
 
-    for coro in _as_completed(aws):
-        result = await coro
+    results = await _gather(*coros)
+
+    for result in results:
         if result is not None:
             return result
 
