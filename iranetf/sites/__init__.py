@@ -283,7 +283,7 @@ async def _fipiran_data(ds):
     df.type.replace(
         {
             6: 'Stock', 4: 'Fixed', 7: 'Mixed',
-            5: 'Commodity', 17: 'FOF'
+            5: 'Commodity', 17: 'FOF', 18: 'REIT',
         }, inplace=True
     )
 
@@ -326,19 +326,20 @@ async def update_dataset() -> _DataFrame:
 
     new_with_tsetmcid = new_fipiran_df[new_fipiran_df.tsetmc_id.notna()]
 
-    tsetmc_df = await _tsetmc_dataset()
-    new_with_tsetmcid = new_with_tsetmcid.merge(
-        tsetmc_df, 'left', on='tsetmc_id'
-    )
+    if not new_with_tsetmcid.empty:
+        tsetmc_df = await _tsetmc_dataset()
+        new_with_tsetmcid = new_with_tsetmcid.merge(
+            tsetmc_df, 'left', on='tsetmc_id'
+        )
 
-    new_dataset = _concat([ds, new_with_tsetmcid]).sort_values('symbol')
-    new_dataset[[  # resort columns (order was changed by the ds.reset_index)
-        'symbol', 'name', 'type', 'tsetmc_id', 'fipiran_id', 'url', 'site_type'
-    ]].to_csv(
-        _DATASET_PATH,
-        lineterminator='\n',
-        encoding='utf-8-sig',
-        index=False
-    )
+        new_dataset = _concat([ds, new_with_tsetmcid]).sort_values('symbol')
+        new_dataset[[  # resort columns (order was changed by the ds.reset_index)
+            'symbol', 'name', 'type', 'tsetmc_id', 'fipiran_id', 'url', 'site_type'
+        ]].to_csv(
+            _DATASET_PATH,
+            lineterminator='\n',
+            encoding='utf-8-sig',
+            index=False
+        )
 
-    return new_fipiran_df[new_fipiran_df.tsetmc_id.notna()]
+    return new_fipiran_df[new_fipiran_df.tsetmc_id.isna()]

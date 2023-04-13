@@ -12,5 +12,9 @@ async def main():
 unrecognized_df = run(main())
 
 if not unrecognized_df.empty:
-    print('check unrecognized_df')
-    breakpoint()
+    print('See #unadded_etfs.html for remaining ETFs')
+    with open('#unadded_etfs.html', 'w', encoding='utf8') as f:
+        f.write('<head><meta charset="UTF-8"></head>')
+        unrecognized_df.to_html(f)
+else:
+    print('No new ETFs')
