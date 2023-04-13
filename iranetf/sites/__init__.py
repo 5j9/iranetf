@@ -1,7 +1,7 @@
 from abc import ABC as _ABC, abstractmethod as _abstractmethod
 from asyncio import gather as _gather
 from json import JSONDecodeError as _JSONDecodeError, loads as _loads
-from logging import warning
+from logging import error, warning
 from pathlib import Path as _Path
 from typing import TypedDict as _TypedDict
 
@@ -18,8 +18,12 @@ from pandas import (
     to_datetime as _to_datetime,
 )
 
-from iranetf import _datetime, _get, _j2g, _jdatetime
+from iranetf import Session as _Session, _datetime, _get, _j2g, _jdatetime
 
+_ETF_TYPES = {  # numbers are according to fipiran
+    6: 'Stock', 4: 'Fixed', 7: 'Mixed',
+    5: 'Commodity', 17: 'FOF', 18: 'REIT',
+}
 
 class _LiveNAV(_TypedDict, total=True):
     issue: int
@@ -280,12 +284,7 @@ async def _fipiran_data(ds):
         }, copy=False, inplace=True, errors='raise'
     )
 
-    df.type.replace(
-        {
-            6: 'Stock', 4: 'Fixed', 7: 'Mixed',
-            5: 'Commodity', 17: 'FOF', 18: 'REIT',
-        }, inplace=True
-    )
+    df.type.replace(_ETF_TYPES, inplace=True)
 
     return df
 
@@ -343,3 +342,32 @@ async def update_dataset() -> _DataFrame:
         )
 
     return new_fipiran_df[new_fipiran_df.tsetmc_id.isna()]
+
+
+async def _check_live_site(site: BaseSite):
+    if site != site:  # na
+        return
+
+    try:
+        navps = await site.live_navps()
+    except Exception as e:
+        error(f'exception during checking of {site}: {e}')
+    else:
+        assert type(navps['issue']) is int
+
+
+async def check_dataset(live=False):
+    ds = load_dataset(site=False)
+    assert ds.symbol.is_unique
+    assert ds.name.is_unique
+    assert ds.type.unique().isin(_ETF_TYPES.values()).all()
+    assert ds.tsetmc_id.is_unique
+    assert ds.fipiran_id.is_unique
+
+    if not live:
+        return
+
+    ds['site'] = ds[ds.site_type.notna()].apply(_make_site, axis=1)
+    coros = ds.site.apply(_check_live_site)
+    async with _Session():
+        await _gather(*coros)
