@@ -236,12 +236,14 @@ async def _check_validity(site: BaseSite) -> tuple[str, str] | None:
     return f'{last_url.scheme}://{last_url.host}/', type(site).__name__
 
 
+SITE_TYPES = (RayanHamafza, TadbirPardaz, MabnaDP, LeveragedTadbirPardaz)
+
 
 async def _url_type(domain: str) -> tuple:
     aws = [
         _check_validity(SiteType(f'{protocol}://{domain}/'))
         for protocol in ('https', 'http')
-        for SiteType in (RayanHamafza, TadbirPardaz)
+        for SiteType in SITE_TYPES
     ]
 
     for coro in _as_completed(aws):
