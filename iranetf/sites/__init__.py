@@ -9,6 +9,7 @@ from aiohttp import (
     ClientConnectorError as _ClientConnectorError,
     ClientOSError as _ClientOSError,
     ServerTimeoutError as _ServerTimeoutError,
+    TooManyRedirects as _TooManyRedirects
 )
 from pandas import (
     DataFrame as _DataFrame,
@@ -230,6 +231,7 @@ async def _check_validity(site: BaseSite) -> tuple[str, str] | None:
         _ClientConnectorError,
         _ServerTimeoutError,
         _ClientOSError,
+        _TooManyRedirects,
     ):
         return None
     last_url = site.last_response.url  # to avoid redirected URLs
