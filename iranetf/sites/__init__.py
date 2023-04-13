@@ -312,12 +312,13 @@ async def update_dataset() -> _DataFrame:
     fipiran_df['url'] = url
     fipiran_df['site_type'] = site_type
 
+    fipiran_ids_existing_in_ds = fipiran_df.fipiran_id.isin(ds.fipiran_id)
+
     # to update existing urls and names
     ds.set_index('fipiran_id', inplace=True)
-    ds.update(fipiran_df.set_index('fipiran_id'))
+    fipiran_ids_existing_in_ds.set_index('fipiran_id', inplace=True)
+    ds.update(fipiran_ids_existing_in_ds)
     ds.reset_index(inplace=True)
-
-    fipiran_ids_existing_in_ds = fipiran_df.fipiran_id.isin(ds.fipiran_id)
 
     new_fipiran_df = fipiran_df[~fipiran_ids_existing_in_ds].copy()
 
