@@ -1,7 +1,7 @@
 from abc import ABC as _ABC, abstractmethod as _abstractmethod
 from asyncio import gather as _gather
 from json import JSONDecodeError as _JSONDecodeError, loads as _loads
-from logging import error, warning
+from logging import error as _error, warning as _warning
 from pathlib import Path as _Path
 from typing import TypedDict as _TypedDict
 
@@ -9,7 +9,7 @@ from aiohttp import (
     ClientConnectorError as _ClientConnectorError,
     ClientOSError as _ClientOSError,
     ServerTimeoutError as _ServerTimeoutError,
-    TooManyRedirects as _TooManyRedirects
+    TooManyRedirects as _TooManyRedirects,
 )
 from pandas import (
     DataFrame as _DataFrame,
@@ -19,6 +19,7 @@ from pandas import (
     to_datetime as _to_datetime,
 )
 
+import iranetf
 from iranetf import _datetime, _get, _j2g, _jdatetime
 
 _ETF_TYPES = {  # numbers are according to fipiran
@@ -280,7 +281,7 @@ async def _fipiran_data(ds):
 
     dataset_ids_not_on_fipiran = ds[~ds.fipiran_id.isin(fipiran_df.regNo)]
     if not dataset_ids_not_on_fipiran.empty:
-        warning('some dataset rows were not found on fipiran')
+        _warning('some dataset rows were not found on fipiran')
 
     df = fipiran_df[
         (fipiran_df['typeOfInvest'] == 'Negotiable')
@@ -368,7 +369,7 @@ async def _check_live_site(site: BaseSite):
     try:
         navps = await site.live_navps()
     except Exception as e:
-        error(f'exception during checking of {site}: {e}')
+        _error(f'exception during checking of {site}: {e}')
     else:
         assert type(navps['issue']) is int
 
@@ -385,5 +386,11 @@ async def check_dataset(live=False):
         return
 
     ds['site'] = ds[ds.site_type.notna()].apply(_make_site, axis=1)
+    iranetf.SSL = False  # many sites fail ssl verification
     coros = ds.site.apply(_check_live_site)
     await _gather(*coros)
+
+    if not (no_site := ds[ds.site.isna()]).empty:
+        _warning(
+            f'some dataset entries have no associated site:\n{no_site.symbol}'
+        )
