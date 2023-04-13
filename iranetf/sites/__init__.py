@@ -370,5 +370,4 @@ async def check_dataset(live=False):
 
     ds['site'] = ds[ds.site_type.notna()].apply(_make_site, axis=1)
     coros = ds.site.apply(_check_live_site)
-    async with _Session():
-        await _gather(*coros)
+    await _gather(*coros)
