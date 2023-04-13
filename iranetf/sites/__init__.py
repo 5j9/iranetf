@@ -1,5 +1,5 @@
 from abc import ABC as _ABC, abstractmethod as _abstractmethod
-from asyncio import gather as _gather
+from asyncio import as_completed as _as_completed, gather as _gather
 from json import JSONDecodeError as _JSONDecodeError, loads as _loads
 from logging import error, warning
 from pathlib import Path as _Path
@@ -222,22 +222,33 @@ def load_dataset(*, site=True) -> _DataFrame:
     return df
 
 
+async def _check_validity(site: BaseSite) -> tuple[str, str] | None:
+    try:
+        await site.live_navps()
+    except (
+        _JSONDecodeError,
+        _ClientConnectorError,
+        _ServerTimeoutError,
+        _ClientOSError,
+    ):
+        return None
+    last_url = site.last_response.url  # to avoid redirected URLs
+    return f'{last_url.scheme}://{last_url.host}/', type(site).__name__
+
+
+
 async def _url_type(domain: str) -> tuple:
-    for protocol in ('https', 'http'):
-        for SiteType in (RayanHamafza, TadbirPardaz):
-            url = f'{protocol}://{domain}/'
-            site = SiteType(url)
-            try:
-                await site.live_navps()
-            except (
-                _JSONDecodeError,
-                _ClientConnectorError,
-                _ServerTimeoutError,
-                _ClientOSError,
-            ):
-                continue
-            last_url = site.last_response.url  # to avoid redirected URLs
-            return f'{last_url.scheme}://{last_url.host}/', SiteType.__name__
+    aws = [
+        _check_validity(SiteType(f'{protocol}://{domain}/'))
+        for protocol in ('https', 'http')
+        for SiteType in (RayanHamafza, TadbirPardaz)
+    ]
+
+    for coro in _as_completed(aws):
+        result = await coro
+        if result is not None:
+            return result
+
     return None, None
 
 
@@ -312,13 +323,12 @@ async def update_dataset() -> _DataFrame:
     fipiran_df['url'] = url
     fipiran_df['site_type'] = site_type
 
-    fipiran_ids_existing_in_ds = fipiran_df.fipiran_id.isin(ds.fipiran_id)
-
     # to update existing urls and names
     ds.set_index('fipiran_id', inplace=True)
-    fipiran_ids_existing_in_ds.set_index('fipiran_id', inplace=True)
-    ds.update(fipiran_ids_existing_in_ds)
+    ds.update(fipiran_df.set_index('fipiran_id'))
     ds.reset_index(inplace=True)
+
+    fipiran_ids_existing_in_ds = fipiran_df.fipiran_id.isin(ds.fipiran_id)
 
     new_fipiran_df = fipiran_df[~fipiran_ids_existing_in_ds].copy()
 
