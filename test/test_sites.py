@@ -83,3 +83,19 @@ async def test_live_navps_ltp():
 async def test_navps_history_ltp():
     # leveraged ETFs do not have statistical history for preferred shares
     await assert_navps_history(ltp, has_statistical=False)
+
+
+@file('homay_profit.json')
+async def test_rayanhamafza_fund_profit():
+    df = await RayanHamafza('https://www.homayeagah.ir/').fund_profit()
+    assert [*df.dtypes.items()] == [
+        ('ProfitDate', dtype('<M8[ns]')),
+        ('FundUnit', dtype('int64')),
+        ('ProfitGuaranteeUnit', dtype('int64')),
+        ('UnitProfit', dtype('int64')),
+        ('ExtraProfit', dtype('int64')),
+        ('SumUnitProfit', dtype('int64')),
+        ('SumExtraProfit', dtype('int64')),
+        ('SumProfitGuarantee', dtype('int64')),
+        ('SUMAllProfit', dtype('int64'))
+    ]
