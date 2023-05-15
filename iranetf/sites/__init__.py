@@ -350,17 +350,23 @@ async def update_dataset() -> _DataFrame:
 
     new_with_tsetmcid = new_fipiran_df[new_fipiran_df.tsetmc_id.notna()]
 
+    tsetmc_df = await _tsetmc_dataset()
+
+    # update symbol
+    ds.set_index('tsetmc_id', inplace=True)
+    tsetmc_df.set_index('tsetmc_id', inplace=True)
+    ds.update(tsetmc_df)
+
     if not new_with_tsetmcid.empty:
-        tsetmc_df = await _tsetmc_dataset()
         new_with_tsetmcid = new_with_tsetmcid.merge(
             tsetmc_df, 'left', on='tsetmc_id'
         )
+        ds = _concat([ds, new_with_tsetmcid])
 
-        ds = _concat([ds, new_with_tsetmcid]).sort_values('symbol')
-
+    ds.reset_index(inplace=True)
     ds[[  # resort columns (order was changed by the ds.reset_index)
         'symbol', 'name', 'type', 'tsetmc_id', 'fipiran_id', 'url', 'site_type'
-    ]].to_csv(
+    ]].sort_values('symbol').to_csv(
         _DATASET_PATH,
         lineterminator='\n',
         encoding='utf-8-sig',
