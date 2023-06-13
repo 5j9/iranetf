@@ -1,5 +1,5 @@
 from abc import ABC as _ABC, abstractmethod as _abstractmethod
-from asyncio import gather as _gather
+from asyncio import gather as _gather, TimeoutError as _TimeoutError
 from json import JSONDecodeError as _JSONDecodeError, loads as _loads
 from logging import error as _error, warning as _warning
 from pathlib import Path as _Path
@@ -241,6 +241,7 @@ async def _check_validity(site: BaseSite) -> tuple[str, str] | None:
         _ServerTimeoutError,
         _ClientOSError,
         _TooManyRedirects,
+        _TimeoutError,
     ):
         return None
     last_url = site.last_response.url  # to avoid redirected URLs
