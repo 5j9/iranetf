@@ -1,5 +1,5 @@
 from abc import ABC as _ABC, abstractmethod as _abstractmethod
-from asyncio import gather as _gather, TimeoutError as _TimeoutError
+from asyncio import TimeoutError as _TimeoutError, gather as _gather
 from json import JSONDecodeError as _JSONDecodeError, loads as _loads
 from logging import error as _error, warning as _warning
 from pathlib import Path as _Path
