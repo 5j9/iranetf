@@ -220,7 +220,7 @@ def load_dataset(*, site=True) -> _DataFrame:
             'symbol': 'string',
             'name': 'string',
             'type': 'category',
-            'tsetmc_id': 'Int64',
+            'tsetmc_id': 'string',
             'fipiran_id': 'int64',
             'url': 'string',
             'site_type': 'category',
