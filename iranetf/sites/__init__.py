@@ -1,7 +1,7 @@
 from abc import ABC as _ABC, abstractmethod as _abstractmethod
 from asyncio import TimeoutError as _TimeoutError, gather as _gather
 from json import JSONDecodeError as _JSONDecodeError, loads as _loads
-from logging import error as _error, warning as _warning
+from logging import error as _error, info as _info, warning as _warning
 from pathlib import Path as _Path
 from typing import TypedDict as _TypedDict
 
@@ -232,7 +232,7 @@ def load_dataset(*, site=True) -> _DataFrame:
     return df
 
 
-async def _check_validity(site: BaseSite) -> tuple[str, str] | None:
+async def _check_validity(site: BaseSite, retry=0) -> tuple[str, str] | None:
     try:
         await site.live_navps()
     except (
@@ -243,6 +243,8 @@ async def _check_validity(site: BaseSite) -> tuple[str, str] | None:
         _TooManyRedirects,
         _TimeoutError,
     ):
+        if retry > 0:
+            return await _check_validity(site, retry - 1)
         return None
     last_url = site.last_response.url  # to avoid redirected URLs
     return f'{last_url.scheme}://{last_url.host}/', type(site).__name__
@@ -253,7 +255,7 @@ SITE_TYPES = (RayanHamafza, TadbirPardaz, MabnaDP, LeveragedTadbirPardaz)
 
 async def _url_type(domain: str) -> tuple:
     coros = [
-        _check_validity(SiteType(f'{protocol}://{domain}/'))
+        _check_validity(SiteType(f'{protocol}://{domain}/'), 2)
         for protocol in ('https', 'http')
         for SiteType in SITE_TYPES
     ]
@@ -285,6 +287,7 @@ async def _inscodes(names_without_tsetmc_id) -> _Series:
 
 async def _fipiran_data(ds):
     import fipiran.funds
+    _info('await fipiran.funds.funds()')
     async with fipiran.Session():
         fipiran_df = await fipiran.funds.funds()
 
@@ -318,6 +321,7 @@ async def _fipiran_data(ds):
 async def _tsetmc_dataset() -> _DataFrame:
     import tsetmc.dataset
 
+    _info('await tsetmc.dataset.update()')
     async with tsetmc.Session():
         await tsetmc.dataset.update()
 
@@ -334,6 +338,7 @@ async def update_dataset() -> _DataFrame:
     ds = load_dataset(site=False)
     fipiran_df = await _fipiran_data(ds)
 
+    _info('await _url_type_columns(...)')
     url, site_type = await _url_type_columns(fipiran_df['domain'])
     fipiran_df['url'] = url
     fipiran_df['site_type'] = site_type
@@ -347,6 +352,7 @@ async def update_dataset() -> _DataFrame:
 
     new_fipiran_df = fipiran_df[~fipiran_ids_existing_in_ds].copy()
 
+    _info('await _inscodes(...)')
     new_fipiran_df['tsetmc_id'] = await _inscodes(new_fipiran_df.name)
 
     new_with_tsetmcid = new_fipiran_df[new_fipiran_df.tsetmc_id.notna()]

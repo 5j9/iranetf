@@ -1,7 +1,10 @@
+import logging
 from asyncio import run
 
 import iranetf
 from iranetf.sites import update_dataset
+
+logging.getLogger().setLevel(logging.INFO)
 
 
 async def main():
