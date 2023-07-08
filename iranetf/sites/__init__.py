@@ -250,7 +250,8 @@ async def _check_validity(site: BaseSite, retry=0) -> tuple[str, str] | None:
     return f'{last_url.scheme}://{last_url.host}/', type(site).__name__
 
 
-SITE_TYPES = (RayanHamafza, TadbirPardaz, MabnaDP, LeveragedTadbirPardaz)
+# sorted from most common to least common
+SITE_TYPES = (RayanHamafza, TadbirPardaz, LeveragedTadbirPardaz, MabnaDP)
 
 
 async def _url_type(domain: str) -> tuple:
