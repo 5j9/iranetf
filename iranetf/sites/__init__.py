@@ -8,6 +8,7 @@ from typing import TypedDict as _TypedDict
 from aiohttp import (
     ClientConnectorError as _ClientConnectorError,
     ClientOSError as _ClientOSError,
+    ServerDisconnectedError as _ServerDisconnectedError,
     ServerTimeoutError as _ServerTimeoutError,
     TooManyRedirects as _TooManyRedirects,
 )
@@ -242,6 +243,7 @@ async def _check_validity(site: BaseSite, retry=0) -> tuple[str, str] | None:
         _ClientOSError,
         _TooManyRedirects,
         _TimeoutError,
+        _ServerDisconnectedError,
     ):
         if retry > 0:
             return await _check_validity(site, retry - 1)
@@ -256,8 +258,7 @@ SITE_TYPES = (RayanHamafza, TadbirPardaz, LeveragedTadbirPardaz, MabnaDP)
 
 async def _url_type(domain: str) -> tuple:
     coros = [
-        _check_validity(SiteType(f'{protocol}://{domain}/'), 2)
-        for protocol in ('https', 'http')
+        _check_validity(SiteType(f'http://{domain}/'), 2)
         for SiteType in SITE_TYPES
     ]
 
@@ -267,6 +268,7 @@ async def _url_type(domain: str) -> tuple:
         if result is not None:
             return result
 
+    _warning(f'_url_type failed for {domain}')
     return None, None
 
 
