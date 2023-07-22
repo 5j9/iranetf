@@ -322,18 +322,19 @@ async def _fipiran_data(ds):
 
 
 async def _tsetmc_dataset() -> _DataFrame:
-    import tsetmc.dataset
+    from tsetmc import Session
+    from tsetmc.dataset import LazyDS, update
 
     _info('await tsetmc.dataset.update()')
-    async with tsetmc.Session():
-        await tsetmc.dataset.update()
+    async with Session():
+        await update()
 
-    # noinspection PyProtectedMember
-    return _DataFrame(
-        tsetmc.dataset._L18S.values(),
-        columns=['tsetmc_id', 'symbol', 'l30'],
-        copy=False,
-    ).drop(columns='l30')
+    df = LazyDS.df
+    df.drop(columns='l30', inplace=True)
+    df.columns = ['tsetmc_id', 'symbol']
+    df.set_index('tsetmc_id', inplace=True)
+
+    return df
 
 
 async def update_dataset() -> _DataFrame:
@@ -364,7 +365,6 @@ async def update_dataset() -> _DataFrame:
 
     # update symbol
     ds.set_index('tsetmc_id', inplace=True)
-    tsetmc_df.set_index('tsetmc_id', inplace=True)
     ds.update(tsetmc_df)
 
     if not new_with_tsetmcid.empty:
