@@ -9,8 +9,7 @@ logging.getLogger().setLevel(logging.INFO)
 
 async def main():
     iranetf.SSL = False  # tolerate week ssl certs
-    async with iranetf.Session():
-        return await update_dataset()
+    return await update_dataset()
 
 
 unrecognized_df = run(main())

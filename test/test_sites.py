@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from aiohttp_test_utils import file
+from aiohutils.tests import file
 from numpy import dtype
 
 from iranetf.sites import (

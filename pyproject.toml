@@ -16,6 +16,7 @@ dependencies = [
     "aiohttp[speedups]",
     "pandas",
     "jdatetime >= 4.1.0",
+    "aiohutils>=0.7.1",
 ]
 dynamic = ["version"]
 
@@ -30,9 +31,6 @@ content-type = "text/x-rst"
 [project.urls]
 Homepage = "https://github.com/5j9/fipiran"
 "Bug Tracker" = "https://github.com/5j9/fipiran/issues"
-
-[project.optional-dependencies]
-tests = ["aiohttp_test_utils"]
 
 
 [tool.setuptools]

@@ -280,10 +280,9 @@ async def _url_type_columns(domains):
 async def _inscodes(names_without_tsetmc_id) -> _Series:
     import tsetmc.instruments
     search = tsetmc.instruments.search
-    async with tsetmc.Session():
-        results = await _gather(*[
-            search(name) for name in names_without_tsetmc_id
-        ])
+    results = await _gather(*[
+        search(name) for name in names_without_tsetmc_id
+    ])
     results = [(None if len(r) != 1 else r.iat[0, 2]) for r in results]
     return _Series(results, index=names_without_tsetmc_id.index, dtype='Int64')
 
@@ -291,8 +290,7 @@ async def _inscodes(names_without_tsetmc_id) -> _Series:
 async def _fipiran_data(ds):
     import fipiran.funds
     _info('await fipiran.funds.funds()')
-    async with fipiran.Session():
-        fipiran_df = await fipiran.funds.funds()
+    fipiran_df = await fipiran.funds.funds()
 
     dataset_ids_not_on_fipiran = ds[~ds.fipiran_id.isin(fipiran_df.regNo)]
     if not dataset_ids_not_on_fipiran.empty:
@@ -322,12 +320,10 @@ async def _fipiran_data(ds):
 
 
 async def _tsetmc_dataset() -> _DataFrame:
-    from tsetmc import Session
     from tsetmc.dataset import LazyDS, update
 
     _info('await tsetmc.dataset.update()')
-    async with Session():
-        await update()
+    await update()
 
     df = LazyDS.df
     df.drop(columns='l30', inplace=True)
