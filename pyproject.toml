@@ -16,7 +16,7 @@ dependencies = [
     "aiohttp[speedups]",
     "pandas",
     "jdatetime >= 4.1.0",
-    "aiohutils>=0.7.1",
+    "aiohutils>=0.8.0",
 ]
 dynamic = ["version"]
 
