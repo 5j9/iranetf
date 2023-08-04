@@ -5,6 +5,7 @@ from logging import error as _error, info as _info, warning as _warning
 from pathlib import Path as _Path
 from typing import TypedDict as _TypedDict
 
+import pandas as _pd
 from aiohttp import (
     ClientConnectorError as _ClientConnectorError,
     ClientOSError as _ClientOSError,
@@ -23,6 +24,7 @@ from pandas import (
 import iranetf
 from iranetf import _datetime, _get, _j2g, _jdatetime
 
+_pd.options.mode.copy_on_write = True
 _ETF_TYPES = {  # numbers are according to fipiran
     6: 'Stock', 4: 'Fixed', 7: 'Mixed',
     5: 'Commodity', 17: 'FOF', 18: 'REIT',
@@ -350,7 +352,7 @@ async def update_dataset() -> _DataFrame:
 
     fipiran_ids_existing_in_ds = fipiran_df.fipiran_id.isin(ds.fipiran_id)
 
-    new_fipiran_df = fipiran_df[~fipiran_ids_existing_in_ds].copy()
+    new_fipiran_df = fipiran_df[~fipiran_ids_existing_in_ds]
 
     _info('await _inscodes(...)')
     new_fipiran_df['tsetmc_id'] = await _inscodes(new_fipiran_df.name)
