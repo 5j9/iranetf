@@ -1,3 +1,4 @@
+import warnings as _w
 from abc import ABC as _ABC, abstractmethod as _abstractmethod
 from asyncio import TimeoutError as _TimeoutError, gather as _gather
 from json import JSONDecodeError as _JSONDecodeError, loads as _loads
@@ -26,9 +27,14 @@ from iranetf import _datetime, _get, _j2g, _jdatetime
 
 _pd.options.mode.copy_on_write = True
 _ETF_TYPES = {  # numbers are according to fipiran
-    6: 'Stock', 4: 'Fixed', 7: 'Mixed',
-    5: 'Commodity', 17: 'FOF', 18: 'REIT',
+    6: 'Stock',
+    4: 'Fixed',
+    7: 'Mixed',
+    5: 'Commodity',
+    17: 'FOF',
+    18: 'REIT',
 }
+
 
 class _LiveNAV(_TypedDict, total=True):
     issue: int
@@ -37,7 +43,6 @@ class _LiveNAV(_TypedDict, total=True):
 
 
 class BaseSite(_ABC):
-
     __slots__ = 'url', 'last_response'
 
     def __init__(self, url: str):
@@ -47,7 +52,9 @@ class BaseSite(_ABC):
     def __repr__(self):
         return f'{type(self).__name__}({self.url})'
 
-    async def _json(self, path: str, df: bool = False) -> list | dict | str | _DataFrame:
+    async def _json(
+        self, path: str, df: bool = False
+    ) -> list | dict | str | _DataFrame:
         r = await _get(self.url + path)
         self.last_response = r
         content = await r.read()
@@ -66,7 +73,6 @@ class BaseSite(_ABC):
 
 
 class MabnaDP(BaseSite):
-
     async def _json(
         self, path: str, df: bool = False
     ) -> list | dict | _DataFrame:
@@ -74,7 +80,9 @@ class MabnaDP(BaseSite):
 
     async def live_navps(self) -> _LiveNAV:
         j = await self._json('navetf.json')
-        j['date'] = _jdatetime.strptime(j['date_time'], '%H:%M %Y/%m/%d').togregorian()
+        j['date'] = _jdatetime.strptime(
+            j['date_time'], '%H:%M %Y/%m/%d'
+        ).togregorian()
         j['issue'] = int(j.pop('purchase_price').replace(',', ''))
         j['cancel'] = int(j.pop('redemption_price').replace(',', ''))
         return j
@@ -82,7 +90,15 @@ class MabnaDP(BaseSite):
     async def navps_history(self) -> _DataFrame:
         j = await self._json('navps.json')
         df = _DataFrame(j[0]['values'])
-        df['date'] = df['date'].astype(str).apply(lambda i: _jdatetime.strptime(i, format='%Y%m%d000000').togregorian())
+        df['date'] = (
+            df['date']
+            .astype(str)
+            .apply(
+                lambda i: _jdatetime.strptime(
+                    i, format='%Y%m%d000000'
+                ).togregorian()
+            )
+        )
         df['issue'] = df.pop('purchase_price')
         df['cancel'] = df.pop('redeption_price')
         df['statistical'] = df.pop('statistical_value')
@@ -90,7 +106,6 @@ class MabnaDP(BaseSite):
 
 
 class RayanHamafza(BaseSite):
-
     async def _json(
         self, path: str, df: bool = False
     ) -> list | dict | _DataFrame:
@@ -101,8 +116,7 @@ class RayanHamafza(BaseSite):
         d['issue'] = d.pop('SellNAVPerShare')
         d['cancel'] = d.pop('PurchaseNAVPerShare')
         d['date'] = _jdatetime.strptime(
-            f"{d.pop('JalaliDate')} {d.pop('Time')}",
-            '%Y/%m/%d %H:%M'
+            f"{d.pop('JalaliDate')} {d.pop('Time')}", '%Y/%m/%d %H:%M'
         ).togregorian()
         return d
 
@@ -134,7 +148,6 @@ class RayanHamafza(BaseSite):
 
 
 class TadbirPardaz(BaseSite):
-
     # version = '9.2.0'
 
     async def live_navps(self) -> _LiveNAV:
@@ -154,26 +167,37 @@ class TadbirPardaz(BaseSite):
         return d
 
     async def navps_history(self) -> _DataFrame:
-        j : list = await self._json('Chart/TotalNAV?type=getnavtotal')
+        j: list = await self._json('Chart/TotalNAV?type=getnavtotal')
         issue, statistical, cancel = [[d['y'] for d in i['List']] for i in j]
         date = [d['x'] for d in j[0]['List']]
-        df = _DataFrame({
-            'date': date,
-            'issue': issue,
-            'cancel': cancel,
-            'statistical': statistical,
-        })
+        df = _DataFrame(
+            {
+                'date': date,
+                'issue': issue,
+                'cancel': cancel,
+                'statistical': statistical,
+            }
+        )
         df['date'] = _to_datetime(df.date)
         return df
 
 
 class LeveragedTadbirPardaz(BaseSite):
-
     async def navps_history(self) -> _DataFrame:
         j: list = await self._json('Chart/TotalNAV?type=getnavtotal')
 
         frames = []
-        for i, name in zip(j, ('normal_issue', 'normal_statistical', 'normal_cancel', 'issue', 'cancel', 'normal')):
+        for i, name in zip(
+            j,
+            (
+                'normal_issue',
+                'normal_statistical',
+                'normal_cancel',
+                'issue',
+                'cancel',
+                'normal',
+            ),
+        ):
             df = _DataFrame(i['List']).drop(columns='name')
             df['date'] = _to_datetime(df['x'])
             df.drop(columns='x', inplace=True)
@@ -217,7 +241,10 @@ def load_dataset(*, site=True) -> _DataFrame:
     If site is True, convert url and site_type columns to site object.
     """
     df = _read_csv(
-        _DATASET_PATH, encoding='utf-8-sig', low_memory=False, memory_map=True,
+        _DATASET_PATH,
+        encoding='utf-8-sig',
+        low_memory=False,
+        memory_map=True,
         lineterminator='\n',
         dtype={
             'symbol': 'string',
@@ -227,7 +254,7 @@ def load_dataset(*, site=True) -> _DataFrame:
             'fipiran_id': 'int64',
             'url': 'string',
             'site_type': 'category',
-        }
+        },
     )
     if site:
         df['site'] = df[df.site_type.notna()].apply(_make_site, axis=1)
@@ -275,22 +302,29 @@ async def _url_type(domain: str) -> tuple:
 
 
 async def _url_type_columns(domains):
-    list_of_tuples = await _gather(*[_url_type(d) for d in domains])
+    # there will be a lot of redirection warnings, let's silent them
+    with _w.catch_warnings():
+        _w.filterwarnings(
+            'ignore', category=UserWarning, module='aiohutils.session'
+        )
+        list_of_tuples = await _gather(*[_url_type(d) for d in domains])
     return zip(*list_of_tuples)
 
 
 async def _inscodes(names_without_tsetmc_id) -> _Series:
     import tsetmc.instruments
+
     search = tsetmc.instruments.search
-    results = await _gather(*[
-        search(name) for name in names_without_tsetmc_id
-    ])
+    results = await _gather(
+        *[search(name) for name in names_without_tsetmc_id]
+    )
     results = [(None if len(r) != 1 else r.iat[0, 2]) for r in results]
     return _Series(results, index=names_without_tsetmc_id.index, dtype='Int64')
 
 
 async def _fipiran_data(ds):
     import fipiran.funds
+
     _info('await fipiran.funds.funds()')
     fipiran_df = await fipiran.funds.funds()
 
@@ -313,10 +347,13 @@ async def _fipiran_data(ds):
             'regNo': 'fipiran_id',
             'fundType': 'type',
             'websiteAddress': 'domain',
-        }, copy=False, inplace=True, errors='raise'
+        },
+        copy=False,
+        inplace=True,
+        errors='raise',
     )
 
-    df.type.replace(_ETF_TYPES, inplace=True)
+    df['type'] = df['type'].replace(_ETF_TYPES)
 
     return df
 
@@ -372,13 +409,18 @@ async def update_dataset() -> _DataFrame:
         ds = _concat([ds, new_with_tsetmcid])
 
     ds.reset_index(inplace=True)
-    ds[[  # resort columns (order was changed by the ds.reset_index)
-        'symbol', 'name', 'type', 'tsetmc_id', 'fipiran_id', 'url', 'site_type'
-    ]].sort_values('symbol').to_csv(
-        _DATASET_PATH,
-        lineterminator='\n',
-        encoding='utf-8-sig',
-        index=False
+    ds[
+        [  # resort columns (order was changed by the ds.reset_index)
+            'symbol',
+            'name',
+            'type',
+            'tsetmc_id',
+            'fipiran_id',
+            'url',
+            'site_type',
+        ]
+    ].sort_values('symbol').to_csv(
+        _DATASET_PATH, lineterminator='\n', encoding='utf-8-sig', index=False
     )
 
     return new_fipiran_df[new_fipiran_df.tsetmc_id.isna()]
