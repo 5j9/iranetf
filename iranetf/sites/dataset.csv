@@ -1,10 +1,11 @@
-﻿symbol,name,type,tsetmc_id,fipiran_id,url,site_type
+﻿symbol,name,type,insCode,regNo,url,site_type
 آتیمس,آرمان آتیه درخشان مس,Stock,22839330962768817,11378,http://armanmesetf.ir/,RayanHamafza
 آرام,شاخصی آرام مفید,Stock,14230681955555738,11939,https://arametf.com/,TadbirPardaz
 آساس,آسمان آرمانی سهام,Stock,66682662312253625,11195,https://asasfund.ir/,TadbirPardaz
 آسام,آرمان سپهر آشنا,Mixed,36592972482259020,11172,https://asaetf.ir/,TadbirPardaz
 آسامید,مشترک آسمان امید,Fixed,24869832924911721,11626,https://asamidfund.ir/,TadbirPardaz
 آفاق,نوع دوم افق آتی,Fixed,37073830945037165,11976,https://ofoghati.ir/,TadbirPardaz
+آلا,اعتماد ارغوان,Fixed,19828734979381742,12128,http://etemadarghavan.sanaamc.com/,RayanHamafza
 آلتون,طلای آسمان آلتون,Commodity,28374437855144739,12006,https://altonfund.ir/,TadbirPardaz
 آوا,آوای معیار,Stock,18007109712724189,11729,http://avayemeyar.ir/,RayanHamafza
 آکام,ثابت آکام,Fixed,490987973229371,12117,http://akamvista.ir/,RayanHamafza
@@ -13,6 +14,7 @@
 ارزش,ارزش آفرین بیدار,Stock,43443105991896600,11712,http://arzesh.ebb.ir/,RayanHamafza
 ارزش مسکن,املاک و مستغلات مدیریت ارزش مسکن,REIT,71945594172117613,12027,https://reit1.cvpf.ir/,TadbirPardaz
 ارمغان,ارمغان ایرانیان,Fixed,31366347648583654,10920,http://armaghanfund.ir/,RayanHamafza
+استیل,بخشی صنایع مفید,Stock,24907784641855842,12150,https://mofidsectorfund.com/,TadbirPardaz
 اطلس,توسعه اطلس مفید,Stock,11427939669935844,11215,https://atlasetf.com/,TadbirPardaz
 اعتبار,نوع دوم اعتبار,Fixed,35163287528816137,12031,http://etebaretf2.com/,RayanHamafza
 اعتماد,اعتماد آفرین پارسیان,Fixed,66818022341772870,11315,http://eap-fund.com/,RayanHamafza
@@ -72,6 +74,7 @@
 طلا,پشتوانه طلای لوتوس,Commodity,46700660505281786,11509,http://lotusgoldfund.capital/,RayanHamafza
 عقیق,مشترک عقیق,Stock,45452221088910484,10830,http://aghighfund.com/,RayanHamafza
 عیار,طلای عیار مفید,Commodity,34144395039913458,11586,https://ayaretf.com/,TadbirPardaz
+فاخر,ثروت افزون فاخر,Fixed,56344907495802692,12146,https://fakherfund.ir/,RayanHamafza
 فراز,فراز داریک,Stock,13666407494621646,11773,http://farazdarik.ir/,RayanHamafza
 فردا,آوای فردای زاگرس,Fixed,65249046611427924,11776,https://afzfund.ir/,TadbirPardaz
 فیروزا,ارمغان فیروزه آسیا,Fixed,10795723506538053,11518,https://firouzehfixetf.com/,TadbirPardaz
@@ -108,6 +111,7 @@
 کمند,در اوراق بهادار با درآمد ثابت کمند,Fixed,34718633636164421,11513,http://kamandfixedincome.com/,RayanHamafza
 کهربا,در اوراق بهادار مبتنی بر گواهی سپرده سکه طلا کهربا,Commodity,25559236668122210,11856,http://kahroba.charisma.ir/,RayanHamafza
 کیان,با درآمد ثابت کیان,Fixed,53251602435454519,11459,https://kianfunds1.ir/,RayanHamafza
+گارانتی,تضمین اصل سرمایه گیتی دماوند,Mixed,971068957336171,12135,http://gitidamavandfund.ir/,MabnaDP
 گنجین,گنجینه یکم آوید,Fixed,57728534324022361,11499,https://ganjinehavid.ir/,TadbirPardaz
 گنجینه,گنجینه داریوش,Fixed,47101579271117172,11673,http://ganjineh.dariush.fund/,RayanHamafza
 گوهر,در اوراق بهادار مبتنی بر سکه طلای کیان,Commodity,12390706505809150,11556,https://kianfunds3.ir/,RayanHamafza

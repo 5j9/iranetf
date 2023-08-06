@@ -250,14 +250,14 @@ def load_dataset(*, site=True) -> _DataFrame:
             'symbol': 'string',
             'name': 'string',
             'type': 'category',
-            'tsetmc_id': 'string',
-            'fipiran_id': 'int64',
+            'insCode': 'string',
+            'regNo': 'int64',
             'url': 'string',
             'site_type': 'category',
         },
     )
     if site:
-        df['site'] = df[df.site_type.notna()].apply(_make_site, axis=1)
+        df['site'] = df[df['site_type'].notna()].apply(_make_site, axis=1)
         df.drop(columns=['url', 'site_type'], inplace=True)
     return df
 
@@ -290,7 +290,6 @@ async def _url_type(domain: str) -> tuple:
         _check_validity(SiteType(f'http://{domain}/'), 2)
         for SiteType in SITE_TYPES
     ]
-
     results = await _gather(*coros)
 
     for result in results:
@@ -311,25 +310,27 @@ async def _url_type_columns(domains):
     return zip(*list_of_tuples)
 
 
-async def _inscodes(names_without_tsetmc_id) -> _Series:
+async def _add_ins_code(new_items: _DataFrame) -> None:
+    names_without_code = new_items[new_items['insCode'].isna()].name
+    if names_without_code.empty:
+        return
     import tsetmc.instruments
 
     search = tsetmc.instruments.search
-    results = await _gather(
-        *[search(name) for name in names_without_tsetmc_id]
-    )
-    results = [(None if len(r) != 1 else r.iat[0, 2]) for r in results]
-    return _Series(results, index=names_without_tsetmc_id.index, dtype='Int64')
+    _info('searching names on tsetmc to find their insCode')
+    results = await _gather(*[search(name) for name in names_without_code])
+    ins_codes = [(None if len(r) != 1 else r[0]['insCode']) for r in results]
+    new_items['insCode'] = ins_codes
 
 
-async def _fipiran_data(ds):
+async def _fipiran_data(ds) -> _DataFrame:
     import fipiran.funds
 
     _info('await fipiran.funds.funds()')
     fipiran_df = await fipiran.funds.funds()
 
-    dataset_ids_not_on_fipiran = ds[~ds.fipiran_id.isin(fipiran_df.regNo)]
-    if not dataset_ids_not_on_fipiran.empty:
+    reg_not_in_fipiran = ds[~ds['regNo'].isin(fipiran_df['regNo'])]
+    if not reg_not_in_fipiran.empty:
         _warning('some dataset rows were not found on fipiran')
 
     df = fipiran_df[
@@ -340,13 +341,22 @@ async def _fipiran_data(ds):
         & fipiran_df['isCompleted']
     ]
 
-    df = df[['regNo', 'name', 'fundType', 'websiteAddress']]
+    df = df[
+        [
+            'regNo',
+            'smallSymbolName',
+            'name',
+            'fundType',
+            'websiteAddress',
+            'insCode',
+        ]
+    ]
 
     df.rename(
         columns={
-            'regNo': 'fipiran_id',
             'fundType': 'type',
             'websiteAddress': 'domain',
+            'smallSymbolName': 'symbol',
         },
         copy=False,
         inplace=True,
@@ -366,10 +376,21 @@ async def _tsetmc_dataset() -> _DataFrame:
 
     df = LazyDS.df
     df.drop(columns='l30', inplace=True)
-    df.columns = ['tsetmc_id', 'symbol']
-    df.set_index('tsetmc_id', inplace=True)
+    df.columns = ['insCode', 'symbol']
+    df.set_index('insCode', inplace=True)
 
     return df
+
+
+def _add_new_items_to_ds(new_items: _DataFrame, ds: _DataFrame) -> _DataFrame:
+    if new_items.empty:
+        return ds
+    new_with_code = new_items[new_items['insCode'].notna()]
+    if not new_with_code.empty:
+        ds = _concat([ds, new_with_code.drop(columns=['domain'])])
+    else:
+        _info('new_with_code is empty!')
+    return ds
 
 
 async def update_dataset() -> _DataFrame:
@@ -383,39 +404,33 @@ async def update_dataset() -> _DataFrame:
     fipiran_df['site_type'] = site_type
 
     # to update existing urls and names
-    ds.set_index('fipiran_id', inplace=True)
-    ds.update(fipiran_df.set_index('fipiran_id'))
+    ds.set_index('regNo', inplace=True)
+    ds['domain'] = None
+    ds.update(fipiran_df.set_index('regNo'))
+    # use domain as URL for those who do not have any URL
+    ds.loc[ds['url'].isna(), 'url'] = 'http://' + ds['domain'] + '/'
+    ds.drop(columns=['domain'], inplace=True)
     ds.reset_index(inplace=True)
 
-    fipiran_ids_existing_in_ds = fipiran_df.fipiran_id.isin(ds.fipiran_id)
-
-    new_fipiran_df = fipiran_df[~fipiran_ids_existing_in_ds]
-
-    _info('await _inscodes(...)')
-    new_fipiran_df['tsetmc_id'] = await _inscodes(new_fipiran_df.name)
-
-    new_with_tsetmcid = new_fipiran_df[new_fipiran_df.tsetmc_id.notna()]
+    reg_existing_in_ds = fipiran_df['regNo'].isin(ds['regNo'])
+    new_items = fipiran_df[~reg_existing_in_ds]
 
     tsetmc_df = await _tsetmc_dataset()
+    await _add_ins_code(new_items)
+    ds = _add_new_items_to_ds(new_items, ds)
 
-    # update symbol
-    ds.set_index('tsetmc_id', inplace=True)
+    # update all data, old or new, using tsetmc_df
+    ds.set_index('insCode', inplace=True)
     ds.update(tsetmc_df)
-
-    if not new_with_tsetmcid.empty:
-        new_with_tsetmcid = new_with_tsetmcid.merge(
-            tsetmc_df, 'left', on='tsetmc_id'
-        )
-        ds = _concat([ds, new_with_tsetmcid])
-
     ds.reset_index(inplace=True)
+
     ds[
         [  # resort columns (order was changed by the ds.reset_index)
             'symbol',
             'name',
             'type',
-            'tsetmc_id',
-            'fipiran_id',
+            'insCode',
+            'regNo',
             'url',
             'site_type',
         ]
@@ -423,7 +438,7 @@ async def update_dataset() -> _DataFrame:
         _DATASET_PATH, lineterminator='\n', encoding='utf-8-sig', index=False
     )
 
-    return new_fipiran_df[new_fipiran_df.tsetmc_id.isna()]
+    return new_items[new_items['insCode'].isna()]
 
 
 async def _check_live_site(site: BaseSite):
@@ -440,21 +455,21 @@ async def _check_live_site(site: BaseSite):
 
 async def check_dataset(live=False):
     ds = load_dataset(site=False)
-    assert ds.symbol.is_unique
-    assert ds.name.is_unique
-    assert ds.type.unique().isin(_ETF_TYPES.values()).all()
-    assert ds.tsetmc_id.is_unique
-    assert ds.fipiran_id.is_unique
+    assert ds['symbol'].is_unique
+    assert ds['name'].is_unique
+    assert ds['type'].unique().isin(_ETF_TYPES.values()).all()
+    assert ds['insCode'].is_unique
+    assert ds['regNo'].is_unique
 
     if not live:
         return
 
-    ds['site'] = ds[ds.site_type.notna()].apply(_make_site, axis=1)
+    ds['site'] = ds[ds['site_type'].notna()].apply(_make_site, axis=1)
     iranetf.SSL = False  # many sites fail ssl verification
-    coros = ds.site.apply(_check_live_site)
+    coros = ds['site'].apply(_check_live_site)
     await _gather(*coros)
 
-    if not (no_site := ds[ds.site.isna()]).empty:
+    if not (no_site := ds[ds['site'].isna()]).empty:
         _warning(
             f'some dataset entries have no associated site:\n{no_site.symbol}'
         )
