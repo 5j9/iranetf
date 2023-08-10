@@ -1,6 +1,8 @@
 import logging
 from asyncio import run
 
+import config
+
 import iranetf
 from iranetf.sites import update_dataset
 
@@ -9,7 +11,9 @@ logging.getLogger().setLevel(logging.INFO)
 
 async def main():
     iranetf.SSL = False  # tolerate week ssl certs
-    return await update_dataset()
+    return await update_dataset(
+        check_existing_sites=config.check_existing_sites,
+    )
 
 
 unrecognized_df = run(main())

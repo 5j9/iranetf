@@ -300,14 +300,30 @@ async def _url_type(domain: str) -> tuple:
     return None, None
 
 
-async def _url_type_columns(domains):
+async def _add_url_and_type(
+    fipiran_df: _DataFrame, known_domains: _Series | None
+):
+    domains_to_be_checked = fipiran_df['domain']
+    if known_domains is not None:
+        selector = ~domains_to_be_checked.isin(known_domains)
+        domains_to_be_checked = domains_to_be_checked[selector]
+    else:
+        selector = slice(None)
+
+    _info(f'checking site types of {len(domains_to_be_checked)} domains')
     # there will be a lot of redirection warnings, let's silent them
     with _w.catch_warnings():
         _w.filterwarnings(
             'ignore', category=UserWarning, module='aiohutils.session'
         )
-        list_of_tuples = await _gather(*[_url_type(d) for d in domains])
-    return zip(*list_of_tuples)
+        list_of_tuples = await _gather(
+            *[_url_type(d) for d in domains_to_be_checked]
+        )
+
+    url, site_type = zip(*list_of_tuples)
+    fipiran_df.loc[selector, ['url', 'site_type']] = _DataFrame(
+        {'url': url, 'site_type': site_type}, index=domains_to_be_checked.index
+    )
 
 
 async def _add_ins_code(new_items: _DataFrame) -> None:
@@ -393,15 +409,16 @@ def _add_new_items_to_ds(new_items: _DataFrame, ds: _DataFrame) -> _DataFrame:
     return ds
 
 
-async def update_dataset() -> _DataFrame:
+async def update_dataset(*, check_existing_sites=False) -> _DataFrame:
     """Update dataset and return newly found that could not be added."""
     ds = load_dataset(site=False)
     fipiran_df = await _fipiran_data(ds)
-
-    _info('await _url_type_columns(...)')
-    url, site_type = await _url_type_columns(fipiran_df['domain'])
-    fipiran_df['url'] = url
-    fipiran_df['site_type'] = site_type
+    await _add_url_and_type(
+        fipiran_df,
+        known_domains=None
+        if check_existing_sites
+        else ds['url'].str.extract('//(.*)/')[0],
+    )
 
     # to update existing urls and names
     ds.set_index('regNo', inplace=True)
