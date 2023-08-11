@@ -5,6 +5,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "iranetf"
+authors = [{name = "5j9", email = "5j9@users.noreply.github.com"}]
 description = "a library to fetch data from iranetf.org"
 classifiers = [
     "Programming Language :: Python :: 3",
@@ -12,17 +13,16 @@ classifiers = [
     "Operating System :: OS Independent",
 ]
 requires-python = ">= 3.10"
+dynamic = ["version"]
 dependencies = [
-    "aiohttp[speedups]",
     "pandas >= 2.0.0",
     "jdatetime >= 4.1.0",
-    "aiohutils >= 0.9.0",
+    "aiohutils >= 0.9.2",
 ]
-dynamic = ["version"]
-
-[[project.authors]]
-name = "5j9"
-email = "5j9@users.noreply.github.com"
+[project.optional-dependencies]
+test = [
+    "aiohutils[test] >= 0.9.2",
+]
 
 [project.readme]
 file = "README.rst"
