@@ -36,7 +36,7 @@ _ETF_TYPES = {  # numbers are according to fipiran
 }
 
 
-class _LiveNAV(_TypedDict, total=True):
+class LiveNAVPS(_TypedDict, total=True):
     issue: int
     cancel: int
     date: _datetime
@@ -64,12 +64,16 @@ class BaseSite(_ABC):
         return j
 
     @_abstractmethod
-    async def live_navps(self) -> _LiveNAV:
+    async def live_navps(self) -> LiveNAVPS:
         ...
 
     @_abstractmethod
     async def navps_history(self) -> _DataFrame:
         ...
+
+
+def _fa_int(s: str) -> int:
+    return int(s.replace(',', ''))
 
 
 class MabnaDP(BaseSite):
@@ -78,13 +82,13 @@ class MabnaDP(BaseSite):
     ) -> list | dict | _DataFrame:
         return await super()._json(f'api/v1/overall/{path}', df)
 
-    async def live_navps(self) -> _LiveNAV:
+    async def live_navps(self) -> LiveNAVPS:
         j = await self._json('navetf.json')
         j['date'] = _jdatetime.strptime(
             j['date_time'], '%H:%M %Y/%m/%d'
         ).togregorian()
-        j['issue'] = int(j.pop('purchase_price').replace(',', ''))
-        j['cancel'] = int(j.pop('redemption_price').replace(',', ''))
+        j['issue'] = _fa_int(j.pop('purchase_price'))
+        j['cancel'] = _fa_int(j.pop('redemption_price'))
         return j
 
     async def navps_history(self) -> _DataFrame:
@@ -111,7 +115,7 @@ class RayanHamafza(BaseSite):
     ) -> list | dict | _DataFrame:
         return await super()._json(f'Data/{path}', df)
 
-    async def live_navps(self) -> _LiveNAV:
+    async def live_navps(self) -> LiveNAVPS:
         d = await self._json('FundLiveData')
         d['issue'] = d.pop('SellNAVPerShare')
         d['cancel'] = d.pop('PurchaseNAVPerShare')
@@ -150,12 +154,12 @@ class RayanHamafza(BaseSite):
 class TadbirPardaz(BaseSite):
     # version = '9.2.0'
 
-    async def live_navps(self) -> _LiveNAV:
+    async def live_navps(self) -> LiveNAVPS:
         d = await self._json('Fund/GetETFNAV')
         # the json is escaped twice, so it needs to be loaded again
         d = _loads(d)
-        d['issue'] = int(d.pop('subNav').replace(',', ''))
-        d['cancel'] = int(d.pop('cancelNav').replace(',', ''))
+        d['issue'] = _fa_int(d.pop('subNav'))
+        d['cancel'] = _fa_int(d.pop('cancelNav'))
 
         date = d.pop('publishDate')
         try:
@@ -180,6 +184,14 @@ class TadbirPardaz(BaseSite):
         )
         df['date'] = _to_datetime(df.date)
         return df
+
+
+class LeveragedTadbirPardazLiveNAVPS(LiveNAVPS):
+    BaseUnitsCancelNAV: int
+    BaseUnitsTotalNetAssetValue: int
+    BaseUnitsTotalSubscription: int
+    SuperUnitsTotalSubscription: int
+    SuperUnitsTotalNetAssetValue: int
 
 
 class LeveragedTadbirPardaz(BaseSite):
@@ -209,20 +221,22 @@ class LeveragedTadbirPardaz(BaseSite):
         df.reset_index(inplace=True)
         return df
 
-    async def live_navps(self):
+    async def live_navps(self) -> LeveragedTadbirPardazLiveNAVPS:
         d = await self._json('Fund/GetLeveragedNAV')
         # the json is escaped twice, so it needs to be loaded again
         d = _loads(d)
-        d['issue'] = int(d.pop('SuperUnitsSubscriptionNAV').replace(',', ''))
-        d['cancel'] = int(d.pop('SuperUnitsCancelNAV').replace(',', ''))
 
         date = d.pop('PublishDate')
+        d = {k: _fa_int(v) for k, v in d.items()}
+
         try:
             date = _jdatetime.strptime(date, '%Y/%m/%d %H:%M:%S')
         except ValueError:
             date = _jdatetime.strptime(date, '%Y/%m/%d ')
         d['date'] = date.togregorian()
 
+        d['issue'] = d.pop('SuperUnitsSubscriptionNAV')
+        d['cancel'] = d.pop('SuperUnitsCancelNAV')
         return d
 
 

@@ -1,23 +1,17 @@
 from datetime import datetime
 
-from aiohutils.tests import file
+from aiohutils.tests import assert_dict_type, file
 from numpy import dtype
 
 from iranetf.sites import (
     BaseSite,
     LeveragedTadbirPardaz,
+    LeveragedTadbirPardazLiveNAVPS,
+    LiveNAVPS,
     MabnaDP,
     RayanHamafza,
     TadbirPardaz,
 )
-
-
-async def assert_live(site: BaseSite):
-    live = await site.live_navps()
-    assert type(live) is dict
-    assert type(live['cancel']) is type(live['issue']) is int  # noqa
-    assert type(live['date']) == datetime
-
 
 tadbir = TadbirPardaz('https://modirfund.ir/')
 rayan = RayanHamafza('https://yaghootfund.ir/')
@@ -25,12 +19,13 @@ rayan = RayanHamafza('https://yaghootfund.ir/')
 
 @file('modir_live.json')
 async def test_tadbir_live_navps():
-    await assert_live(tadbir)
+    d = await tadbir.live_navps()
+    assert_dict_type(d, LiveNAVPS)
 
 
 @file('almas_live.json')
 async def test_rayan_live_navps():
-    await assert_live(rayan)
+    assert_dict_type(await rayan.live_navps(), LiveNAVPS)
 
 
 async def assert_navps_history(site: BaseSite, has_statistical=True):
@@ -55,7 +50,8 @@ async def test_navps_history_rayan():
 
 @file('icpfvc_navps_date_space.json')
 async def test_navps_date_ends_with_space():
-    await assert_live(TadbirPardaz('http://www.icpfvc.ir/'))
+    d = await TadbirPardaz('http://www.icpfvc.ir/').live_navps()
+    assert_dict_type(d, LiveNAVPS)
 
 
 mabna_dp = MabnaDP('https://kianfunds6.ir/')
@@ -63,7 +59,11 @@ mabna_dp = MabnaDP('https://kianfunds6.ir/')
 
 @file('hamvasn_live.json')
 async def test_live_navps_mabna():
-    await assert_live(mabna_dp)
+    d = await mabna_dp.live_navps()
+    assert type(d.pop('date_time')) is str
+    assert type(d.pop('statistical_price')) is float
+    assert type(d.pop('unit_count')) is int
+    assert_dict_type(d, LiveNAVPS)
 
 
 @file('hamvazn_navps_history.json')
@@ -76,7 +76,8 @@ ltp = LeveragedTadbirPardaz('https://ahrom.charisma.ir/')
 
 @file('ahrom_live.json')
 async def test_live_navps_ltp():
-    await assert_live(ltp)
+    live = await ltp.live_navps()
+    assert_dict_type(live, LeveragedTadbirPardazLiveNAVPS)
 
 
 @file('ahrom_navps_history.json')
@@ -97,5 +98,5 @@ async def test_rayanhamafza_fund_profit():
         ('SumUnitProfit', dtype('int64')),
         ('SumExtraProfit', dtype('int64')),
         ('SumProfitGuarantee', dtype('int64')),
-        ('SUMAllProfit', dtype('int64'))
+        ('SUMAllProfit', dtype('int64')),
     ]
