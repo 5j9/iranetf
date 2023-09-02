@@ -15,8 +15,8 @@ classifiers = [
 requires-python = ">= 3.10"
 dynamic = ["version"]
 dependencies = [
-    "aiohttp",
-    "pandas >= 2.0.0",
+    "aiohttp[speedups]",
+    "pandas >= 2.1.0",
     "jdatetime >= 4.1.0",
     "aiohutils >= 0.10.0",
 ]

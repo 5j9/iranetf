@@ -26,6 +26,7 @@ import iranetf
 from iranetf import _datetime, _get, _j2g, _jdatetime
 
 _pd.options.mode.copy_on_write = True
+_pd.options.future.infer_string = True
 _ETF_TYPES = {  # numbers are according to fipiran
     6: 'Stock',
     4: 'Fixed',
