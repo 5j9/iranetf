@@ -506,9 +506,15 @@ async def check_dataset(live=False):
         return
 
     ds['site'] = ds[ds['site_type'].notna()].apply(_make_site, axis=1)
-    iranetf.SSL = False  # many sites fail ssl verification
+
     coros = ds['site'].apply(_check_live_site)
-    await _gather(*coros)
+
+    ssl = iranetf.SSL
+    iranetf.SSL = False  # many sites fail ssl verification
+    try:
+        await _gather(*coros)
+    finally:
+        iranetf.SSL = ssl
 
     if not (no_site := ds[ds['site'].isna()]).empty:
         _warning(
