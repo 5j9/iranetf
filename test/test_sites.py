@@ -100,3 +100,7 @@ async def test_rayanhamafza_fund_profit():
         ('SumProfitGuarantee', dtype('int64')),
         ('SUMAllProfit', dtype('int64')),
     ]
+
+
+def test_from_l18():
+    assert BaseSite.from_l18('استیل').url == 'https://mofidsectorfund.com/'

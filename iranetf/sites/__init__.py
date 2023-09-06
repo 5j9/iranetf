@@ -45,13 +45,14 @@ class LiveNAVPS(_TypedDict, total=True):
 
 class BaseSite(_ABC):
     __slots__ = 'url', 'last_response'
+    ds: _DataFrame
 
     def __init__(self, url: str):
         assert url[-1] == '/', 'the url must end with `/`'
         self.url = url
 
     def __repr__(self):
-        return f'{type(self).__name__}({self.url})'
+        return f"{type(self).__name__}('{self.url}')"
 
     async def _json(
         self, path: str, df: bool = False
@@ -71,6 +72,14 @@ class BaseSite(_ABC):
     @_abstractmethod
     async def navps_history(self) -> _DataFrame:
         ...
+
+    @classmethod
+    def from_l18(cls, l18: str) -> 'BaseSite':
+        try:
+            ds = cls.ds
+        except AttributeError:
+            ds = cls.ds = load_dataset(site=True).set_index('symbol')
+        return ds.loc[l18, 'site']
 
 
 def _fa_int(s: str) -> int:
