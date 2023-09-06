@@ -1,4 +1,4 @@
-__version__ = '0.16.1.dev0'
+__version__ = '0.17.0'
 
 import warnings as _w
 from abc import ABC as _ABC, abstractmethod as _abstractmethod
