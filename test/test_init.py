@@ -1,9 +1,7 @@
-from datetime import datetime
-
 from aiohutils.tests import assert_dict_type, file
 from numpy import dtype
 
-from iranetf.sites import (
+from iranetf import (
     BaseSite,
     LeveragedTadbirPardaz,
     LeveragedTadbirPardazLiveNAVPS,

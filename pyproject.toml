@@ -6,7 +6,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "iranetf"
 authors = [{name = "5j9", email = "5j9@users.noreply.github.com"}]
-description = "a library to fetch data from iranetf.org"
+description = "a library to fetch data from ETF websites active TSE"
 classifiers = [
     "Programming Language :: Python :: 3",
     "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
