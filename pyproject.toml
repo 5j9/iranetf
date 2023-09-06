@@ -31,8 +31,7 @@ file = "README.rst"
 content-type = "text/x-rst"
 
 [project.urls]
-Homepage = "https://github.com/5j9/fipiran"
-"Bug Tracker" = "https://github.com/5j9/fipiran/issues"
+Homepage = "https://github.com/5j9/iranetf"
 
 
 [tool.setuptools]
