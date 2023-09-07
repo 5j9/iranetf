@@ -96,7 +96,9 @@ class BaseSite(_ABC):
         ...
 
     @classmethod
-    def from_l18(cls, l18: str) -> 'BaseSite':
+    def from_l18(
+        cls, l18: str
+    ) -> 'LeveragedTadbirPardaz | TadbirPardaz | RayanHamafza | MabnaDP':
         try:
             ds = cls.ds
         except AttributeError:
