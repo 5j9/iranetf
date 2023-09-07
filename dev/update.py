@@ -4,7 +4,7 @@ from asyncio import run
 import config
 
 import iranetf
-from iranetf.sites import update_dataset
+from iranetf import update_dataset
 
 logging.getLogger().setLevel(logging.INFO)
 
