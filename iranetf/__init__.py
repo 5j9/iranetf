@@ -111,6 +111,7 @@ def _fa_int(s: str) -> int:
 
 
 class MabnaDP(BaseSite):
+
     async def _json(
         self, path: str, df: bool = False
     ) -> list | dict | _DataFrame:
@@ -141,6 +142,20 @@ class MabnaDP(BaseSite):
         df['cancel'] = df.pop('redeption_price')
         df['statistical'] = df.pop('statistical_value')
         return df
+
+    async def version(self) -> str:
+        content = await _read(self.url)
+        start = content.find('نگارش '.encode())
+        if start == -1:
+            start = content.find('نسخه '.encode())
+            if start == -1:
+                raise ValueError('version was not found')
+            start += 9
+        else:
+            start += 11
+
+        end = content.find(b'<', start)
+        return content[start:end].strip().decode()
 
 
 class RayanHamafza(BaseSite):
@@ -185,8 +200,17 @@ class RayanHamafza(BaseSite):
         return df
 
 
-class TadbirPardaz(BaseSite):
-    # version = '9.2.0'
+class BaseTadbirPardaz(BaseSite):
+    # last checked version = '9.2.2'
+
+    async def version(self) -> str:
+        content = await _read(self.url)
+        start = content.find(b'version number:')
+        end = content.find(b'\n', start)
+        return content[start + 15:end].strip().decode()
+
+
+class TadbirPardaz(BaseTadbirPardaz):
 
     async def live_navps(self) -> LiveNAVPS:
         d = await self._json('Fund/GetETFNAV')
@@ -228,7 +252,7 @@ class LeveragedTadbirPardazLiveNAVPS(LiveNAVPS):
     SuperUnitsTotalNetAssetValue: int
 
 
-class LeveragedTadbirPardaz(BaseSite):
+class LeveragedTadbirPardaz(BaseTadbirPardaz):
     async def navps_history(self) -> _DataFrame:
         j: list = await self._json('Chart/TotalNAV?type=getnavtotal')
 

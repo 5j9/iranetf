@@ -102,3 +102,22 @@ async def test_rayanhamafza_fund_profit():
 
 def test_from_l18():
     assert BaseSite.from_l18('استیل').url == 'https://mofidsectorfund.com/'
+
+
+@file('tadbir_version.html')
+async def test_tadbir_version():
+    assert (await tadbir.version()) == '9.2.2'
+
+
+@file('leveraged_tadbir_version.html')
+async def test_leveraged_tadbir_version():
+    assert (await ltp.version()) == '9.2.2'
+
+
+@file('mabna_version.html')
+async def test_mabna_version():
+    assert (await mabna_dp.version()) == '2.5'
+
+@file('old_mabna_version.html')
+async def test_old_mabna_version():
+    assert (await MabnaDP('https://gitidamavandfund.ir/').version()) == '2.11'

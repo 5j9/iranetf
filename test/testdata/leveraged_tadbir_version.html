@@ -1,0 +1,1399 @@
+<!DOCTYPE html>
+<html>
+<head>
+    
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <meta name="keywords" content= />
+    <meta name="Description" content= />
+    <title></title>
+    <link href="/Content/Style/Fa/bootstrap-rtl.css" rel="stylesheet" />
+    <link href="/Content/Style/Fa/main.min.css" rel="stylesheet" />
+    <link href="/Content/Style/keyboard.css" rel="stylesheet" />
+    <link href="/Content/Style/font-awesome.min.css" rel="stylesheet" />
+    <link href="/Content/Style/jquery.mCustomScrollbar.min.css" rel="stylesheet" />
+    <link href="/Content/Style/persian-datepicker.css" rel="stylesheet" />
+    <link href="/Content/Style/jquery-ui.min.css" rel="stylesheet" />
+    <link href="/Content/Style/CustomStyles.css" rel="stylesheet" />
+    <script src="/Scripts/jquery-3.6.1.min.js" type="text/javascript"></script>
+    <script src="/Scripts/jquery-ui.min.js" type="text/javascript"></script>
+    <script src="/Scripts/jquery-migrate-1.2.1.js" type="text/javascript"></script>
+
+    <script type="text/javascript">
+        function alertx(msg, title, btnText) {
+            title = title || 'خطا';
+            btnText = btnText || 'خب';
+            $(function () {
+                $('<div />').html("<div style='direction: rtl;' id='dialog'><p>" + msg + "</p></div>").dialog({
+                    closeOnEscape: true,
+                    draggable: false,
+                    modal: true,
+                    title: title,
+                    buttons: [
+                        {
+                            text: btnText,
+                            icon: "ui-icon-alert",
+                            click: function () {
+                                $(this).dialog("close");
+                            }
+                        }
+                    ],
+                    open: function () {
+                        $(this).parents(".ui-dialog:first").find(".ui-dialog-titlebar").addClass("ui-state-error");
+                    }
+                });
+            });
+        }
+
+    </script>
+
+
+
+</head>
+<body class="rtl blue" style="min-height: 100vh; background-color: #222">
+    
+    <div class="container-fluid" style="min-height: 100vh; padding-top: 58px;">
+        <div class="row menu-row">
+            <div class="container-fluid">
+                <nav class="navbar navbar-expand-xl navbar-light col-lg-12" style="min-height: 56px">
+                    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent">
+                        <span class="navbar-toggler-icon"></span>
+                    </button>
+                    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                        <ul class="navbar-nav">
+ 
+
+    <li class="nav-item ">
+<a class="nav-link" href="/">صفحه اول</a>        
+    </li>
+    <li class="nav-item dropdown">
+                <a class='nav-link  haschild' href='javascript:void(0)'> درباره صندوق</a>
+                    <div class="dropdown-menu">
+                <ul class="nav flex-column">
+                                <li class="nav-item"><a class='dropdown-item ' href="/AboutFund/FundCost">هزینه‌های صندوق</a></li>
+                                <li class="nav-item"><a class='dropdown-item ' href="/AboutFund/FundGoals">اهداف صندوق</a></li>
+                                <li class="nav-item"><a class='dropdown-item ' href="/AboutFund/FundStatute">اساسنامه صندوق</a></li>
+                                <li class="nav-item"><a class='dropdown-item ' href="/AboutFund/FundProspectus">امیدنامه صندوق</a></li>
+                                        <li class="nav-item"><a class="dropdown-item " href="/AboutFund/FundBankAccounts">حساب‌های بانکی صندوق</a></li>
+                                        <li class="nav-item"><a class="dropdown-item " href="/AboutFund/FundInvestmentHelp">راهنمای سرمایه‌گذاری</a></li>
+                                <li class="nav-item"><a class='dropdown-item ' href="/AboutFund/FundBranchs">شعبه‌های صندوق</a></li>
+                                <li class="nav-item"><a class='dropdown-item ' href="/AboutFund/FundGeneralInfo">اطلاعات کلی صندوق</a></li>
+                                <li class="nav-item"><a class='dropdown-item ' href="/AboutFund/FundComplaint">ثبت شکایت</a></li>
+                </ul>
+            </div>
+
+    </li>
+    <li class="nav-item dropdown">
+                <a class='nav-link  haschild' href='javascript:void(0)'> ارکان صندوق</a>
+                    <div class="dropdown-menu">
+                <ul class="nav flex-column">
+                                <li class="nav-item"><a class='dropdown-item ' href="/Pillar/Auditor">حسابرس صندوق</a></li>
+                                <li class="nav-item"><a class='dropdown-item ' href="/Pillar/InvestmentManager">مدیر سرمایه‌گذاری</a></li>
+                                <li class="nav-item"><a class='dropdown-item ' href="/Pillar/Manager">مدیر صندوق</a></li>
+                                <li class="nav-item"><a class='dropdown-item ' href="/Pillar/Trustee">متولی صندوق</a></li>
+                                <li class="nav-item"><a class='dropdown-item ' href="/Pillar/FundBroker">کارگزار صندوق</a></li>
+                </ul>
+            </div>
+
+    </li>
+    <li class="nav-item dropdown">
+                <a class='nav-link  haschild' href='javascript:void(0)'> گزارش‌های صندوق</a>
+                    <div class="dropdown-menu">
+                <ul class="nav flex-column">
+                                <li class="nav-item"><a class='dropdown-item ' href="/Reports/FundSuperUnits">دارندگان واحدهای ممتاز</a></li>
+                                <li class="nav-item"><a class='dropdown-item ' href="/Reports/FundFinancialStatements">صورت‌های مالی صندوق</a></li>
+                                <li class="nav-item"><a class='dropdown-item ' href="/Reports/FundMeeting">مجامع صندوق</a></li>
+                                        <li class="nav-item"><a class="dropdown-item " href="/Reports/FundEfficiencyForDifferentPeriods">بازده دوره‌ای صندوق</a></li>
+                                        <li class="nav-item"><a class="dropdown-item " href="/Reports/FundDailyEfficiency">بازدهی روزانه صندوق</a></li>
+                                <li class="nav-item"><a class='dropdown-item ' href="/Reports/FundAssetDistributionForDifferentPeriods">ترکیب دارایی‌های دوره‌ای</a></li>
+                                <li class="nav-item"><a class='dropdown-item ' href="/Reports/FundDailyAssetDistribution">ترکیب دارایی‌های روزانه</a></li>
+                </ul>
+            </div>
+
+    </li>
+    <li class="nav-item dropdown">
+                <a class='nav-link  haschild' href='javascript:void(0)'> خبرهای صندوق</a>
+                    <div class="dropdown-menu">
+                <ul class="nav flex-column">
+                                <li class="nav-item"><a class='dropdown-item ' href="/News/NewsList">لیست خبرها</a></li>
+                </ul>
+            </div>
+
+    </li>
+    <li class="nav-item ">
+                <a class='nav-link ' href="/Reports/FundManagerReports" >بیانیه سیاست‌های سرمایه‌گذاری</a>
+        
+    </li>
+    <li class="nav-item ">
+                <a class='nav-link ' href="/User/Help" >راهنمای صدور و ابطال اینترنتی</a>
+        
+    </li>
+    <li class="nav-item ">
+                <a class='nav-link ' href="/Fund/Rules" >قوانین و مقررات</a>
+        
+    </li>
+    <li class="nav-item ">
+                <a class='nav-link ' href="/AboutFund/FundContactUs" >ارتباط با صندوق</a>
+        
+    </li>
+
+
+                        </ul>
+                    </div>
+                    <div style="position: absolute; left: 20px; text-align: left; top: 9px;">
+                        <ul class="navbar-nav flex-row">
+                                <li class="nav-item mr-auto" ><a class="nav-link" href="/User/Login">ورود</a></li>
+                        </ul>
+                    </div>
+                </nav>
+            </div>
+        </div>
+        <div class="row header">
+            <div class="fund-title-box col-12">
+                <div class="row m-0">
+                    <div class="d-flex mx-auto" style="align-content: center; justify-content: center; flex-direction: row">
+                        <div style="margin: 10px;border-radius: 5px; overflow: hidden;"><img style="height: 75px;" src="/ImageHandler.ashx?ImageId=259" alt="" /></div>
+ 
+
+<div class="d-flex flex-column flex-md-row align-items-center justify-content-center" style="margin:10px 0;">
+    <div class="title mx-3">صندوق سرمایه گذاری اهرمی کاریزما</div>
+    <div class="header-RegisterNo">
+        <table style="width: 100%;">
+            <tr>
+                <td>شماره ثبت نزد سازمان بورس و اوراق بهادار</td>
+                <td style="text-align:left">۱۱۹۱۲</td>
+            </tr>
+            <tr>
+                <td>شماره ثبت نزد مرجع ثبت شرکت‌ها و موسسات غیرتجاری</td>
+                <td style="text-align:left">۵۲۶۸۰</td>
+            </tr>
+
+        </table>
+    </div>
+</div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+
+
+      <div class="row mb-sm-3 d-flex flex-column justify-content-center header-container">
+          <a href="https://charisma.ir/funds/ahrom" target="_blank">
+              <img alt="" style="width: 100%;" src="/ImageHandler.ashx?ImageId=1565" />
+          </a>
+      </div>
+
+
+<style>
+    .header-container {
+        overflow: hidden;
+        box-shadow: 0 0px 14px 0px #737373;
+        max-height: initial;
+        flex-wrap: nowrap;
+    }
+</style>
+
+<div class="row">
+  <div class="container-fluid">
+    <div id="content"> 
+
+<div class="row top-cards  pt-3 m-0 mb-3">
+            <div class="col-12 d-flex m-0 p-0 pt-3 row justify-content-md-center">
+                <div class="col-lg-3 col-sm-6 mb-3 d-flex full-width" >
+                    <div class="card text-center border-info d-flex full-width align-stretch">
+                        <a class="text-info p-0 d-flex full-width flex-column h-100" href="/User/login">
+                            <div class="card-body d-flex full-width p-0">
+                                <h6 class="card-title m-0 px-3 py-1 d-flex full-width justify-content-center align-items-center">
+                                    <span>ورود</span>
+                                    <img src="/Content/Images/ico08.png" class="m-1" alt="" />
+                                </h6>
+                            </div>
+                            <div class="card-footer text-white bg-info"><p class="card-text">جهت ورود به حساب خود کلیک کنید!</p></div>
+                        </a>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-sm-6 mb-3 d-flex full-width" style=display:none!important;>
+                    <div class="card text-center border-primary d-flex full-width align-stretch">
+                        <a class="text-primary p-0 d-flex full-width flex-column h-100" href='/User/RegisterType'>
+                            <div class="card-body d-flex full-width p-0">
+                                <h6 class="card-title m-0 px-3 py-1 d-flex full-width justify-content-center align-items-center">
+                                    <span>ثبت نام</span>
+                                    <img src="/Content/Images/ico07.png" class="m-1" alt="" />
+                                </h6>
+                            </div>
+                            <div class="card-footer text-white bg-primary"><p class="card-text">جهت ثبت نام در صندوق کلیک کنید!</p></div>
+                        </a>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-sm-6 mb-3 d-flex full-width" >
+                    <div class="card text-center border-success d-flex full-width align-stretch" style=display:none!important;>
+                        <a class="text-success p-0 d-flex full-width flex-column h-100" href='/Request/IssuanceRequest'>
+                            <div class="card-body d-flex full-width p-0">
+                                <h6 class="card-title m-0 px-3 py-1 d-flex full-width justify-content-center align-items-center">
+                                    <span>صدور واحد</span>
+                                    <img src="/Content/Images/ico05.png" class="m-1" alt="" />
+                                </h6>
+                            </div>
+                            <div class="card-footer text-white bg-success"><p class="card-text">جهت صدور واحدهای جدید کلیک کنید!</p></div>
+                        </a>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-sm-6 mb-3 d-flex full-width" >
+                    <div class="card text-center border-danger d-flex full-width align-stretch" style=display:none!important;>
+                        <a class="text-danger p-0 d-flex full-width flex-column h-100" href='/Request/cancelRequest'>
+                            <div class="card-body d-flex full-width p-0">
+                                <h6 class="card-title m-0 px-3 py-1 d-flex full-width justify-content-center align-items-center">
+                                    <span>ابطال واحد</span>
+                                    <img src="/Content/Images/ico06.png" class="m-1" alt="" />
+                                </h6>
+                            </div>
+                            <div class="card-footer text-white bg-danger"><p class="card-text">جهت ابطال واحدهای خود کلیک کنید!</p></div>
+                        </a>
+                    </div>
+                </div>
+            </div>
+</div>
+<div class="row mb-3">
+ 
+
+        <div class="col-lg-8 d-flex">
+            <div class="card" style="width: 100%">
+                <div class="card-header"><i class="fa fa-info"></i>اطلاعات سرمایه‌گذاری</div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-lg-6">
+                            <div class="data-box">
+                                <h5 class="card-header text-center">پایانی</h5>
+                                <div class="data-row" >
+                                    <div class="data-label">تاریخ محاسبه NAV صندوق</div>
+                                    <div class="data-value" id="Date">۱۴۰۲/۰۷/۰۹</div>
+                                </div>
+                                <div class="data-row" >
+                                    <div class="data-label">تعداد کل واحدهای سرمایه گذاری</div>
+                                    <div class="data-value">۵,۶۸۰,۶۱۹,۳۳۴</div>
+                                </div>
+                                <div class="data-row" >
+                                    <div class="data-label">تعداد کل واحدهای باقی مانده</div>
+                                    <div class="data-value">۳,۳۱۹,۳۸۰,۶۶۶ </div>
+                                </div>
+
+                                <div class="data-row" >
+                                    <div class="data-label">NAVصدور واحد‌هاي ممتاز(پایانی)</div>
+                                    <div class="data-value" style="color: #85ca5f;">۱۷,۵۹۸</div>
+                                </div>
+                                <div class="data-row" >
+                                    <div class="data-label">NAVابطال واحد‌هاي ممتاز(پایانی)</div>
+                                    <div class="data-value" style="color: #d25d5e;">۱۷,۳۹۶</div>
+                                </div>
+                                <div class="data-row" >
+                                    <div class="data-label">NAVواحدهاي عادي(پایانی)</div>
+                                    <div class="data-value">۱۴,۶۱۰</div>
+                                </div>
+
+                                <div class="data-row" >
+                                    <div class="data-label">کل خالص ارزش دارایی‌ها (ریال)</div>
+                                    <div class="data-value">۹۶,۰۳۱,۲۱۳,۴۴۲,۵۷۲</div>
+                                </div>
+                                <div class="data-row" >
+                                    <div class="data-label">خالص ارزش دارايي‌هاي واحد عادي</div>
+                                    <div class="data-value" id="BaseUnitsTotalNetAssetValueFinal">۴۶,۹۳۶,۸۲۶,۲۰۱,۰۴۰</div>
+                                </div>
+                                <div class="data-row" >
+                                    <div class="data-label">خالص ارزش دارايي‌هاي واحد ممتاز</div>
+                                    <div class="data-value" id="SuperUnitsTotalNetAssetValueFinal">۴۹,۰۹۴,۳۸۷,۲۴۱,۵۳۲</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="data-box">
+                                <h5 class="card-header text-center">لحظه ای</h5>
+                                <div class="data-row" id="trdate" >
+                                    <div class="data-label">تاریخ انتشار</div>
+                                    <div class="data-value datatype-date" id="LeveragedPublishDate">۱۴۰۲/۰۷/۱۰ ۱۵:۵۸:۰۷</div>
+                                </div>
+                                <div class="data-row" >
+                                    <div class="data-label">تعداد واحد‌هاي‌ عادي صادر شده</div>
+                                    <div class="data-value" id="BaseUnitsTotalSubscription">۲,۸۴۳,۱۱۹,۳۳۴ </div>
+                                </div>
+                                <div class="data-row" >
+                                    <div class="data-label">تعداد واحد‌هاي ممتاز صادر شده</div>
+                                    <div class="data-value" id="SuperUnitsTotalSubscription">۲,۸۳۷,۵۰۰,۰۰۰</div>
+                                </div>
+                                <div class="data-row" >
+                                    <div class="data-label">NAV واحدهاي عادي</div>
+                                    <div class="data-value" id="BaseUnitsCancelNAV">۱۴,۶۱۸</div>
+                                </div>
+                                <div class="data-row" >
+                                    <div class="data-label">NAV صدور واحد‌هاي ممتاز</div>
+                                    <div class="data-value" id="SuperUnitsSubscriptionNAV" style="color: #85ca5f;">۱۷,۷۷۲</div>
+                                </div>
+                                <div class="data-row" >
+                                    <div class="data-label">NAV ابطال واحد‌هاي ممتاز</div>
+                                    <div class="data-value" id="SuperUnitsCancelNAV" style="color: #d25d5e;">۱۷,۵۷۰</div>
+                                </div>
+                                <div class="data-row" >
+                                    <div class="data-label">کل خالص ارزش دارایی‌ها (ریال)</div>
+                                    <div class="data-value">۹۱,۴۱۶,۶۲۲,۷۲۰,۲۰۴</div>
+                                </div>
+                                <div class="data-row" >
+                                    <div class="data-label">خالص ارزش دارايي‌هاي واحد عادي</div>
+                                    <div class="data-value" id="BaseUnitsTotalNetAssetValue">۴۱,۵۶۰,۷۱۸,۴۲۴,۴۱۲</div>
+                                </div>
+                                <div class="data-row" >
+                                    <div class="data-label">خالص ارزش دارايي‌هاي واحد ممتاز</div>
+                                    <div class="data-value" id="SuperUnitsTotalNetAssetValue">۴۹,۸۵۵,۹۰۴,۲۹۵,۷۹۲</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4 d-flex">
+            <div class="card" style="width: 100%">
+                <div class="card-header"><i class="fa fa-info"></i>اطلاعات صندوق</div>
+                <div class="card-body">
+                    <div class="data-box">
+                                <div class="data-row" >
+                                    <div class="data-label">مدیر صندوق</div>
+                                    <div class="data-value"><a href="/Pillar/Manager" target="_blank">سبدگردان کاریزما</a></div>
+                                </div>
+
+                                <div class="data-row" >
+                                    <div class="data-label">متولی صندوق</div>
+                                    <div class="data-value"><a href="/Pillar/Trustee" target="_blank">موسسه حسابرسی هدف نوین نگر</a></div>
+                                </div>
+
+                                <div class="data-row" >
+                                    <div class="data-label">حسابرس</div>
+                                    <div class="data-value"><a href="/Pillar/Auditor" target="_blank">موسسه حسابرسی رازدار</a></div>
+                                </div>
+
+                                <div class="data-row" >
+                                    <div class="data-label">مدیران سرمایه‌گذاری</div>
+                                    <div class="data-value"><a href="/Pillar/InvestmentManager" target="_blank">آرش غفاری، سعید ویسی زاده، حمزه قوچی فرد</a></div>
+                                </div>
+
+                                <div class="data-row" >
+                                    <div class="data-label">مدیر ثبت</div>
+                                    <div class="data-value"><a href="/Pillar/FundRegistrationManager" target="_blank">سبدگردان کاریزما</a></div>
+                                </div>
+
+
+
+
+                                <div class="data-row" >
+                                    <div class="data-label">تاریخ آغاز فعالیت</div>
+                                    <div class="data-value">۱۴۰۰/۰۹/۳۰</div>
+                                </div>
+
+                                <div class="data-row" >
+                                    <div class="data-label">نوع صندوق</div>
+                                    <div class="data-value">صندوق اهرمی</div>
+                                </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+
+<script type="text/javascript">
+    function publishNAV() {
+        var isEtfMode=false;
+        var isLeveragedMode=true;
+        if (isEtfMode) {
+            $.ajax({
+                url: '/Fund/GetETFNAV',
+                type: 'GET',
+                dataType: 'json',
+                cache: false,
+                success: function (results) {
+                    if (results !== "") {
+                        var obj = JSON.parse(results);
+                        $('#SubscriptionNAV').html(obj.subNav);
+                        $('#CancelNAV').html(obj.cancelNav);
+                        $('#EsmiNAV').html(obj.esmiNav);
+                        $('#trdate').show();
+                        $('#PublishDate').html(obj.publishDate);
+                    }
+                },
+                error: function () {
+                }
+            });
+        }
+        else if (isLeveragedMode) {
+            $.ajax({
+                url: '/Fund/GetLeveragedNAV',
+                type: 'GET',
+                dataType: 'json',
+                cache: false,
+                success: function (results) {
+                    if (results !== "") {
+                        var obj = JSON.parse(results);
+                        $('#BaseUnitsCancelNAV').html(obj.BaseUnitsCancelNAV);
+                        $('#BaseUnitsTotalNetAssetValue').html(obj.BaseUnitsTotalNetAssetValue);
+                        $('#BaseUnitsTotalSubscription').html(obj.BaseUnitsTotalSubscription);
+                        $('#SuperUnitsCancelNAV').html(obj.SuperUnitsCancelNAV);
+                        $('#SuperUnitsSubscriptionNAV').html(obj.SuperUnitsSubscriptionNAV);
+                        $('#SuperUnitsTotalSubscription').html(obj.SuperUnitsTotalSubscription);
+                        $('#SuperUnitsTotalNetAssetValue').html(obj.SuperUnitsTotalNetAssetValue);
+                        $('#trdate').show();
+                        $('#LeveragedPublishDate').html(obj.PublishDate);
+                    }
+                },
+                error: function () {
+                }
+            });
+        }
+    }
+    var refreshId = setInterval("publishNAV()", 5000);
+</script>
+
+</div>
+<div class="row mb-3">
+ 
+
+<div class="col-12 d-flex">
+    <div class="news">
+        <div class="news-header">خبرها: </div>
+        <div id="newsTitle">
+                        <span class="news-span">
+                            [ ۱۴۰۲/۰۷/۰۸ ]
+<a href="/News/Index/1359">اطلاعیه درخصوص نرخ بازدهی واحدهای عادی صندوق سرمایه گذاری سهامی اهرمی کاریزما</a>                        </span>
+                        <span class="news-span">
+                            [ ۱۴۰۲/۰۷/۰۵ ]
+                                <a target="_blank">صورتجلسه مجمع مورخ ۱۴۰۲/۰۶/۲۶سرمایه گذاری سهامی اهرمی کاریزما در خصوص تغییر (بند۳-۱- امیدنامه) به همراه تاییدیه سازمان</a>
+                        </span>
+                        <span class="news-span">
+                            [ ۱۴۰۲/۰۶/۲۶ ]
+                                <a target="_blank">لیست حاضرین در مجمع مورخ ۱۴۰۲/۰۶/۲۶ صندوق سرمایه گذاری سهامی اهرمی کاریزما</a>
+                        </span>
+
+        </div>
+    </div>
+    <ul id="pagination" class="columnP grid_1_wide">
+        <li><a id="leftArrow" href="javascript:void(0)"></a></li>
+        <li id="newsNav"></li>
+        <li><a id="rightArrow" href="javascript:void(0)"></a></li>
+    </ul>
+</div>
+
+
+
+</div>
+<div class="row">
+ 
+<style>
+    .loading-mask {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(255, 255, 255, .712);
+        z-index: 7;
+    }
+
+        .loading-mask > div {
+            margin: auto;
+            display: flex;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.85);
+            box-shadow: 0 0 40px 20px rgba(255, 255, 255, 0.85);
+        }
+
+            .loading-mask > div > .text {
+                margin: 0 10px
+            }
+
+    .loading {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 50px;
+        height: 50px;
+    }
+
+        .loading div {
+            box-sizing: border-box;
+            border-radius: 100%;
+            padding: 2px;
+            border-style: solid;
+            border-color: #096994;
+            width: 100%;
+            height: 100%;
+            border-left-color: #eee;
+            border-width: 2px
+        }
+
+        .loading > div > div * {
+            border-width: 0
+        }
+
+        .loading * {
+            animation: loadingAnimation 5s infinite
+        }
+</style>
+<div class="col-12">
+    <div class="chart-box d-flex">
+        <div id="rightMenu">
+            <ul id="chartsNav" class="items"></ul>
+        </div>
+        <div style="position: relative; width: 100%">
+            <div class="loading-mask">
+                <div>
+                    <div class="loading">
+                        <div>
+                            <div></div>
+                        </div>
+                    </div>
+                    <div class="text">در حال دریافت اطلاعات نمودار</div>
+                </div>
+            </div>
+            <div id="divCharts" style="flex: 1; min-height: 400px">
+                <div id="highChartContainerA"></div>
+                <div id="highChartContainerC"></div>
+                <div id="highChartContainerB"></div>
+                <div id="highChartContainerD"></div>
+                <div id="highChartContainerE"></div>
+                <div id="highChartContainerF"></div>
+            </div>
+        </div>
+        <div id="exportIcons">
+            <input type="submit" id="DotNetExport_Submit" name="DotNetExport_Submit" style="display: none" />
+            <input type="hidden" name="DotNetExport" id="DotNetExport" />
+            <ul class="icons">
+                <li>
+                    <a id="btnExportToExcel" class="DotNetExport" export="Excel" href="/Download/DownloadNavChartList?exportType=Excel"
+                       title="خروجی اکسل نمودار" target="_blank"><span class="icon excel"></span></a>
+                </li>
+                <li>
+                    <a id="btnExportToPDF" class="DotNetExport" export="PDF" href="/Download/DownloadNavChartList?exportType=PDF"
+                       title="خروجی PDF نمودار" target="_blank"><span class="icon pdf"></span></a>
+                </li>
+                <li>
+                    <a id="btnShowTable" href="javascript:void(0)" title="نمایش جدول اطلاعات نمودار">
+                        <span class="icon table"></span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>
+<div class="col-12 my-2">
+    <div class="table-responsive table-wrapper position-relative" id="grid">
+        <div class="loading-mask nav-loading-mask">
+            <div>
+                <div class="loading">
+                    <div>
+                        <div></div>
+                    </div>
+                </div>
+                <div class="text">در حال دریافت اطلاعات نمودار</div>
+            </div>
+        </div>
+        <table class="table m-0" id="tblNavList">
+            <thead>
+            <tr>
+                        <th class="d-none d-lg-table-cell">ردیف</th>
+                        <th>تاریخ</th>
+                        <th>NAV صدور واحدهای ممتاز</th>
+                        <th>NAV ابطال واحدهای ممتاز</th>
+                        <th>NAV واحدهای عادی</th>
+                        <th>خالص ارزش صندوق</th>
+                        <th>خالص ارزش واحدهای ممتاز</th>
+                        <th>خالص ارزش واحدهای عادی</th>
+                        <th>تعداد واحد ممتاز صادر شده</th>
+                        <th>تعداد واحد ممتاز باطل شده</th>
+                        <th>تعداد واحد عادی صادر شده</th>
+                        <th>تعداد واحد عادی باطل شده</th>
+                        <th>مانده گواهی ممتاز</th>
+                        <th>مانده گواهی عادی</th>
+                        <th>کل واحدهای صندوق</th>
+                        <th>نسبت اهرمی</th>
+                        <th>تعداد سرمایه‌گذاران واحدهای عادی</th>
+
+            </tr>
+            </thead>
+            <tbody>
+                        <tr>
+                            <td class="d-none d-lg-table-cell">۱</td>
+                            <td>۱۴۰۲/۰۷/۰۹</td>
+                            <td class="d-none d-md-table-cell">۱۷,۵۹۸</td>
+                            <td class="d-none d-xl-table-cell">۱۷,۳۹۶</td>
+                            <td class="d-none d-md-table-cell">۱۴,۶۱۰</td>
+                            <td class="d-none d-sm-table-cell">۹۶,۰۳۱,۲۱۳,۴۴۲,۵۷۲</td>
+                            <td class="d-none d-sm-table-cell">۴۹,۰۹۴,۳۸۷,۲۴۱,۵۳۲</td>
+                            <td class="d-none d-sm-table-cell">۴۶,۹۳۶,۸۲۶,۲۰۱,۰۴۰</td>
+                            <td class="d-none d-sm-table-cell">۲۷,۰۰۰,۰۰۰</td>
+                            <td class="d-none d-sm-table-cell">۰</td>
+                            <td class="d-none d-sm-table-cell">۲۰,۱۵۸</td>
+                            <td class="d-none d-sm-table-cell">۸۰,۴۴۱</td>
+                            <td class="d-none d-sm-table-cell">۲,۸۲۲,۱۰۰,۰۰۰</td>
+                            <td class="d-none d-sm-table-cell">۳,۲۱۲,۶۵۰,۶۶۴</td>
+                            <td class="d-none d-sm-table-cell">۶,۰۳۴,۷۵۰,۶۶۴</td>
+                            <td class="d-none d-sm-table-cell" dir="rtl">۰.۹۶</td>
+                            <td class="d-none d-sm-table-cell">۱,۱۰۶</td>
+                        </tr>
+                        <tr>
+                            <td class="d-none d-lg-table-cell">۲</td>
+                            <td>۱۴۰۲/۰۷/۰۸</td>
+                            <td class="d-none d-md-table-cell">۱۷,۷۹۶</td>
+                            <td class="d-none d-xl-table-cell">۱۷,۵۹۴</td>
+                            <td class="d-none d-md-table-cell">۱۴,۶۰۲</td>
+                            <td class="d-none d-sm-table-cell">۹۶,۰۸۸,۸۲۸,۳۳۵,۷۶۵</td>
+                            <td class="d-none d-sm-table-cell">۴۹,۱۷۶,۸۲۳,۰۸۷,۶۷۱</td>
+                            <td class="d-none d-sm-table-cell">۴۶,۹۱۲,۰۰۵,۲۴۸,۰۹۴</td>
+                            <td class="d-none d-sm-table-cell">۰</td>
+                            <td class="d-none d-sm-table-cell">۰</td>
+                            <td class="d-none d-sm-table-cell">۰</td>
+                            <td class="d-none d-sm-table-cell">۰</td>
+                            <td class="d-none d-sm-table-cell">۲,۷۹۵,۱۰۰,۰۰۰</td>
+                            <td class="d-none d-sm-table-cell">۳,۲۱۲,۷۱۰,۹۴۷</td>
+                            <td class="d-none d-sm-table-cell">۶,۰۰۷,۸۱۰,۹۴۷</td>
+                            <td class="d-none d-sm-table-cell" dir="rtl">۰.۹۵</td>
+                            <td class="d-none d-sm-table-cell">۱,۱۰۳</td>
+                        </tr>
+                        <tr>
+                            <td class="d-none d-lg-table-cell">۳</td>
+                            <td>۱۴۰۲/۰۷/۰۷</td>
+                            <td class="d-none d-md-table-cell">۱۸,۱۵۱</td>
+                            <td class="d-none d-xl-table-cell">۱۷,۹۴۸</td>
+                            <td class="d-none d-md-table-cell">۱۴,۵۹۴</td>
+                            <td class="d-none d-sm-table-cell">۹۷,۰۵۱,۸۹۸,۸۴۳,۸۷۶</td>
+                            <td class="d-none d-sm-table-cell">۵۰,۱۶۵,۵۹۵,۲۸۳,۳۵۸</td>
+                            <td class="d-none d-sm-table-cell">۴۶,۸۸۶,۳۰۳,۵۶۰,۵۱۸</td>
+                            <td class="d-none d-sm-table-cell">۰</td>
+                            <td class="d-none d-sm-table-cell">۰</td>
+                            <td class="d-none d-sm-table-cell">۰</td>
+                            <td class="d-none d-sm-table-cell">۰</td>
+                            <td class="d-none d-sm-table-cell">۲,۷۹۵,۱۰۰,۰۰۰</td>
+                            <td class="d-none d-sm-table-cell">۳,۲۱۲,۷۱۰,۹۴۷</td>
+                            <td class="d-none d-sm-table-cell">۶,۰۰۷,۸۱۰,۹۴۷</td>
+                            <td class="d-none d-sm-table-cell" dir="rtl">۰.۹۳</td>
+                            <td class="d-none d-sm-table-cell">۱,۱۰۳</td>
+                        </tr>
+                        <tr>
+                            <td class="d-none d-lg-table-cell">۴</td>
+                            <td>۱۴۰۲/۰۷/۰۶</td>
+                            <td class="d-none d-md-table-cell">۱۸,۱۵۷</td>
+                            <td class="d-none d-xl-table-cell">۱۷,۹۵۴</td>
+                            <td class="d-none d-md-table-cell">۱۴,۵۸۶</td>
+                            <td class="d-none d-sm-table-cell">۹۷,۰۴۳,۵۳۴,۱۱۴,۳۱۰</td>
+                            <td class="d-none d-sm-table-cell">۵۰,۱۸۲,۹۳۲,۲۴۱,۳۶۸</td>
+                            <td class="d-none d-sm-table-cell">۴۶,۸۶۰,۶۰۱,۸۷۲,۹۴۲</td>
+                            <td class="d-none d-sm-table-cell">۰</td>
+                            <td class="d-none d-sm-table-cell">۰</td>
+                            <td class="d-none d-sm-table-cell">۴۴,۴۵۵</td>
+                            <td class="d-none d-sm-table-cell">۱۹,۲۰۹</td>
+                            <td class="d-none d-sm-table-cell">۲,۷۹۵,۱۰۰,۰۰۰</td>
+                            <td class="d-none d-sm-table-cell">۳,۲۱۲,۷۱۰,۹۴۷</td>
+                            <td class="d-none d-sm-table-cell">۶,۰۰۷,۸۱۰,۹۴۷</td>
+                            <td class="d-none d-sm-table-cell" dir="rtl">۰.۹۳</td>
+                            <td class="d-none d-sm-table-cell">۱,۱۰۳</td>
+                        </tr>
+                        <tr>
+                            <td class="d-none d-lg-table-cell">۵</td>
+                            <td>۱۴۰۲/۰۷/۰۵</td>
+                            <td class="d-none d-md-table-cell">۱۸,۱۶۸</td>
+                            <td class="d-none d-xl-table-cell">۱۷,۹۶۵</td>
+                            <td class="d-none d-md-table-cell">۱۴,۵۷۴</td>
+                            <td class="d-none d-sm-table-cell">۹۷,۰۳۵,۲۴۹,۰۷۰,۹۱۶</td>
+                            <td class="d-none d-sm-table-cell">۵۰,۲۱۳,۵۶۷,۶۶۴,۵۴۲</td>
+                            <td class="d-none d-sm-table-cell">۴۶,۸۲۱,۶۸۱,۴۰۶,۳۷۴</td>
+                            <td class="d-none d-sm-table-cell">۰</td>
+                            <td class="d-none d-sm-table-cell">۰</td>
+                            <td class="d-none d-sm-table-cell">۸۱,۷۶۲</td>
+                            <td class="d-none d-sm-table-cell">۶۲۱</td>
+                            <td class="d-none d-sm-table-cell">۲,۷۹۵,۱۰۰,۰۰۰</td>
+                            <td class="d-none d-sm-table-cell">۳,۲۱۲,۶۸۵,۷۰۱</td>
+                            <td class="d-none d-sm-table-cell">۶,۰۰۷,۷۸۵,۷۰۱</td>
+                            <td class="d-none d-sm-table-cell" dir="rtl">۰.۹۳</td>
+                            <td class="d-none d-sm-table-cell">۱,۱۰۶</td>
+                        </tr>
+                        <tr>
+                            <td class="d-none d-lg-table-cell">۶</td>
+                            <td>۱۴۰۲/۰۷/۰۴</td>
+                            <td class="d-none d-md-table-cell">۱۸,۱۱۱</td>
+                            <td class="d-none d-xl-table-cell">۱۷,۹۰۹</td>
+                            <td class="d-none d-md-table-cell">۱۴,۵۶۶</td>
+                            <td class="d-none d-sm-table-cell">۹۶,۸۵۳,۰۵۹,۴۰۰,۰۲۴</td>
+                            <td class="d-none d-sm-table-cell">۵۰,۰۵۸,۲۶۱,۳۷۹,۰۶۴</td>
+                            <td class="d-none d-sm-table-cell">۴۶,۷۹۴,۷۹۸,۰۲۰,۹۶۰</td>
+                            <td class="d-none d-sm-table-cell">۰</td>
+                            <td class="d-none d-sm-table-cell">۰</td>
+                            <td class="d-none d-sm-table-cell">۱۹,۲۰۳</td>
+                            <td class="d-none d-sm-table-cell">۶۴,۴۵۷</td>
+                            <td class="d-none d-sm-table-cell">۲,۷۹۵,۱۰۰,۰۰۰</td>
+                            <td class="d-none d-sm-table-cell">۳,۲۱۲,۶۰۴,۵۶۰</td>
+                            <td class="d-none d-sm-table-cell">۶,۰۰۷,۷۰۴,۵۶۰</td>
+                            <td class="d-none d-sm-table-cell" dir="rtl">۰.۹۳</td>
+                            <td class="d-none d-sm-table-cell">۱,۱۰۳</td>
+                        </tr>
+                        <tr>
+                            <td class="d-none d-lg-table-cell">۷</td>
+                            <td>۱۴۰۲/۰۷/۰۳</td>
+                            <td class="d-none d-md-table-cell">۱۸,۱۰۲</td>
+                            <td class="d-none d-xl-table-cell">۱۷,۹۰۰</td>
+                            <td class="d-none d-md-table-cell">۱۴,۵۵۸</td>
+                            <td class="d-none d-sm-table-cell">۹۶,۸۰۳,۴۴۱,۹۹۱,۷۹۳</td>
+                            <td class="d-none d-sm-table-cell">۵۰,۰۳۳,۶۸۵,۹۹۹,۵۸۱</td>
+                            <td class="d-none d-sm-table-cell">۴۶,۷۶۹,۷۵۵,۹۹۲,۲۱۲</td>
+                            <td class="d-none d-sm-table-cell">۰</td>
+                            <td class="d-none d-sm-table-cell">۰</td>
+                            <td class="d-none d-sm-table-cell">۰</td>
+                            <td class="d-none d-sm-table-cell">۰</td>
+                            <td class="d-none d-sm-table-cell">۲,۷۹۵,۱۰۰,۰۰۰</td>
+                            <td class="d-none d-sm-table-cell">۳,۲۱۲,۶۴۹,۸۱۴</td>
+                            <td class="d-none d-sm-table-cell">۶,۰۰۷,۷۴۹,۸۱۴</td>
+                            <td class="d-none d-sm-table-cell" dir="rtl">۰.۹۳</td>
+                            <td class="d-none d-sm-table-cell">۱,۱۰۴</td>
+                        </tr>
+                        <tr>
+                            <td class="d-none d-lg-table-cell">۸</td>
+                            <td>۱۴۰۲/۰۷/۰۲</td>
+                            <td class="d-none d-md-table-cell">۱۸,۴۶۱</td>
+                            <td class="d-none d-xl-table-cell">۱۸,۲۵۷</td>
+                            <td class="d-none d-md-table-cell">۱۴,۵۵۰</td>
+                            <td class="d-none d-sm-table-cell">۹۷,۷۷۳,۵۵۶,۸۷۴,۲۹۴</td>
+                            <td class="d-none d-sm-table-cell">۵۱,۰۲۹,۵۰۲,۰۸۰,۵۹۴</td>
+                            <td class="d-none d-sm-table-cell">۴۶,۷۴۴,۰۵۴,۷۹۳,۷۰۰</td>
+                            <td class="d-none d-sm-table-cell">۰</td>
+                            <td class="d-none d-sm-table-cell">۰</td>
+                            <td class="d-none d-sm-table-cell">۹۰,۷۵۴</td>
+                            <td class="d-none d-sm-table-cell">۳۵,۴۰۳</td>
+                            <td class="d-none d-sm-table-cell">۲,۷۹۵,۱۰۰,۰۰۰</td>
+                            <td class="d-none d-sm-table-cell">۳,۲۱۲,۶۴۹,۸۱۴</td>
+                            <td class="d-none d-sm-table-cell">۶,۰۰۷,۷۴۹,۸۱۴</td>
+                            <td class="d-none d-sm-table-cell" dir="rtl">۰.۹۲</td>
+                            <td class="d-none d-sm-table-cell">۱,۱۰۴</td>
+                        </tr>
+                        <tr>
+                            <td class="d-none d-lg-table-cell">۹</td>
+                            <td>۱۴۰۲/۰۷/۰۱</td>
+                            <td class="d-none d-md-table-cell">۱۸,۴۶۷</td>
+                            <td class="d-none d-xl-table-cell">۱۸,۲۶۳</td>
+                            <td class="d-none d-md-table-cell">۱۴,۵۴۲</td>
+                            <td class="d-none d-sm-table-cell">۹۷,۷۶۴,۱۳۶,۷۹۲,۶۵۰</td>
+                            <td class="d-none d-sm-table-cell">۵۱,۰۴۶,۵۸۸,۱۱۱,۷۰۴</td>
+                            <td class="d-none d-sm-table-cell">۴۶,۷۱۷,۵۴۸,۶۸۰,۹۴۶</td>
+                            <td class="d-none d-sm-table-cell">۰</td>
+                            <td class="d-none d-sm-table-cell">۰</td>
+                            <td class="d-none d-sm-table-cell">۰</td>
+                            <td class="d-none d-sm-table-cell">۰</td>
+                            <td class="d-none d-sm-table-cell">۲,۷۹۵,۱۰۰,۰۰۰</td>
+                            <td class="d-none d-sm-table-cell">۳,۲۱۲,۵۹۴,۴۶۳</td>
+                            <td class="d-none d-sm-table-cell">۶,۰۰۷,۶۹۴,۴۶۳</td>
+                            <td class="d-none d-sm-table-cell" dir="rtl">۰.۹۲</td>
+                            <td class="d-none d-sm-table-cell">۱,۰۹۵</td>
+                        </tr>
+                        <tr>
+                            <td class="d-none d-lg-table-cell">۱۰</td>
+                            <td>۱۴۰۲/۰۶/۳۱</td>
+                            <td class="d-none d-md-table-cell">۱۸,۵۵۱</td>
+                            <td class="d-none d-xl-table-cell">۱۸,۳۴۷</td>
+                            <td class="d-none d-md-table-cell">۱۴,۵۳۴</td>
+                            <td class="d-none d-sm-table-cell">۹۷,۹۷۳,۶۷۱,۱۴۸,۰۵۸</td>
+                            <td class="d-none d-sm-table-cell">۵۱,۲۸۱,۸۲۳,۲۲۲,۸۱۶</td>
+                            <td class="d-none d-sm-table-cell">۴۶,۶۹۱,۸۴۷,۹۲۵,۲۴۲</td>
+                            <td class="d-none d-sm-table-cell">۰</td>
+                            <td class="d-none d-sm-table-cell">۰</td>
+                            <td class="d-none d-sm-table-cell">۰</td>
+                            <td class="d-none d-sm-table-cell">۰</td>
+                            <td class="d-none d-sm-table-cell">۲,۷۹۵,۱۰۰,۰۰۰</td>
+                            <td class="d-none d-sm-table-cell">۳,۲۱۲,۵۹۴,۴۶۳</td>
+                            <td class="d-none d-sm-table-cell">۶,۰۰۷,۶۹۴,۴۶۳</td>
+                            <td class="d-none d-sm-table-cell" dir="rtl">۰.۹۱</td>
+                            <td class="d-none d-sm-table-cell">۱,۰۹۵</td>
+                        </tr>
+                        <tr>
+                            <td class="d-none d-lg-table-cell">۱۱</td>
+                            <td>۱۴۰۲/۰۶/۳۰</td>
+                            <td class="d-none d-md-table-cell">۱۸,۵۵۷</td>
+                            <td class="d-none d-xl-table-cell">۱۸,۳۵۳</td>
+                            <td class="d-none d-md-table-cell">۱۴,۵۲۶</td>
+                            <td class="d-none d-sm-table-cell">۹۷,۹۶۴,۹۸۵,۸۷۰,۲۱۱</td>
+                            <td class="d-none d-sm-table-cell">۵۱,۲۹۸,۸۳۸,۷۰۰,۶۷۳</td>
+                            <td class="d-none d-sm-table-cell">۴۶,۶۶۶,۱۴۷,۱۶۹,۵۳۸</td>
+                            <td class="d-none d-sm-table-cell">۰</td>
+                            <td class="d-none d-sm-table-cell">۰</td>
+                            <td class="d-none d-sm-table-cell">۳۴,۵۰۶,۷۵۵</td>
+                            <td class="d-none d-sm-table-cell">۹,۱۹۴</td>
+                            <td class="d-none d-sm-table-cell">۲,۷۹۵,۱۰۰,۰۰۰</td>
+                            <td class="d-none d-sm-table-cell">۳,۲۱۲,۵۹۴,۴۶۳</td>
+                            <td class="d-none d-sm-table-cell">۶,۰۰۷,۶۹۴,۴۶۳</td>
+                            <td class="d-none d-sm-table-cell" dir="rtl">۰.۹۱</td>
+                            <td class="d-none d-sm-table-cell">۱,۰۹۵</td>
+                        </tr>
+                        <tr>
+                            <td class="d-none d-lg-table-cell">۱۲</td>
+                            <td>۱۴۰۲/۰۶/۲۹</td>
+                            <td class="d-none d-md-table-cell">۱۸,۵۶۱</td>
+                            <td class="d-none d-xl-table-cell">۱۸,۳۵۷</td>
+                            <td class="d-none d-md-table-cell">۱۴,۵۱۸</td>
+                            <td class="d-none d-sm-table-cell">۹۷,۴۴۸,۶۶۰,۶۱۷,۸۱۰</td>
+                            <td class="d-none d-sm-table-cell">۵۱,۳۰۹,۰۴۹,۷۹۴,۵۷۴</td>
+                            <td class="d-none d-sm-table-cell">۴۶,۱۳۹,۶۱۰,۸۲۳,۲۳۶</td>
+                            <td class="d-none d-sm-table-cell">۰</td>
+                            <td class="d-none d-sm-table-cell">۰</td>
+                            <td class="d-none d-sm-table-cell">۱,۴۹۲</td>
+                            <td class="d-none d-sm-table-cell">۴۶۴</td>
+                            <td class="d-none d-sm-table-cell">۲,۷۹۵,۱۰۰,۰۰۰</td>
+                            <td class="d-none d-sm-table-cell">۳,۱۷۸,۰۹۶,۹۰۲</td>
+                            <td class="d-none d-sm-table-cell">۵,۹۷۳,۱۹۶,۹۰۲</td>
+                            <td class="d-none d-sm-table-cell" dir="rtl">۰.۹</td>
+                            <td class="d-none d-sm-table-cell">۱,۰۸۸</td>
+                        </tr>
+                        <tr>
+                            <td class="d-none d-lg-table-cell">۱۳</td>
+                            <td>۱۴۰۲/۰۶/۲۸</td>
+                            <td class="d-none d-md-table-cell">۱۸,۶۶۴</td>
+                            <td class="d-none d-xl-table-cell">۱۸,۴۵۹</td>
+                            <td class="d-none d-md-table-cell">۱۴,۵۰۶</td>
+                            <td class="d-none d-sm-table-cell">۹۷,۶۹۷,۵۱۶,۹۴۱,۵۱۷</td>
+                            <td class="d-none d-sm-table-cell">۵۱,۵۹۶,۰۵۸,۱۹۳,۲۷۳</td>
+                            <td class="d-none d-sm-table-cell">۴۶,۱۰۱,۴۵۸,۷۴۸,۲۴۴</td>
+                            <td class="d-none d-sm-table-cell">۰</td>
+                            <td class="d-none d-sm-table-cell">۰</td>
+                            <td class="d-none d-sm-table-cell">۲۱,۱۷۳</td>
+                            <td class="d-none d-sm-table-cell">۱۵۱,۸۵۱,۰۸۲</td>
+                            <td class="d-none d-sm-table-cell">۲,۷۹۵,۱۰۰,۰۰۰</td>
+                            <td class="d-none d-sm-table-cell">۳,۱۷۸,۰۹۵,۸۷۴</td>
+                            <td class="d-none d-sm-table-cell">۵,۹۷۳,۱۹۵,۸۷۴</td>
+                            <td class="d-none d-sm-table-cell" dir="rtl">۰.۸۹</td>
+                            <td class="d-none d-sm-table-cell">۱,۰۸۹</td>
+                        </tr>
+                        <tr>
+                            <td class="d-none d-lg-table-cell">۱۴</td>
+                            <td>۱۴۰۲/۰۶/۲۷</td>
+                            <td class="d-none d-md-table-cell">۱۸,۷۰۴</td>
+                            <td class="d-none d-xl-table-cell">۱۸,۵۰۰</td>
+                            <td class="d-none d-md-table-cell">۱۴,۴۹۸</td>
+                            <td class="d-none d-sm-table-cell">۹۹,۹۸۵,۸۹۹,۷۹۱,۴۴۴</td>
+                            <td class="d-none d-sm-table-cell">۵۱,۷۰۸,۶۳۵,۷۸۹,۵۱۰</td>
+                            <td class="d-none d-sm-table-cell">۴۸,۲۷۷,۲۶۴,۰۰۱,۹۳۴</td>
+                            <td class="d-none d-sm-table-cell">۰</td>
+                            <td class="d-none d-sm-table-cell">۰</td>
+                            <td class="d-none d-sm-table-cell">۱۹,۰۱۰</td>
+                            <td class="d-none d-sm-table-cell">۱۴,۷۵۵,۴۹۹</td>
+                            <td class="d-none d-sm-table-cell">۲,۷۹۵,۱۰۰,۰۰۰</td>
+                            <td class="d-none d-sm-table-cell">۳,۳۲۹,۹۲۵,۷۸۳</td>
+                            <td class="d-none d-sm-table-cell">۶,۱۲۵,۰۲۵,۷۸۳</td>
+                            <td class="d-none d-sm-table-cell" dir="rtl">۰.۹۳</td>
+                            <td class="d-none d-sm-table-cell">۱,۰۸۷</td>
+                        </tr>
+                        <tr>
+                            <td class="d-none d-lg-table-cell">۱۵</td>
+                            <td>۱۴۰۲/۰۶/۲۶</td>
+                            <td class="d-none d-md-table-cell">۱۸,۹۰۲</td>
+                            <td class="d-none d-xl-table-cell">۱۸,۶۹۷</td>
+                            <td class="d-none d-md-table-cell">۱۴,۴۸۶</td>
+                            <td class="d-none d-sm-table-cell">۱۰۰,۷۰۹,۹۶۹,۹۰۲,۰۹۵</td>
+                            <td class="d-none d-sm-table-cell">۵۲,۲۵۹,۱۹۲,۲۲۹,۹۰۳</td>
+                            <td class="d-none d-sm-table-cell">۴۸,۴۵۰,۷۷۷,۶۷۲,۱۹۲</td>
+                            <td class="d-none d-sm-table-cell">۰</td>
+                            <td class="d-none d-sm-table-cell">۰</td>
+                            <td class="d-none d-sm-table-cell">۰</td>
+                            <td class="d-none d-sm-table-cell">۰</td>
+                            <td class="d-none d-sm-table-cell">۲,۷۹۵,۱۰۰,۰۰۰</td>
+                            <td class="d-none d-sm-table-cell">۳,۳۴۴,۶۶۲,۲۷۲</td>
+                            <td class="d-none d-sm-table-cell">۶,۱۳۹,۷۶۲,۲۷۲</td>
+                            <td class="d-none d-sm-table-cell" dir="rtl">۰.۹۳</td>
+                            <td class="d-none d-sm-table-cell">۱,۰۴۸</td>
+                        </tr>
+                        <tr>
+                            <td class="d-none d-lg-table-cell">۱۶</td>
+                            <td>۱۴۰۲/۰۶/۲۵</td>
+                            <td class="d-none d-md-table-cell">۱۸,۷۷۱</td>
+                            <td class="d-none d-xl-table-cell">۱۸,۵۶۹</td>
+                            <td class="d-none d-md-table-cell">۱۴,۴۷۸</td>
+                            <td class="d-none d-sm-table-cell">۱۰۰,۳۲۵,۱۸۶,۱۸۷,۹۷۸</td>
+                            <td class="d-none d-sm-table-cell">۵۱,۹۰۱,۱۶۵,۸۱۳,۹۶۲</td>
+                            <td class="d-none d-sm-table-cell">۴۸,۴۲۴,۰۲۰,۳۷۴,۰۱۶</td>
+                            <td class="d-none d-sm-table-cell">۰</td>
+                            <td class="d-none d-sm-table-cell">۰</td>
+                            <td class="d-none d-sm-table-cell">۰</td>
+                            <td class="d-none d-sm-table-cell">۰</td>
+                            <td class="d-none d-sm-table-cell">۲,۷۹۵,۱۰۰,۰۰۰</td>
+                            <td class="d-none d-sm-table-cell">۳,۳۴۴,۶۶۲,۲۷۲</td>
+                            <td class="d-none d-sm-table-cell">۶,۱۳۹,۷۶۲,۲۷۲</td>
+                            <td class="d-none d-sm-table-cell" dir="rtl">۰.۹۳</td>
+                            <td class="d-none d-sm-table-cell">۱,۰۴۸</td>
+                        </tr>
+                        <tr>
+                            <td class="d-none d-lg-table-cell">۱۷</td>
+                            <td>۱۴۰۲/۰۶/۲۴</td>
+                            <td class="d-none d-md-table-cell">۱۸,۷۷۵</td>
+                            <td class="d-none d-xl-table-cell">۱۸,۵۷۳</td>
+                            <td class="d-none d-md-table-cell">۱۴,۴۷۰</td>
+                            <td class="d-none d-sm-table-cell">۱۰۰,۳۱۰,۹۳۰,۳۱۴,۹۹۸</td>
+                            <td class="d-none d-sm-table-cell">۵۱,۹۱۳,۶۶۷,۲۳۹,۱۵۸</td>
+                            <td class="d-none d-sm-table-cell">۴۸,۳۹۷,۲۶۳,۰۷۵,۸۴۰</td>
+                            <td class="d-none d-sm-table-cell">۰</td>
+                            <td class="d-none d-sm-table-cell">۰</td>
+                            <td class="d-none d-sm-table-cell">۰</td>
+                            <td class="d-none d-sm-table-cell">۰</td>
+                            <td class="d-none d-sm-table-cell">۲,۷۹۵,۱۰۰,۰۰۰</td>
+                            <td class="d-none d-sm-table-cell">۳,۳۴۴,۶۶۲,۲۷۲</td>
+                            <td class="d-none d-sm-table-cell">۶,۱۳۹,۷۶۲,۲۷۲</td>
+                            <td class="d-none d-sm-table-cell" dir="rtl">۰.۹۳</td>
+                            <td class="d-none d-sm-table-cell">۱,۰۴۸</td>
+                        </tr>
+                        <tr>
+                            <td class="d-none d-lg-table-cell">۱۸</td>
+                            <td>۱۴۰۲/۰۶/۲۳</td>
+                            <td class="d-none d-md-table-cell">۱۸,۷۷۷</td>
+                            <td class="d-none d-xl-table-cell">۱۸,۵۷۵</td>
+                            <td class="d-none d-md-table-cell">۱۴,۴۶۲</td>
+                            <td class="d-none d-sm-table-cell">۱۰۰,۲۹۰,۱۱۸,۱۵۶,۸۵۹</td>
+                            <td class="d-none d-sm-table-cell">۵۱,۹۱۹,۶۱۲,۳۷۹,۱۹۵</td>
+                            <td class="d-none d-sm-table-cell">۴۸,۳۷۰,۵۰۵,۷۷۷,۶۶۴</td>
+                            <td class="d-none d-sm-table-cell">۰</td>
+                            <td class="d-none d-sm-table-cell">۰</td>
+                            <td class="d-none d-sm-table-cell">۴۲,۸۶۳</td>
+                            <td class="d-none d-sm-table-cell">۸۰,۳۷۳</td>
+                            <td class="d-none d-sm-table-cell">۲,۷۹۵,۱۰۰,۰۰۰</td>
+                            <td class="d-none d-sm-table-cell">۳,۳۴۴,۶۶۲,۲۷۲</td>
+                            <td class="d-none d-sm-table-cell">۶,۱۳۹,۷۶۲,۲۷۲</td>
+                            <td class="d-none d-sm-table-cell" dir="rtl">۰.۹۳</td>
+                            <td class="d-none d-sm-table-cell">۱,۰۴۸</td>
+                        </tr>
+                        <tr>
+                            <td class="d-none d-lg-table-cell">۱۹</td>
+                            <td>۱۴۰۲/۰۶/۲۲</td>
+                            <td class="d-none d-md-table-cell">۱۸,۷۸۸</td>
+                            <td class="d-none d-xl-table-cell">۱۸,۵۸۶</td>
+                            <td class="d-none d-md-table-cell">۱۴,۴۵۰</td>
+                            <td class="d-none d-sm-table-cell">۱۰۰,۲۸۱,۴۷۷,۸۱۳,۳۶۴</td>
+                            <td class="d-none d-sm-table-cell">۵۱,۹۵۰,۵۶۵,۹۶۳,۴۶۴</td>
+                            <td class="d-none d-sm-table-cell">۴۸,۳۳۰,۹۱۱,۸۴۹,۹۰۰</td>
+                            <td class="d-none d-sm-table-cell">۰</td>
+                            <td class="d-none d-sm-table-cell">۰</td>
+                            <td class="d-none d-sm-table-cell">۱۶,۰۸۲</td>
+                            <td class="d-none d-sm-table-cell">۶,۰۰۰</td>
+                            <td class="d-none d-sm-table-cell">۲,۷۹۵,۱۰۰,۰۰۰</td>
+                            <td class="d-none d-sm-table-cell">۳,۳۴۴,۶۹۹,۷۸۲</td>
+                            <td class="d-none d-sm-table-cell">۶,۱۳۹,۷۹۹,۷۸۲</td>
+                            <td class="d-none d-sm-table-cell" dir="rtl">۰.۹۳</td>
+                            <td class="d-none d-sm-table-cell">۱,۰۵۰</td>
+                        </tr>
+                        <tr>
+                            <td class="d-none d-lg-table-cell">۲۰</td>
+                            <td>۱۴۰۲/۰۶/۲۱</td>
+                            <td class="d-none d-md-table-cell">۱۸,۶۹۴</td>
+                            <td class="d-none d-xl-table-cell">۱۸,۴۹۴</td>
+                            <td class="d-none d-md-table-cell">۱۴,۴۳۸</td>
+                            <td class="d-none d-sm-table-cell">۹۹,۹۸۲,۷۹۷,۴۵۸,۳۲۰</td>
+                            <td class="d-none d-sm-table-cell">۵۱,۶۹۲,۱۶۷,۵۶۹,۷۲۰</td>
+                            <td class="d-none d-sm-table-cell">۴۸,۲۹۰,۶۲۹,۸۸۸,۶۰۰</td>
+                            <td class="d-none d-sm-table-cell">۰</td>
+                            <td class="d-none d-sm-table-cell">۰</td>
+                            <td class="d-none d-sm-table-cell">۱۵,۱۱۱</td>
+                            <td class="d-none d-sm-table-cell">۱۰۷,۱۲۱,۴۵۱</td>
+                            <td class="d-none d-sm-table-cell">۲,۷۹۵,۱۰۰,۰۰۰</td>
+                            <td class="d-none d-sm-table-cell">۳,۳۴۴,۶۸۹,۷۰۰</td>
+                            <td class="d-none d-sm-table-cell">۶,۱۳۹,۷۸۹,۷۰۰</td>
+                            <td class="d-none d-sm-table-cell" dir="rtl">۰.۹۳</td>
+                            <td class="d-none d-sm-table-cell">۱,۰۴۸</td>
+                        </tr>
+
+            </tbody>
+            <tfoot>
+            <tr>
+                        <td colspan="21" style="text-align: left">
+                            <a id="allNavLink" href='/Reports/FundNAVList' target="_blank">
+                                مشاهده همه
+                            </a>
+
+                        </td>
+
+
+            </tr>
+            </tfoot>
+        </table>
+    </div>
+</div>
+
+
+<script type="text/javascript">
+    var type = "getnavtotal";
+    var inProgress = false;
+    var dataLoaded = false;
+    var potfolioId = 1;
+    var topFiveSelector = '#chartsNav .title_item.menu-item-6';
+
+    $(document).ready(function () {
+      potfolioId = $("#basketId").val();
+      window.onscroll = function () {
+          if ($('#divCharts').offset().top - $(window).scrollTop() < 600 && !inProgress && !dataLoaded) {
+              NAVChartAjax();
+              }
+      };
+      $('#basketId').on('change', function () {
+          potfolioId = this.value;
+          var newUrl = "/Reports/FundNAVList?basketId=" + potfolioId;
+          $("#allNavLink").attr('href', newUrl);
+          NAVChartAjax();
+          getNavListAjax();
+      });
+
+        $('#divCharts').cycle({
+            fx: 'scrollLeft',
+            speed: 500,
+            delay: 100,
+            pager: '#chartsNav',
+            slideExpr: 'div',
+            pagerAnchorBuilder: function (idx) {
+//                console.log('idx', idx);
+                if (idx == 0) {
+                            
+                    return '<li><a href="#"><span class="title_item menu-item-' + (idx + 1) + '"></span></a><div id="multiChart"> <table class="subTable" cellspacing="0"> <thead> <tr> <th id="BaseTitle" colspan="3">صندوق</th> </tr> <tr> <th id="title1"></th> <th id="title3"></th> <th id="title2"></th> </tr> </thead> <tbody> <tr> <td class="" ChartType="getnav3" id="chart3"></td> <td class="" ChartType="getnav2" id="chart2"></td> <td id="chart1" class="selected" ChartType="getnav"></td> </tr> </tbody> </table> <table class="subTable" cellspacing="0"> <thead> <tr> <th id="SuperTitle" colspan="3">ممتاز و عادی</th> </tr> <tr> <th id="title4"></th> <th id="title6">قیمت واحد عادی</th> <th id="title5"></th> </tr> </thead> <tbody> <tr> <td class="" ChartType="getnav5" id="chart5"></td> <td class="" ChartType="getnav6" id="chart6"></td> <td class="" ChartType="getnav4" id="chart4"></td> </tr> </tbody> </table> </div></li>';
+                            
+
+                } else {
+                    return '<li><a href="#"><span class="title_item menu-item-' + (idx + 1) + '"></span></a></li>';
+                }
+            },
+            onPagerEvent: function (idx) {
+                if (idx == 0) {
+                    $('#multiChart').slideDown(500);
+                } else {
+                    $('#multiChart').slideUp(300);
+                }
+            },
+            updateActivePagerLink: function (pager, currSlideIndex) {
+                $(pager).find('a').removeClass('selected').filter('a:eq(' + currSlideIndex + ')').addClass('selected');
+                $(pager).find('span').removeClass('selected').filter('span:eq(' + currSlideIndex + ')').addClass('selected');
+            }
+        });
+        $('#divCharts').cycle('pause');
+
+        if ($(topFiveSelector).length) {
+            $(topFiveSelector).text('پنج صنعت برتر');
+            $(topFiveSelector).css({
+                "background": "none",
+                "color": "#616161"
+            });
+        }
+
+        if ('True' === 'False') {
+            $('#chartsNav li:nth-child(2)').hide();
+        }
+
+        if ('True' === 'False')
+            $('#chartsNav li:nth-child(3)').hide();
+
+        if ('' === '' ||
+            '' == null ||
+            '' === 'False') {
+            $('#chartsNav li:nth-child(6)').hide();
+        }
+
+
+      // قیمت‌های روزانه صندوق
+      function getNavListAjax() {
+        $(".nav-loading-mask").show();
+          $.ajax({
+            type: "GET",
+            url: '/Reports/AjaxFundNavList',
+            data: { "basketId": potfolioId },
+            success: function (msg) {
+              if (msg) {
+                $(".nav-loading-mask").hide();
+                var str = '';
+                for (var i = 0; i < msg.length; i++) {
+                  str +=
+                  `<tr>
+                    <td class="d-none d-lg-table-cell">${ convertToPersianDigits((i + 1).toString())}</td>
+                    <td class="ltr">${ convertToPersianDigits(msg[i].JalaliDate) }</td>
+                    <td class="ltr">${ convertToPersianDigits(addCommas(msg[i].SubscriptionNAV)) }</td>
+                    <td class="ltr">${ convertToPersianDigits(addCommas(msg[i].CancelNAV)) }</td>
+                    <td class="d-none d-sm-table-cell ltr">${ convertToPersianDigits(addCommas(msg[i].EsmiNAV - msg[i].CancelNAV)) }</td>
+                    <td class="d-none d-md-table-cell ltr">${ convertToPersianDigits(addCommas(msg[i].TotalSubscriptionUnit)) }</td>
+                    <td class="d-none d-xl-table-cell ltr">${ convertToPersianDigits(addCommas(msg[i].TotalSubscription)) }</td>
+                    <td class="d-none d-md-table-cell ltr">${ convertToPersianDigits(addCommas(msg[i].TotalCancelUnit)) }</td>
+                    <td class="d-none d-xl-table-cell ltr">${ convertToPersianDigits(addCommas(msg[i].TotalCancel)) }</td>
+                    <td class="d-none d-md-table-cell ltr">${ convertToPersianDigits(addCommas(msg[i].TotalUnit)) }</td>
+                    <td class="d-none d-sm-table-cell ltr">${ convertToPersianDigits(addCommas(msg[i].TotalNetAssetValue)) }</td>
+                  </tr>`;
+                }
+                $("#tblNavList tbody").html(str);
+              }
+            },
+            failure: function () {
+              $(".nav-loading-mask").hide();
+            }
+          });
+      };
+
+        // قیمت‌های روزانه صندوق
+        function NAVChartAjax() {
+          inProgress = true;
+          $(".loading-mask").show();
+          $.ajax({
+            type: "GET",
+            url: '/Chart/TotalNAV',
+            data: { "type": type, "basketId": potfolioId },
+            success: function (msg) {
+              var ajr = msg;
+              if (ajr) {
+                dataLoaded = true;
+                inProgress = false;
+                $(".loading-mask").hide();
+                NAVChart(ajr, msg, 'highChartContainerA');
+                $("#chartsNav li:nth-child(1)").click(function () {
+                  window.chartA.setSize(parseInt($(window.chartA.container).css("width")), parseInt($(window.chartA.container).css("height")), false);
+                });
+              }
+              sectorChartAjax();
+              stockChartAjax();
+              NetAssetAjax();
+              FundVsBourse();
+              topFiveIndustry();
+              },
+            failure: function () {
+              sectorChartAjax();
+              stockChartAjax();
+              NetAssetAjax();
+              FundVsBourse();
+              topFiveIndustry();
+            }
+          });
+        };
+
+        // ارزش خالص دارایی‌ها
+        function NetAssetAjax() {
+            $.ajax({
+                type: "GET",
+                url: '/Chart/CombinationOfFundAssets',
+                data: { "type": type, "basketId": potfolioId },
+                success: function (msg) {
+                    var ajr = msg;
+                    if (ajr) {
+                        NAVAssetChart(ajr, 'success', msg, 'highChartContainerD', 'getkhales');
+                        $("#chartsNav li:nth-child(4)").click(function() {window.chartK.setSize(parseInt($(window.chartK.container).css("width")), parseInt($(window.chartK.container).css("height")), false);
+                        });
+                    }
+                }
+            });
+        };
+
+        // مقایسه بازده صندوق با بازار
+        function FundVsBourse() {
+            $.ajax({
+                type: "GET",
+                url: '/Chart/CompaireFundAndBourseEfficiency',
+                data: { "type": type, "basketId": potfolioId },
+                success: function (msg) {
+                    var ajr = msg;
+                    if (ajr) {
+                        NAVCompareChart(ajr, msg, 'highChartContainerE');
+                        $("#chartsNav li:nth-child(5)").click(function() {window.chartP.setSize(parseInt($(window.chartP.container).css("width")), parseInt($(window.chartP.container).css("height")), false);
+                        });
+                    }
+                }
+            });
+        };
+
+        // ترکیب صنایع در سبد سهام
+        function sectorChartAjax() {
+            $.ajax({
+                type: "GET",
+                url: '/Chart/IndustryCompositions',
+                data: { "type": type, "basketId": potfolioId },
+                success: function (msg) {
+
+                    var ajr = msg;
+                    if (ajr) {
+                        SectorChart(ajr, 'success', msg);
+                        $("#chartsNav li:nth-child(3)").click(function () { window.chartC.setSize(parseInt($(window.chartC.container).css("width")), parseInt($(window.chartC.container).css("height")), false) })
+                    }
+                },
+                error: function (xhr, ajaxOptions, thrownError) {
+                    console.log(xhr.responseText);
+                    console.log(xhr.status);
+                    console.log(thrownError);
+                }
+            });
+        };
+
+        // ترکیب دارایی‌های صندوق
+        function stockChartAjax() {
+            $.ajax({
+                type: "GET",
+                url: '/Chart/AssetCompositions',
+                data: { "type": type, "basketId": potfolioId },
+                success: function (msg) {
+                    //console.log('result: ' + JSON.stringify(msg));
+                    var ajr = msg;
+                    if (ajr) {
+                        GetStockChart(ajr, 'success', msg);
+                        $("#chartsNav li:nth-child(2)").click(function () { window.chartC.setSize(parseInt($(window.chartC.container).css("width")), parseInt($(window.chartC.container).css("height")), false) })
+                    }
+                }
+            });
+        };
+        //NAVChartAjax();
+
+
+        topFiveIndustry = () => {
+            $.ajax({
+                type: "GET",
+                url: '/Chart/TopFiveIndustry',
+                data: { "type": type, "basketId": potfolioId },
+                success: function (msg) {
+                    if (msg) {
+                        topFiveIndustryChart(msg);
+                        $("#chartsNav li:nth-child(6)").click(function () {
+                            window.chartF.setSize(parseInt($(window.chartF.container).css("width")), parseInt($(window.chartF.container).css("height")), false)
+                        })
+                    }
+                },
+                error: function (xhr, ajaxOptions, thrownError) {
+                    console.log(xhr.responseText);
+                    console.log(xhr.status);
+                    console.log(thrownError);
+                }
+            });
+        }
+
+    });
+</script>
+
+</div>
+<input type="hidden" value="(value) id="isLeveragedMode" />
+</div>
+  </div>
+</div>
+<div class="row footer">
+  <div class="container-fluid">
+    <div class="row footer-box">
+ 
+
+<div class="col-lg-2 footer-group">
+    <span class="footer-group-title">سایت‌های مرتبط</span>
+    <ul>
+        <li> 
+            <a href='http://www.seo.ir/' target="_blank">سازمان بورس اوراق بهادار</a>
+        </li>
+        <li>
+            <a href='http://www.fipiran.com/' target="_blank">مرکز پردازش اطلاعات مالی</a>
+        </li>
+        <li>
+            <a href='http://www.tsetmc.com/' target="_blank">مدیریت فن آوری بورس تهران</a>
+        </li>
+        <li>
+            <a href='http://www.sena.ir/' target="_blank">پایگاه اطلاع رسانی بازار سرمایه</a>
+        </li>
+    </ul>
+</div>
+<div class="col-lg-2 footer-group">
+    <span class="footer-group-title">ارتباط با صندوق</span>
+    <ul>
+        <li>
+            <a href="/AboutFund/FundContactUs" target="_blank">ارتباط با صندوق</a>
+        </li>
+        <li>
+            <a href="/AboutFund/FundBranchs" target="_blank">شعبه‌های صندوق</a>
+        </li>
+    </ul>
+</div>
+<div class="col-lg-2 footer-group">
+    <span class="footer-group-title">اخبار</span>
+    <ul>
+        <li>
+            <a href="/News/NewsList" target="_blank">لیست خبرها</a>
+        </li>
+        <li>
+            <a href="/Reports/FundMeeting" target="_blank">مجامع صندوق</a>
+        </li>
+    </ul>
+</div>
+<div class="col-lg-2 footer-group">
+    <span class="footer-group-title">گزارش‌ها</span>
+    <ul>
+        <li>
+            <a href="/Reports/FundFinancialStatements" target="_blank">صورت‌های مالی صندوق</a>
+        </li>
+                <li>
+                    <a href="/Reports/FundAssetDistributionForDifferentPeriods" target="_blank">ترکیب دارایی‌های دوره‌ای</a>
+                </li>
+
+     </ul>
+</div>
+<div class="col-lg-2 footer-group">
+    <span class="footer-group-title">درباره صندوق</span>
+    <ul>
+        <li>
+            <a href="/AboutFund/FundInvestmentHelp" target="_blank">راهنمای سرمایه‌گذاری</a>
+        </li>
+        <li>
+            <a href="/AboutFund/FundStatute" target="_blank">اساسنامه صندوق</a>
+        </li>
+        <li>
+            <a href="/AboutFund/FundProspectus" target="_blank">امیدنامه صندوق</a>
+        </li>
+    </ul>
+</div>
+
+<div class="col-lg-2 copyright">
+    <div class="tadbirLogo"></div>
+    <div class="text farsi">
+        کلیه حقوق این سایت متعلق به
+		<a href='Pillar/Manager'>سبدگردان کاریزما </a> می‌باشد.
+    </div>
+    <div class="text ltr">
+        Copyright © 2020 <a href='http://ahrom.charisma.ir'> </a>. All rights reserved.
+    </div>
+    <div class="text ltr">
+        version number:  9.2.2
+    </div>
+    <div class="mt-2 mx-auto"></div>
+</div>
+
+
+    </div>
+  </div>
+</div>
+
+    </div>
+
+    <script src="/Scripts/jquery.mCustomScrollbar.concat.min.js" type="text/javascript"></script>
+    <script src="/Scripts/highstock.js" type="text/javascript"></script>
+    <script src="/Scripts/plugins.js" type="text/javascript"></script>
+    <script src="/Scripts/common.js" type="text/javascript"></script>
+    <script src="/Scripts/highcharts-localization.js" type="text/javascript"></script>
+    <script src="/Scripts/jalali.js" type="text/javascript"></script>
+    <script src="/Scripts/bootstrap.min.js" type="text/javascript"></script>
+    <script src="/Scripts/inputmask.min.js" type="text/javascript"></script>
+    <script src="/Scripts/jquery.inputmask.min.js" type="text/javascript"></script>
+    <script src="/Scripts/virtualKeyboard.js" type="text/javascript"></script>
+    <script src="/Scripts/persian-date.js" type="text/javascript"></script>
+    <script src="/Scripts/persian-datePicker.js" type="text/javascript"></script>
+    <script>
+        $(document).ready(function () {
+            $(".myScroll").mCustomScrollbar({
+                theme: "minimal"
+            });
+            $(".nav-item.dropdown").click(function () {
+                $(this).toggleClass('open');
+            });
+        });
+
+    </script>
+    
+  
+            <script src="/Scripts/homePageScriptsForLeveraged.js"></script>
+
+
+
+    <script src="/Scripts/script.js" type="text/javascript"></script>
+</body>
+</html>
