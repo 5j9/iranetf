@@ -1,6 +1,8 @@
+from asyncio import as_completed, run
+
 from aiohttp import ClientConnectorCertificateError
-from iranetf import load_dataset, RayanHamafza, MabnaDP
-from asyncio import run, as_completed
+
+from iranetf import MabnaDP, RayanHamafza, load_dataset
 
 ds = load_dataset()
 

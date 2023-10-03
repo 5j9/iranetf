@@ -8,7 +8,8 @@ from iranetf import (
     LiveNAVPS,
     MabnaDP,
     RayanHamafza,
-    TadbirPardaz, TPLiveNAVPS,
+    TadbirPardaz,
+    TPLiveNAVPS,
 )
 
 tadbir = TadbirPardaz('https://modirfund.ir/')
