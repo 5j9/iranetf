@@ -16,14 +16,14 @@ requires-python = ">= 3.10"
 dynamic = ["version"]
 dependencies = [
     "aiohttp[speedups]",
-    "aiohutils >= 0.10.0",
+    "aiohutils >= 0.11.0",
     "jdatetime >= 4.1.0",
     "pandas >= 2.1.0",
     "pyarrow",  # pd.options.future.infer_string = True
 ]
 [project.optional-dependencies]
 test = [
-    "aiohutils[test] >= 0.10.0",
+    "aiohutils[test] >= 0.11.0",
 ]
 
 [project.readme]
