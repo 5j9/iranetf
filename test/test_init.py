@@ -8,7 +8,7 @@ from iranetf import (
     LiveNAVPS,
     MabnaDP,
     RayanHamafza,
-    TadbirPardaz,
+    TadbirPardaz, TPLiveNAVPS,
 )
 
 tadbir = TadbirPardaz('https://modirfund.ir/')
@@ -18,7 +18,7 @@ rayan = RayanHamafza('https://yaghootfund.ir/')
 @file('modir_live.json')
 async def test_tadbir_live_navps():
     d = await tadbir.live_navps()
-    assert_dict_type(d, LiveNAVPS)
+    assert_dict_type(d, TPLiveNAVPS)
 
 
 @file('almas_live.json')
@@ -48,8 +48,8 @@ async def test_navps_history_rayan():
 
 @file('icpfvc_navps_date_space.json')
 async def test_navps_date_ends_with_space():
-    d = await TadbirPardaz('http://www.icpfvc.ir/').live_navps()
-    assert_dict_type(d, LiveNAVPS)
+    d = await TadbirPardaz('https://icpfvc.ir/').live_navps()
+    assert_dict_type(d, TPLiveNAVPS)
 
 
 mabna_dp = MabnaDP('https://kianfunds6.ir/')

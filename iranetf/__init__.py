@@ -59,10 +59,14 @@ _ETF_TYPES = {  # numbers are according to fipiran
 }
 
 
-class LiveNAVPS(_TypedDict, total=True):
+class LiveNAVPS(_TypedDict):
     issue: int
     cancel: int
     date: _datetime
+
+
+class TPLiveNAVPS(LiveNAVPS):
+    nominal: int
 
 
 class BaseSite(_ABC):
@@ -200,6 +204,7 @@ class RayanHamafza(BaseSite):
         return df
 
 
+# noinspection PyAbstractClass
 class BaseTadbirPardaz(BaseSite):
     # last checked version = '9.2.2'
 
@@ -212,12 +217,13 @@ class BaseTadbirPardaz(BaseSite):
 
 class TadbirPardaz(BaseTadbirPardaz):
 
-    async def live_navps(self) -> LiveNAVPS:
+    async def live_navps(self) -> TPLiveNAVPS:
         d = await self._json('Fund/GetETFNAV')
         # the json is escaped twice, so it needs to be loaded again
         d = _loads(d)
         d['issue'] = _fa_int(d.pop('subNav'))
         d['cancel'] = _fa_int(d.pop('cancelNav'))
+        d['nominal'] = _fa_int(d.pop('esmiNav'))
 
         date = d.pop('publishDate')
         try:
