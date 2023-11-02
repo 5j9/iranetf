@@ -115,7 +115,6 @@ def _fa_int(s: str) -> int:
 
 
 class MabnaDP(BaseSite):
-
     async def _json(
         self, path: str, df: bool = False
     ) -> list | dict | _DataFrame:
@@ -212,11 +211,10 @@ class BaseTadbirPardaz(BaseSite):
         content = await _read(self.url)
         start = content.find(b'version number:')
         end = content.find(b'\n', start)
-        return content[start + 15:end].strip().decode()
+        return content[start + 15 : end].strip().decode()
 
 
 class TadbirPardaz(BaseTadbirPardaz):
-
     async def live_navps(self) -> TPLiveNAVPS:
         d = await self._json('Fund/GetETFNAV')
         # the json is escaped twice, so it needs to be loaded again
@@ -414,7 +412,9 @@ async def _add_ins_code(new_items: _DataFrame) -> None:
     _info('searching names on tsetmc to find their insCode')
     results = await _gather(*[search(name) for name in names_without_code])
     ins_codes = [(None if len(r) != 1 else r[0]['insCode']) for r in results]
-    new_items['insCode'] = ins_codes
+    new_items['insCode'] = _Series(
+        ins_codes, index=names_without_code.index, dtype='string'
+    )
 
 
 async def _fipiran_data(ds) -> _DataFrame:
