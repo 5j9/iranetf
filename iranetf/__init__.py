@@ -381,10 +381,9 @@ async def _add_url_and_type(
 ):
     domains_to_be_checked = fipiran_df['domain']
     if known_domains is not None:
-        selector = ~domains_to_be_checked.isin(known_domains)
-        domains_to_be_checked = domains_to_be_checked[selector]
-    else:
-        selector = slice(None)
+        domains_to_be_checked = domains_to_be_checked[
+            ~domains_to_be_checked.isin(known_domains)
+        ]
 
     _info(f'checking site types of {len(domains_to_be_checked)} domains')
     # there will be a lot of redirection warnings, let's silent them
@@ -397,7 +396,7 @@ async def _add_url_and_type(
         )
 
     url, site_type = zip(*list_of_tuples)
-    fipiran_df.loc[selector, ['url', 'site_type']] = _DataFrame(
+    fipiran_df.loc[:, ['url', 'site_type']] = _DataFrame(
         {'url': url, 'site_type': site_type}, index=domains_to_be_checked.index
     )
 
