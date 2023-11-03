@@ -42,8 +42,7 @@ namespaces = false
 [tool.setuptools.dynamic.version]
 attr = "iranetf.__version__"
 
-
-[tool.isort]
-profile = "black"
-line_length = 79
-combine_as_imports = true
+[tool.ruff]
+format.quote-style = 'single'
+line-length = 79
+isort.combine-as-imports = true

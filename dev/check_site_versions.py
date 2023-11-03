@@ -15,7 +15,7 @@ async def check_version(site):
 async def main():
     # RayanHamafza does not have version
     sites = [s for s in ds.site if type(s) is not RayanHamafza]
-    coros =  [check_version(s) for s in sites]
+    coros = [check_version(s) for s in sites]
     for future in as_completed(coros):
         try:
             site, version = await future

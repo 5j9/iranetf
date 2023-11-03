@@ -119,6 +119,7 @@ async def test_leveraged_tadbir_version():
 async def test_mabna_version():
     assert (await mabna_dp.version()) == '2.5'
 
+
 @file('old_mabna_version.html')
 async def test_old_mabna_version():
     assert (await MabnaDP('https://gitidamavandfund.ir/').version()) == '2.11'
