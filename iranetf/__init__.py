@@ -66,7 +66,16 @@ class LiveNAVPS(_TypedDict):
 
 
 class TPLiveNAVPS(LiveNAVPS):
+    dailyTotalNetAssetValue: int
+    dailyTotalUnit: int
+    finalCancelNAV: int
+    finalEsmiNAV: int
+    finalSubscriptionNAV: int
+    maxUnit: str
+    navDate: str
     nominal: int
+    totalNetAssetValue: int
+    totalUnit: int
 
 
 class BaseSite(_ABC):
@@ -110,7 +119,7 @@ class BaseSite(_ABC):
         return ds.loc[l18, 'site']
 
 
-def _fa_int(s: str) -> int:
+def _comma_int(s: str) -> int:
     return int(s.replace(',', ''))
 
 
@@ -125,8 +134,8 @@ class MabnaDP(BaseSite):
         j['date'] = _jdatetime.strptime(
             j['date_time'], '%H:%M %Y/%m/%d'
         ).togregorian()
-        j['issue'] = _fa_int(j.pop('purchase_price'))
-        j['cancel'] = _fa_int(j.pop('redemption_price'))
+        j['issue'] = _comma_int(j.pop('purchase_price'))
+        j['cancel'] = _comma_int(j.pop('redemption_price'))
         return j
 
     async def navps_history(self) -> _DataFrame:
@@ -219,9 +228,17 @@ class TadbirPardaz(BaseTadbirPardaz):
         d = await self._json('Fund/GetETFNAV')
         # the json is escaped twice, so it needs to be loaded again
         d = _loads(d)
-        d['issue'] = _fa_int(d.pop('subNav'))
-        d['cancel'] = _fa_int(d.pop('cancelNav'))
-        d['nominal'] = _fa_int(d.pop('esmiNav'))
+
+        d['issue'] = d.pop('subNav')
+        d['cancel'] = d.pop('cancelNav')
+        d['nominal'] = d.pop('esmiNav')
+
+        for k, t in TPLiveNAVPS.__annotations__.items():
+            if t is int:
+                try:
+                    d[k] = _comma_int(d[k])
+                except KeyError:
+                    _w.warn(f'key {k!r} not found')
 
         date = d.pop('publishDate')
         try:
@@ -289,7 +306,7 @@ class LeveragedTadbirPardaz(BaseTadbirPardaz):
         d = _loads(d)
 
         date = d.pop('PublishDate')
-        d = {k: _fa_int(v) for k, v in d.items()}
+        d = {k: _comma_int(v) for k, v in d.items()}
 
         try:
             date = _jdatetime.strptime(date, '%Y/%m/%d %H:%M:%S')
