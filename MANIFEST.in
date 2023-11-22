@@ -1,2 +1,2 @@
-prune test
+prune tests
 include iranetf/sites/dataset.csv
