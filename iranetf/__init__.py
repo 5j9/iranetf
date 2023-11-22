@@ -411,9 +411,7 @@ async def _add_ins_code(new_items: _DataFrame) -> None:
     _info('searching names on tsetmc to find their insCode')
     results = await _gather(*[search(name) for name in names_without_code])
     ins_codes = [(None if len(r) != 1 else r[0]['insCode']) for r in results]
-    new_items['insCode'] = _Series(
-        ins_codes, index=names_without_code.index, dtype='string'
-    )
+    new_items.loc[names_without_code.index, 'insCode'] = ins_codes
 
 
 async def _fipiran_data(ds) -> _DataFrame:
