@@ -6,7 +6,6 @@ import config
 import iranetf
 from iranetf import update_dataset
 
-
 logging.basicConfig(
     format='%(pathname)s:%(lineno)d\n%(asctime)s %(levelname)s %(message)s',
     datefmt='%H:%M:%S',
