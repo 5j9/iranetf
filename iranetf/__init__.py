@@ -178,8 +178,8 @@ class RayanHamafza(BaseSite):
 
     async def live_navps(self) -> LiveNAVPS:
         d = await self._json('FundLiveData')
-        d['issue'] = d.pop('SellNAVPerShare')
-        d['cancel'] = d.pop('PurchaseNAVPerShare')
+        d['issue'] = d.pop('PurchaseNAVPerShare')
+        d['cancel'] = d.pop('SellNAVPerShare')
         d['date'] = _jdatetime.strptime(
             f"{d.pop('JalaliDate')} {d.pop('Time')}", '%Y/%m/%d %H:%M'
         ).togregorian()
