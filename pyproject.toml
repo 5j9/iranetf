@@ -16,14 +16,14 @@ requires-python = ">= 3.12"
 dynamic = ["version"]
 dependencies = [
     "aiohttp[speedups]",
-    "aiohutils >= 0.11.0",
+    "aiohutils >= 0.12.0",
     "jdatetime >= 4.1.0",
     "pandas >= 2.1.0",
     "pyarrow",  # pd.options.future.infer_string = True
 ]
 [project.optional-dependencies]
 test = [
-    "aiohutils[test] >= 0.11.0",
+    "aiohutils[test] >= 0.12.0",
 ]
 
 [project.readme]
@@ -52,9 +52,9 @@ extend-select = [
 ]
 ignore = [
     'UP027',  # list comprehensions are faster than generator expressions
+    'E721',  # Do not compare types, use `isinstance()`; I know what I'm doing.
 ]
 
 
 [tool.pytest.ini_options]
 addopts = '--quiet --tb=short'
-asyncio_mode = 'auto'
