@@ -101,7 +101,7 @@ async def test_rayanhamafza_fund_profit():
     ]
 
 
-def test_from_l18(aiolib):
+def test_from_l18():
     assert BaseSite.from_l18('استیل').url == 'https://mofidsectorfund.com/'
 
 
