@@ -282,6 +282,24 @@ class TadbirPardaz(BaseTadbirPardaz):
         return df
 
 
+class TadbirPardazMultiNAV(TadbirPardaz):
+    """Same as TadbirPardaz, only send basketId to request params."""
+
+    __slots__ = 'basket_id'
+
+    def __init__(self, url: str):
+        """Note: the url ends with #<basket_id> where basket_id is an int."""
+        url, _, self.basket_id = url.partition('#')
+        super().__init__(url)
+
+    async def _json(
+        self, path: str, df: bool = False, cookies: dict = None
+    ) -> list | dict | str | _DataFrame:
+        return await super()._json(
+            f'{path}?basketId={self.basket_id}', df, cookies
+        )
+
+
 class LeveragedTadbirPardazLiveNAVPS(LiveNAVPS):
     BaseUnitsCancelNAV: int
     BaseUnitsTotalNetAssetValue: int

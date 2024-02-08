@@ -10,6 +10,7 @@ from iranetf import (
     RayanHamafza,
     RayanHamafzaMultiNAV,
     TadbirPardaz,
+    TadbirPardazMultiNAV,
     TPLiveNAVPS,
 )
 
@@ -127,7 +128,7 @@ async def test_old_mabna_version():
 
 
 @files('petroagah.json', 'autoagah.json')
-async def test_rayanhamafzamultinav():
+async def test_rayanhamafza_multinav():
     petro = BaseSite.from_l18('پتروآگاه')
     auto = BaseSite.from_l18('اتوآگاه')
     assert type(auto) is RayanHamafzaMultiNAV
@@ -136,3 +137,15 @@ async def test_rayanhamafzamultinav():
     auto_nav = await auto.live_navps()
     assert petro_nav.keys() == auto_nav.keys()
     assert petro_nav != auto_nav
+
+
+@files('still.json', 'khodran.json')
+async def test_tadbirpardaz_multinav():
+    still = BaseSite.from_l18('استیل')
+    khodran = BaseSite.from_l18('خودران')
+    assert type(khodran) is TadbirPardazMultiNAV
+    assert still.url == khodran.url
+    still_nav = await still.live_navps()
+    khodran_nav = await khodran.live_navps()
+    assert still_nav.keys() == khodran_nav.keys()
+    assert still_nav != khodran_nav
