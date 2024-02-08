@@ -391,6 +391,22 @@ def load_dataset(*, site=True) -> _DataFrame:
     return df
 
 
+def save_dataset(ds: _DataFrame):
+    ds[
+        [  # sort columns
+            'symbol',
+            'name',
+            'type',
+            'insCode',
+            'regNo',
+            'url',
+            'site_type',
+        ]
+    ].sort_values('symbol').to_csv(
+        _DATASET_PATH, lineterminator='\n', encoding='utf-8-sig', index=False
+    )
+
+
 async def _check_validity(site: BaseSite, retry=0) -> tuple[str, str] | None:
     try:
         await site.live_navps()
@@ -569,19 +585,7 @@ async def update_dataset(*, check_existing_sites=False) -> _DataFrame:
     ds.update(tsetmc_df)
     ds.reset_index(inplace=True)
 
-    ds[
-        [  # resort columns (order was changed by the ds.reset_index)
-            'symbol',
-            'name',
-            'type',
-            'insCode',
-            'regNo',
-            'url',
-            'site_type',
-        ]
-    ].sort_values('symbol').to_csv(
-        _DATASET_PATH, lineterminator='\n', encoding='utf-8-sig', index=False
-    )
+    save_dataset(ds)
 
     return new_items[new_items['insCode'].isna()]
 
