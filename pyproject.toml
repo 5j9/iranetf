@@ -1,7 +1,10 @@
 [build-system]
 requires = ["setuptools>=66.1.0"]
-build-backend = "setuptools.build_meta"
 
+
+[build-system.build-backend]
+requires = ['flit_core >=3.2,<4']
+build-backend = 'flit_core.buildapi'
 
 [project]
 name = "iranetf"
@@ -34,17 +37,9 @@ content-type = "text/x-rst"
 Homepage = "https://github.com/5j9/iranetf"
 
 
-[tool.setuptools]
-zip-safe = false
-include-package-data = true
-[tool.setuptools.packages.find]
-namespaces = false
-[tool.setuptools.dynamic.version]
-attr = "iranetf.__version__"
-
 [tool.ruff]
-format.quote-style = 'single'
 line-length = 79
+format.quote-style = 'single'
 isort.combine-as-imports = true
 extend-select = [
     'I',  # isort
@@ -54,7 +49,6 @@ ignore = [
     'UP027',  # list comprehensions are faster than generator expressions
     'E721',  # Do not compare types, use `isinstance()`
 ]
-
 
 [tool.pytest.ini_options]
 addopts = '--quiet --tb=short'
