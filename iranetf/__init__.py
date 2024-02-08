@@ -37,8 +37,8 @@ session_manager = SessionManager()
 SSL = None
 
 
-async def _get(url: str) -> _ClientResponse:
-    return await session_manager.get(url, ssl=SSL)
+async def _get(url: str, cookies: dict = None) -> _ClientResponse:
+    return await session_manager.get(url, ssl=SSL, cookies=cookies)
 
 
 async def _read(url: str) -> bytes:
@@ -90,9 +90,9 @@ class BaseSite(_ABC):
         return f"{type(self).__name__}('{self.url}')"
 
     async def _json(
-        self, path: str, df: bool = False
+        self, path: str, df: bool = False, cookies: dict = None
     ) -> list | dict | str | _DataFrame:
-        r = await _get(self.url + path)
+        r = await _get(self.url + path, cookies=cookies)
         self.last_response = r
         content = await r.read()
         j = _loads(content)
@@ -172,9 +172,9 @@ class MabnaDP(BaseSite):
 
 class RayanHamafza(BaseSite):
     async def _json(
-        self, path: str, df: bool = False
+        self, path: str, df: bool = False, cookies: dict = None
     ) -> list | dict | _DataFrame:
-        return await super()._json(f'Data/{path}', df)
+        return await super()._json(f'Data/{path}', df, cookies)
 
     async def live_navps(self) -> LiveNAVPS:
         d = await self._json('FundLiveData')
@@ -210,6 +210,23 @@ class RayanHamafza(BaseSite):
             lambda i: _jdatetime.strptime(i, format='%Y/%m/%d').togregorian()
         )
         return df
+
+
+class RayanHamafzaMultiNAV(RayanHamafza):
+    """Same as RayanHamafza, only send fundId as a cookie."""
+
+    __slots__ = 'cookies'
+
+    def __init__(self, url: str):
+        """Note: the url should end with #<fund_id> where fund_id is an int."""
+        url, _, fund_id = url.partition('#')
+        self.cookies = {'fundId': fund_id}
+        super().__init__(url)
+
+    async def _json(
+        self, path: str, df: bool = False, cookies: dict = None
+    ) -> list | dict | _DataFrame:
+        return await super()._json(path, df, self.cookies)
 
 
 # noinspection PyAbstractClass

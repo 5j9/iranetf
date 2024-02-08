@@ -1,4 +1,4 @@
-from aiohutils.tests import assert_dict_type, file
+from aiohutils.tests import assert_dict_type, file, files
 from numpy import dtype
 
 from iranetf import (
@@ -8,6 +8,7 @@ from iranetf import (
     LiveNAVPS,
     MabnaDP,
     RayanHamafza,
+    RayanHamafzaMultiNAV,
     TadbirPardaz,
     TPLiveNAVPS,
 )
@@ -123,3 +124,15 @@ async def test_mabna_version():
 @file('old_mabna_version.html')
 async def test_old_mabna_version():
     assert (await MabnaDP('https://gitidamavandfund.ir/').version()) == '2.12'
+
+
+@files('petroagah.json', 'autoagah.json')
+async def test_rayanhamafzamultinav():
+    petro = BaseSite.from_l18('پتروآگاه')
+    auto = BaseSite.from_l18('اتوآگاه')
+    assert type(auto) is RayanHamafzaMultiNAV
+    assert petro.url == auto.url
+    petro_nav = await petro.live_navps()
+    auto_nav = await auto.live_navps()
+    assert petro_nav.keys() == auto_nav.keys()
+    assert petro_nav != auto_nav
