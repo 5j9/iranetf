@@ -574,7 +574,8 @@ async def _update_existing_rows_using_fipiran(
     regno.update(fipiran_df.set_index('regNo'))
 
     ds.set_index('insCode', inplace=True)
-    ds.update(regno.set_index('insCode'))
+    # Do not overwrite MultiNAV type and URL.
+    ds.update(regno.set_index('insCode'), overwrite=False)
 
     # use domain as URL for those who do not have any URL
     ds.loc[ds['url'].isna(), 'url'] = 'http://' + regno['domain'] + '/'
