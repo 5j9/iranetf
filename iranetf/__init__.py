@@ -30,6 +30,7 @@ from pandas import (
 
 _pd.options.mode.copy_on_write = True
 _pd.options.future.infer_string = True
+_pd.options.future.no_silent_downcasting = True
 
 session_manager = SessionManager()
 
@@ -547,16 +548,18 @@ def _add_new_items_to_ds(new_items: _DataFrame, ds: _DataFrame) -> _DataFrame:
         return ds
     new_with_code = new_items[new_items['insCode'].notna()]
     if not new_with_code.empty:
-        ds = _concat([ds, new_with_code.drop(columns=['domain'])])
+        ds = _concat(
+            [ds, new_with_code.set_index('insCode').drop(columns=['domain'])]
+        )
     else:
         _info('new_with_code is empty!')
     return ds
 
 
-async def update_dataset(*, check_existing_sites=False) -> _DataFrame:
-    """Update dataset and return newly found that could not be added."""
-    ds = load_dataset(site=False)
-    fipiran_df = await _fipiran_data(ds)
+async def _update_existing_rows_using_fipiran(
+    ds: _DataFrame, fipiran_df: _DataFrame, check_existing_sites: bool
+) -> _DataFrame:
+    """Note: ds index will be set to insCode."""
     await _add_url_and_type(
         fipiran_df,
         known_domains=None
@@ -565,26 +568,37 @@ async def update_dataset(*, check_existing_sites=False) -> _DataFrame:
     )
 
     # to update existing urls and names
-    ds.set_index('regNo', inplace=True)
-    ds['domain'] = None
-    ds.update(fipiran_df.set_index('regNo'))
-    # use domain as URL for those who do not have any URL
-    ds.loc[ds['url'].isna(), 'url'] = 'http://' + ds['domain'] + '/'
-    ds.drop(columns=['domain'], inplace=True)
-    ds.reset_index(inplace=True)
+    # NA values in regNo cause error later due to duplication
+    regno = ds[~ds['regNo'].isna()].set_index('regNo')
+    regno['domain'] = None
+    regno.update(fipiran_df.set_index('regNo'))
 
-    reg_existing_in_ds = fipiran_df['regNo'].isin(ds['regNo'])
-    new_items = fipiran_df[~reg_existing_in_ds]
+    ds.set_index('insCode', inplace=True)
+    ds.update(regno.set_index('insCode'))
+
+    # use domain as URL for those who do not have any URL
+    ds.loc[ds['url'].isna(), 'url'] = 'http://' + regno['domain'] + '/'
+    return ds
+
+
+async def update_dataset(*, check_existing_sites=False) -> _DataFrame:
+    """Update dataset and return newly found that could not be added."""
+    ds = load_dataset(site=False)
+    fipiran_df = await _fipiran_data(ds)
+    ds = await _update_existing_rows_using_fipiran(
+        ds, fipiran_df, check_existing_sites
+    )
+
+    new_items = fipiran_df[~fipiran_df['regNo'].isin(ds['regNo'])]
 
     tsetmc_df = await _tsetmc_dataset()
     await _add_ins_code(new_items)
     ds = _add_new_items_to_ds(new_items, ds)
 
     # update all data, old or new, using tsetmc_df
-    ds.set_index('insCode', inplace=True)
     ds.update(tsetmc_df)
-    ds.reset_index(inplace=True)
 
+    ds.reset_index(inplace=True)
     save_dataset(ds)
 
     return new_items[new_items['insCode'].isna()]
