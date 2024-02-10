@@ -1,10 +1,7 @@
 [build-system]
-requires = ["setuptools>=66.1.0"]
-
-
-[build-system.build-backend]
 requires = ['flit_core >=3.2,<4']
 build-backend = 'flit_core.buildapi'
+
 
 [project]
 name = "iranetf"
@@ -52,3 +49,8 @@ ignore = [
 
 [tool.pytest.ini_options]
 addopts = '--quiet --tb=short'
+
+
+[tool.flit.sdist]
+exclude = ['tests']
+
