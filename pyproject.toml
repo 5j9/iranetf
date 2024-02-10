@@ -2,7 +2,6 @@
 requires = ['flit_core >=3.2,<4']
 build-backend = 'flit_core.buildapi'
 
-
 [project]
 name = "iranetf"
 authors = [{name = "5j9", email = "5j9@users.noreply.github.com"}]
@@ -50,7 +49,5 @@ ignore = [
 [tool.pytest.ini_options]
 addopts = '--quiet --tb=short'
 
-
 [tool.flit.sdist]
-exclude = ['tests']
-
+exclude = ['tests', 'dev']
