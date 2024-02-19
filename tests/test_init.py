@@ -1,5 +1,8 @@
+from unittest.mock import patch
+
 from aiohutils.tests import assert_dict_type, file, files
 from numpy import dtype
+from pytest import raises
 
 from iranetf import (
     BaseSite,
@@ -149,3 +152,14 @@ async def test_tadbirpardaz_multinav():
     khodran_nav = await khodran.live_navps()
     assert still_nav.keys() == khodran_nav.keys()
     assert still_nav != khodran_nav
+
+
+async def test_tadbirpardas_multinav_hist_path():
+    khodran = BaseSite.from_l18('خودران')
+    with patch('iranetf._get', side_effect=NotImplementedError) as get_mock:
+        with raises(NotImplementedError):
+            await khodran.navps_history()
+    get_mock.assert_called_once_with(
+        'https://mofidsectorfund.com/Chart/TotalNAV?type=getnavtotal&basketId=3',
+        cookies=None,
+    )

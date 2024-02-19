@@ -297,7 +297,7 @@ class TadbirPardazMultiNAV(TadbirPardaz):
         self, path: str, df: bool = False, cookies: dict = None
     ) -> list | dict | str | _DataFrame:
         return await super()._json(
-            f'{path}?basketId={self.basket_id}', df, cookies
+            f'{path}&basketId={self.basket_id}', df, cookies
         )
 
 
