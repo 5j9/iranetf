@@ -17,8 +17,7 @@ dependencies = [
     "aiohttp[speedups]",
     "aiohutils >= 0.13.0",
     "jdatetime >= 4.1.0",
-    "pandas >= 2.1.0",
-    "pyarrow",  # pd.options.future.infer_string = True
+    "pandas[pyarrow] >= 2.2.1",
 ]
 [project.optional-dependencies]
 test = [
