@@ -61,8 +61,8 @@ _ETF_TYPES = {  # numbers are according to fipiran
 
 
 class LiveNAVPS(_TypedDict):
-    issue: int
-    cancel: int
+    creation: int
+    redemption: int
     date: _datetime
 
 
@@ -135,8 +135,8 @@ class MabnaDP(BaseSite):
         j['date'] = _jdatetime.strptime(
             j['date_time'], '%H:%M %Y/%m/%d'
         ).togregorian()
-        j['issue'] = _comma_int(j.pop('purchase_price'))
-        j['cancel'] = _comma_int(j.pop('redemption_price'))
+        j['creation'] = _comma_int(j.pop('purchase_price'))
+        j['redemption'] = _comma_int(j.pop('redemption_price'))
         return j
 
     async def navps_history(self) -> _DataFrame:
@@ -151,8 +151,8 @@ class MabnaDP(BaseSite):
                 ).togregorian()
             )
         )
-        df['issue'] = df.pop('purchase_price')
-        df['cancel'] = df.pop('redeption_price')
+        df['creation'] = df.pop('purchase_price')
+        df['redemption'] = df.pop('redeption_price')
         df['statistical'] = df.pop('statistical_value')
         df.set_index('date', inplace=True)
         return df
@@ -180,8 +180,8 @@ class RayanHamafza(BaseSite):
 
     async def live_navps(self) -> LiveNAVPS:
         d = await self._json('FundLiveData')
-        d['issue'] = d.pop('PurchaseNAVPerShare')
-        d['cancel'] = d.pop('SellNAVPerShare')
+        d['creation'] = d.pop('PurchaseNAVPerShare')
+        d['redemption'] = d.pop('SellNAVPerShare')
         d['date'] = _jdatetime.strptime(
             f"{d.pop('JalaliDate')} {d.pop('Time')}", '%Y/%m/%d %H:%M'
         ).togregorian()
@@ -189,14 +189,14 @@ class RayanHamafza(BaseSite):
 
     async def navps_history(self) -> _DataFrame:
         df = await self._json('NAVPerShare', df=True)
-        df.columns = ['date', 'issue', 'cancel', 'statistical']
+        df.columns = ['date', 'creation', 'redemption', 'statistical']
         df['date'] = df['date'].map(_j2g)
         df.set_index('date', inplace=True)
         return df
 
     async def nav_history(self) -> _DataFrame:
         df = await self._json('PureAsset', df=True)
-        df.columns = ['nav', 'date', 'cancel_navps']
+        df.columns = ['nav', 'date', 'redemption_navps']
         df['date'] = df['date'].map(_j2g)
         return df
 
@@ -249,8 +249,8 @@ class TadbirPardaz(BaseTadbirPardaz):
         # the json is escaped twice, so it needs to be loaded again
         d = _loads(d)
 
-        d['issue'] = d.pop('subNav')
-        d['cancel'] = d.pop('cancelNav')
+        d['creation'] = d.pop('subNav')
+        d['redemption'] = d.pop('cancelNav')
         d['nominal'] = d.pop('esmiNav')
 
         for k, t in TPLiveNAVPS.__annotations__.items():
@@ -271,13 +271,15 @@ class TadbirPardaz(BaseTadbirPardaz):
 
     async def navps_history(self) -> _DataFrame:
         j: list = await self._json('Chart/TotalNAV?type=getnavtotal')
-        issue, statistical, cancel = [[d['y'] for d in i['List']] for i in j]
+        creation, statistical, redemption = [
+            [d['y'] for d in i['List']] for i in j
+        ]
         date = [d['x'] for d in j[0]['List']]
         df = _DataFrame(
             {
                 'date': date,
-                'issue': issue,
-                'cancel': cancel,
+                'creation': creation,
+                'redemption': redemption,
                 'statistical': statistical,
             }
         )
@@ -320,11 +322,11 @@ class LeveragedTadbirPardaz(BaseTadbirPardaz):
         for i, name in zip(
             j,
             (
-                'normal_issue',
+                'normal_creation',
                 'normal_statistical',
-                'normal_cancel',
-                'issue',
-                'cancel',
+                'normal_redemption',
+                'creation',
+                'redemption',
                 'normal',
             ),
         ):
@@ -352,8 +354,8 @@ class LeveragedTadbirPardaz(BaseTadbirPardaz):
             date = _jdatetime.strptime(date, '%Y/%m/%d ')
         d['date'] = date.togregorian()
 
-        d['issue'] = d.pop('SuperUnitsSubscriptionNAV')
-        d['cancel'] = d.pop('SuperUnitsCancelNAV')
+        d['creation'] = d.pop('SuperUnitsSubscriptionNAV')
+        d['redemption'] = d.pop('SuperUnitsCancelNAV')
         return d
 
 
@@ -616,7 +618,7 @@ async def _check_live_site(site: BaseSite):
     except Exception as e:
         _error(f'exception during checking of {site}: {e}')
     else:
-        assert type(navps['issue']) is int
+        assert type(navps['creation']) is int
 
 
 async def check_dataset(live=False):
