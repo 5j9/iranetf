@@ -154,6 +154,7 @@ class MabnaDP(BaseSite):
         df['issue'] = df.pop('purchase_price')
         df['cancel'] = df.pop('redeption_price')
         df['statistical'] = df.pop('statistical_value')
+        df.set_index('date', inplace=True)
         return df
 
     async def version(self) -> str:
@@ -190,6 +191,7 @@ class RayanHamafza(BaseSite):
         df = await self._json('NAVPerShare', df=True)
         df.columns = ['date', 'issue', 'cancel', 'statistical']
         df['date'] = df['date'].map(_j2g)
+        df.set_index('date', inplace=True)
         return df
 
     async def nav_history(self) -> _DataFrame:
@@ -280,6 +282,7 @@ class TadbirPardaz(BaseTadbirPardaz):
             }
         )
         df['date'] = _to_datetime(df.date)
+        df.set_index('date', inplace=True)
         return df
 
 
@@ -333,7 +336,6 @@ class LeveragedTadbirPardaz(BaseTadbirPardaz):
             frames.append(df)
 
         df = _concat(frames, axis=1)
-        df.reset_index(inplace=True)
         return df
 
     async def live_navps(self) -> LeveragedTadbirPardazLiveNAVPS:

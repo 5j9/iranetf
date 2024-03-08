@@ -34,7 +34,8 @@ async def test_rayan_live_navps():
 
 async def assert_navps_history(site: BaseSite, has_statistical=True):
     df = await site.navps_history()
-    assert df['date'].dtype == dtype('<M8[ns]')
+    assert df.index.dtype == dtype('<M8[ns]')
+    assert df.index.name == 'date'
     numeric_types = ('int64', 'float64')
     assert df['issue'].dtype in numeric_types
     assert df['cancel'].dtype in numeric_types
