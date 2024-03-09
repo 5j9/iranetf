@@ -126,9 +126,9 @@ def _comma_int(s: str) -> int:
 
 class MabnaDP(BaseSite):
     async def _json(
-        self, path: str, df: bool = False
+        self, path: str, df: bool = False, cookies: dict = None
     ) -> list | dict | _DataFrame:
-        return await super()._json(f'api/v1/overall/{path}', df)
+        return await super()._json(f'api/v1/overall/{path}', df, cookies)
 
     async def live_navps(self) -> LiveNAVPS:
         j = await self._json('navetf.json')
