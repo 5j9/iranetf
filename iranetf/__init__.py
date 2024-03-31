@@ -1,5 +1,4 @@
 __version__ = '0.19.1.dev0'
-
 import warnings as _w
 from abc import ABC as _ABC, abstractmethod as _abstractmethod
 from asyncio import gather as _gather
@@ -26,6 +25,10 @@ from pandas import (
     concat as _concat,
     read_csv as _read_csv,
     to_datetime as _to_datetime,
+)
+from tsetmc.instruments import (
+    Instrument as _Instrument,
+    search as _tsetmc_search,
 )
 
 _pd.options.mode.copy_on_write = True
@@ -366,7 +369,7 @@ def _make_site(row) -> BaseSite:
     return site_class(row['url'])
 
 
-def load_dataset(*, site=True) -> _DataFrame:
+def load_dataset(*, site=True, inst=False) -> _DataFrame:
     """Load dataset.csv as a DataFrame.
 
     If site is True, convert url and site_type columns to site object.
@@ -388,9 +391,14 @@ def load_dataset(*, site=True) -> _DataFrame:
             'site_type': 'category',
         },
     )
+
     if site:
         df['site'] = df[df['site_type'].notna()].apply(_make_site, axis=1)
         df.drop(columns=['url', 'site_type'], inplace=True)
+
+    if inst:
+        df['inst'] = df['insCode'].apply(_Instrument, axis=1)
+
     return df
 
 
@@ -477,11 +485,10 @@ async def _add_ins_code(new_items: _DataFrame) -> None:
     names_without_code = new_items[new_items['insCode'].isna()].name
     if names_without_code.empty:
         return
-    import tsetmc.instruments
-
-    search = tsetmc.instruments.search
     _info('searching names on tsetmc to find their insCode')
-    results = await _gather(*[search(name) for name in names_without_code])
+    results = await _gather(
+        *[_tsetmc_search(name) for name in names_without_code]
+    )
     ins_codes = [(None if len(r) != 1 else r[0]['insCode']) for r in results]
     new_items.loc[names_without_code.index, 'insCode'] = ins_codes
 
