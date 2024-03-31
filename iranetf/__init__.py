@@ -2,7 +2,7 @@ __version__ = '0.19.1.dev0'
 
 import warnings as _w
 from abc import ABC as _ABC, abstractmethod as _abstractmethod
-from asyncio import TimeoutError as _TimeoutError, gather as _gather
+from asyncio import gather as _gather
 from datetime import datetime as _datetime
 from json import JSONDecodeError as _JSONDecodeError, loads as _loads
 from logging import error as _error, info as _info, warning as _warning
@@ -102,12 +102,10 @@ class BaseSite(_ABC):
         return j
 
     @_abstractmethod
-    async def live_navps(self) -> LiveNAVPS:
-        ...
+    async def live_navps(self) -> LiveNAVPS: ...
 
     @_abstractmethod
-    async def navps_history(self) -> _DataFrame:
-        ...
+    async def navps_history(self) -> _DataFrame: ...
 
     @classmethod
     def from_l18(
@@ -416,12 +414,12 @@ async def _check_validity(site: BaseSite, retry=0) -> tuple[str, str] | None:
     try:
         await site.live_navps()
     except (
+        TimeoutError,
         _JSONDecodeError,
         _ClientConnectorError,
         _ServerTimeoutError,
         _ClientOSError,
         _TooManyRedirects,
-        _TimeoutError,
         _ServerDisconnectedError,
     ):
         if retry > 0:
