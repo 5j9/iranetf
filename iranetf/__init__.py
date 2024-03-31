@@ -3,7 +3,9 @@ __version__ = '0.19.1.dev0'
 import warnings as _w
 from abc import ABC as _ABC, abstractmethod as _abstractmethod
 from asyncio import gather as _gather
+from dataclasses import dataclass as _dataclass
 from datetime import datetime as _datetime
+from functools import cache as _cache, cached_property as _cached_property
 from json import JSONDecodeError as _JSONDecodeError, loads as _loads
 from logging import error as _error, info as _info, warning as _warning
 from pathlib import Path as _Path
@@ -19,6 +21,8 @@ from aiohttp import (
     TooManyRedirects as _TooManyRedirects,
 )
 from aiohutils.session import SessionManager
+from fipiran.funds import Fund as _Fund, funds as _funds
+from fipiran.symbols import Symbol as _Symbol
 from jdatetime import datetime as _jdatetime
 from pandas import (
     DataFrame as _DataFrame,
@@ -26,6 +30,10 @@ from pandas import (
     concat as _concat,
     read_csv as _read_csv,
     to_datetime as _to_datetime,
+)
+from tsetmc.instruments import (
+    Instrument as _Instrument,
+    search as _tsetmc_search,
 )
 
 _pd.options.mode.copy_on_write = True
@@ -114,8 +122,8 @@ class BaseSite(_ABC):
         try:
             ds = cls.ds
         except AttributeError:
-            ds = cls.ds = load_dataset(site=True).set_index('symbol')
-        return ds.loc[l18, 'site']
+            ds = cls.ds = load_dataset(etf=True).set_index('symbol')
+        return ds.loc[l18, 'etf'].site
 
 
 def _comma_int(s: str) -> int:
@@ -357,19 +365,43 @@ class LeveragedTadbirPardaz(BaseTadbirPardaz):
         return d
 
 
+@_dataclass
+class Etf:
+    l18: str
+    l30: str
+    type_: str
+    ins_code: str
+    reg_no: int
+    url: str
+    site_type: str
+
+    @_cached_property
+    def site(self) -> BaseSite:
+        site_class = globals()[self.site_type]
+        return site_class(self.url)
+
+    @_cached_property
+    def inst(self) -> _Instrument:
+        return _Instrument(self.ins_code, self.l18)
+
+    @_cached_property
+    def symbol(self) -> _Symbol:
+        return _Symbol(self.l18, self.ins_code)
+
+    @_cached_property
+    def fund(self) -> _Fund:
+        return _Fund(self.reg_no)
+
+
 _DATASET_PATH = _Path(__file__).parent / 'dataset.csv'
 
 
-def _make_site(row) -> BaseSite:
-    type_str = row['site_type']
-    site_class = globals()[type_str]
-    return site_class(row['url'])
-
-
-def load_dataset(*, site=True) -> _DataFrame:
+@_cache
+def load_dataset(*, etf=True) -> _DataFrame:
     """Load dataset.csv as a DataFrame.
 
-    If site is True, convert url and site_type columns to site object.
+    If etf is True, add etf column to result. This will also drop url and
+    site_type columns.
     """
     df = _read_csv(
         _DATASET_PATH,
@@ -388,8 +420,8 @@ def load_dataset(*, site=True) -> _DataFrame:
             'site_type': 'category',
         },
     )
-    if site:
-        df['site'] = df[df['site_type'].notna()].apply(_make_site, axis=1)
+    if etf:
+        df['etf'] = df.apply(lambda r: Etf(*r), axis=1, raw=True)
         df.drop(columns=['url', 'site_type'], inplace=True)
     return df
 
@@ -477,20 +509,18 @@ async def _add_ins_code(new_items: _DataFrame) -> None:
     names_without_code = new_items[new_items['insCode'].isna()].name
     if names_without_code.empty:
         return
-    import tsetmc.instruments
 
-    search = tsetmc.instruments.search
     _info('searching names on tsetmc to find their insCode')
-    results = await _gather(*[search(name) for name in names_without_code])
+    results = await _gather(
+        *[_tsetmc_search(name) for name in names_without_code]
+    )
     ins_codes = [(None if len(r) != 1 else r[0]['insCode']) for r in results]
     new_items.loc[names_without_code.index, 'insCode'] = ins_codes
 
 
 async def _fipiran_data(ds) -> _DataFrame:
-    import fipiran.funds
-
     _info('await fipiran.funds.funds()')
-    fipiran_df = await fipiran.funds.funds()
+    fipiran_df = await _funds()
 
     reg_not_in_fipiran = ds[~ds['regNo'].isin(fipiran_df['regNo'])]
     if not reg_not_in_fipiran.empty:
@@ -586,7 +616,7 @@ async def _update_existing_rows_using_fipiran(
 
 async def update_dataset(*, check_existing_sites=False) -> _DataFrame:
     """Update dataset and return newly found that could not be added."""
-    ds = load_dataset(site=False)
+    ds = load_dataset(etf=False)
     fipiran_df = await _fipiran_data(ds)
     ds = await _update_existing_rows_using_fipiran(
         ds, fipiran_df, check_existing_sites
@@ -603,6 +633,7 @@ async def update_dataset(*, check_existing_sites=False) -> _DataFrame:
 
     ds.reset_index(inplace=True)
     save_dataset(ds)
+    load_dataset.cache_clear()
 
     return new_items[new_items['insCode'].isna()]
 
@@ -621,7 +652,7 @@ async def _check_live_site(site: BaseSite):
 
 async def check_dataset(live=False):
     global SSL
-    ds = load_dataset(site=False)
+    ds = load_dataset(etf=True)
     assert ds['symbol'].is_unique
     assert ds['name'].is_unique
     assert ds['type'].unique().isin(_ETF_TYPES.values()).all()
@@ -631,7 +662,7 @@ async def check_dataset(live=False):
     if not live:
         return
 
-    ds['site'] = ds[ds['site_type'].notna()].apply(_make_site, axis=1)
+    ds['site'] = ds[ds['etf'].apply(getattr, args=('site',)).notna()]
 
     coros = ds['site'].apply(_check_live_site)
 
