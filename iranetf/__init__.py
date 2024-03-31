@@ -117,7 +117,7 @@ class BaseSite(_ABC):
         try:
             ds = cls.ds
         except AttributeError:
-            ds = cls.ds = load_dataset(site=True).set_index('symbol')
+            ds = cls.ds = load_dataset(site=True).set_index('l18')
         return ds.loc[l18, 'site']
 
 
@@ -364,7 +364,7 @@ _DATASET_PATH = _Path(__file__).parent / 'dataset.csv'
 
 
 def _make_site(row) -> BaseSite:
-    type_str = row['site_type']
+    type_str = row['siteType']
     site_class = globals()[type_str]
     return site_class(row['url'])
 
@@ -372,7 +372,7 @@ def _make_site(row) -> BaseSite:
 def load_dataset(*, site=True, inst=False) -> _DataFrame:
     """Load dataset.csv as a DataFrame.
 
-    If site is True, convert url and site_type columns to site object.
+    If site is True, convert url and siteType columns to site object.
     """
     df = _read_csv(
         _DATASET_PATH,
@@ -381,20 +381,20 @@ def load_dataset(*, site=True, inst=False) -> _DataFrame:
         memory_map=True,
         lineterminator='\n',
         dtype={
-            'symbol': 'string',
+            'l18': 'string',
             'name': 'string',
             'type': 'category',
             'insCode': 'string',
             # in case there is an ETF not registered on fipiran
             'regNo': 'Int64',
             'url': 'string',
-            'site_type': 'category',
+            'siteType': 'category',
         },
     )
 
     if site:
-        df['site'] = df[df['site_type'].notna()].apply(_make_site, axis=1)
-        df.drop(columns=['url', 'site_type'], inplace=True)
+        df['site'] = df[df['siteType'].notna()].apply(_make_site, axis=1)
+        df.drop(columns=['url', 'siteType'], inplace=True)
 
     if inst:
         df['inst'] = df['insCode'].apply(_Instrument, axis=1)
@@ -405,15 +405,15 @@ def load_dataset(*, site=True, inst=False) -> _DataFrame:
 def save_dataset(ds: _DataFrame):
     ds[
         [  # sort columns
-            'symbol',
+            'l18',
             'name',
             'type',
             'insCode',
             'regNo',
             'url',
-            'site_type',
+            'siteType',
         ]
-    ].sort_values('symbol').to_csv(
+    ].sort_values('l18').to_csv(
         _DATASET_PATH, lineterminator='\n', encoding='utf-8-sig', index=False
     )
 
@@ -476,8 +476,8 @@ async def _add_url_and_type(
         )
 
     url, site_type = zip(*list_of_tuples)
-    fipiran_df.loc[:, ['url', 'site_type']] = _DataFrame(
-        {'url': url, 'site_type': site_type}, index=domains_to_be_checked.index
+    fipiran_df.loc[:, ['url', 'siteType']] = _DataFrame(
+        {'url': url, 'siteType': site_type}, index=domains_to_be_checked.index
     )
 
 
@@ -526,7 +526,7 @@ async def _fipiran_data(ds) -> _DataFrame:
         columns={
             'fundType': 'type',
             'websiteAddress': 'domain',
-            'smallSymbolName': 'symbol',
+            'smallSymbolName': 'l18',
         },
         copy=False,
         inplace=True,
@@ -546,7 +546,7 @@ async def _tsetmc_dataset() -> _DataFrame:
 
     df = LazyDS.df
     df.drop(columns='l30', inplace=True)
-    df.columns = ['insCode', 'symbol']
+    df.columns = ['insCode', 'l18']
     df.set_index('insCode', inplace=True)
 
     return df
@@ -629,7 +629,7 @@ async def _check_live_site(site: BaseSite):
 async def check_dataset(live=False):
     global SSL
     ds = load_dataset(site=False)
-    assert ds['symbol'].is_unique
+    assert ds['l18'].is_unique
     assert ds['name'].is_unique
     assert ds['type'].unique().isin(_ETF_TYPES.values()).all()
     assert ds['insCode'].is_unique
@@ -638,7 +638,7 @@ async def check_dataset(live=False):
     if not live:
         return
 
-    ds['site'] = ds[ds['site_type'].notna()].apply(_make_site, axis=1)
+    ds['site'] = ds[ds['siteType'].notna()].apply(_make_site, axis=1)
 
     coros = ds['site'].apply(_check_live_site)
 
@@ -651,5 +651,5 @@ async def check_dataset(live=False):
 
     if not (no_site := ds[ds['site'].isna()]).empty:
         _warning(
-            f'some dataset entries have no associated site:\n{no_site.symbol}'
+            f'some dataset entries have no associated site:\n{no_site["l18"]}'
         )
