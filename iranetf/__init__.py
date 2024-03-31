@@ -396,7 +396,7 @@ def load_dataset(*, site=True, inst=False) -> _DataFrame:
         df.drop(columns=['url', 'siteType'], inplace=True)
 
     if inst:
-        df['inst'] = df['insCode'].apply(_Instrument, axis=1)
+        df['inst'] = df['insCode'].apply(_Instrument)
 
     return df
 
