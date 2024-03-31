@@ -378,7 +378,6 @@ def load_dataset(*, site=True, inst=False) -> _DataFrame:
         _DATASET_PATH,
         encoding='utf-8-sig',
         low_memory=False,
-        memory_map=True,
         lineterminator='\n',
         dtype={
             'l18': 'string',
