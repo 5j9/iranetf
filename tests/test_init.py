@@ -112,19 +112,22 @@ def test_from_l18():
     assert BaseSite.from_l18('استیل').url == 'https://mofidsectorfund.com/'
 
 
+EXPECTED_TP_VER = '9.2.5'
+
+
 @file('tadbir_version.html')
 async def test_tadbir_version():
-    assert (await tadbir.version()) == '9.2.2'
+    assert (await tadbir.version()) == EXPECTED_TP_VER
 
 
 @file('leveraged_tadbir_version.html')
 async def test_leveraged_tadbir_version():
-    assert (await ltp.version()) == '9.2.2'
+    assert (await ltp.version()) == EXPECTED_TP_VER
 
 
 @file('mabna_version.html')
 async def test_mabna_version():
-    assert (await mabna_dp.version()) == '2.5'
+    assert (await mabna_dp.version()) == '2.15'
 
 
 @file('old_mabna_version.html')
