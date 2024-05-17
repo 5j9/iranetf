@@ -41,8 +41,12 @@ session_manager = SessionManager()
 SSL = None
 
 
-async def _get(url: str, cookies: dict = None) -> _ClientResponse:
-    return await session_manager.get(url, ssl=SSL, cookies=cookies)
+async def _get(
+    url: str, params: dict = None, cookies: dict = None
+) -> _ClientResponse:
+    return await session_manager.get(
+        url, ssl=SSL, cookies=cookies, params=params
+    )
 
 
 async def _read(url: str) -> bytes:
@@ -82,6 +86,9 @@ class TPLiveNAVPS(LiveNAVPS):
     totalUnit: int
 
 
+_JSON_OR_DF = list | dict | str | _DataFrame
+
+
 class BaseSite(_ABC):
     __slots__ = 'url', 'last_response'
     ds: _DataFrame
@@ -94,9 +101,14 @@ class BaseSite(_ABC):
         return f"{type(self).__name__}('{self.url}')"
 
     async def _json(
-        self, path: str, df: bool = False, cookies: dict = None
-    ) -> list | dict | str | _DataFrame:
-        r = await _get(self.url + path, cookies=cookies)
+        self,
+        path: str,
+        *,
+        params: dict = None,
+        cookies: dict = None,
+        df: bool = False,
+    ) -> _JSON_OR_DF:
+        r = await _get(self.url + path, params, cookies)
         self.last_response = r
         content = await r.read()
         j = _loads(content)
@@ -126,10 +138,8 @@ def _comma_int(s: str) -> int:
 
 
 class MabnaDP(BaseSite):
-    async def _json(
-        self, path: str, df: bool = False, cookies: dict = None
-    ) -> list | dict | _DataFrame:
-        return await super()._json(f'api/v1/overall/{path}', df, cookies)
+    async def _json(self, path, **kwa) -> _JSON_OR_DF:
+        return await super()._json(f'api/v1/overall/{path}', **kwa)
 
     async def live_navps(self) -> LiveNAVPS:
         j = await self._json('navetf.json')
@@ -141,7 +151,7 @@ class MabnaDP(BaseSite):
         return j
 
     async def navps_history(self) -> _DataFrame:
-        j = await self._json('navps.json')
+        j: list[dict] = await self._json('navps.json')
         df = _DataFrame(j[0]['values'])
         df['date'] = (
             df['date']
@@ -174,10 +184,8 @@ class MabnaDP(BaseSite):
 
 
 class RayanHamafza(BaseSite):
-    async def _json(
-        self, path: str, df: bool = False, cookies: dict = None
-    ) -> list | dict | _DataFrame:
-        return await super()._json(f'Data/{path}', df, cookies)
+    async def _json(self, path, **kwa) -> _JSON_OR_DF:
+        return await super()._json(f'Data/{path}', **kwa)
 
     async def live_navps(self) -> LiveNAVPS:
         d = await self._json('FundLiveData')
@@ -227,10 +235,8 @@ class RayanHamafzaMultiNAV(RayanHamafza):
         self.cookies = {'fundId': fund_id}
         super().__init__(url)
 
-    async def _json(
-        self, path: str, df: bool = False, cookies: dict = None
-    ) -> list | dict | _DataFrame:
-        return await super()._json(path, df, self.cookies)
+    async def _json(self, path, **kwa) -> _JSON_OR_DF:
+        return await super()._json(path, cookies=self.cookies, **kwa)
 
 
 # noinspection PyAbstractClass
@@ -271,7 +277,9 @@ class TadbirPardaz(BaseTadbirPardaz):
         return d
 
     async def navps_history(self) -> _DataFrame:
-        j: list = await self._json('Chart/TotalNAV?type=getnavtotal')
+        j: list = await self._json(
+            'Chart/TotalNAV', params={'type': 'getnavtotal'}
+        )
         creation, statistical, redemption = [
             [d['y'] for d in i['List']] for i in j
         ]
@@ -300,10 +308,12 @@ class TadbirPardazMultiNAV(TadbirPardaz):
         super().__init__(url)
 
     async def _json(
-        self, path: str, df: bool = False, cookies: dict = None
-    ) -> list | dict | str | _DataFrame:
+        self, path: str, /, params: dict = None, **kwa
+    ) -> _JSON_OR_DF:
         return await super()._json(
-            f'{path}&basketId={self.basket_id}', df, cookies
+            path,
+            params=(params or {}) | {'basketId': self.basket_id},
+            **kwa,
         )
 
 
@@ -317,7 +327,9 @@ class LeveragedTadbirPardazLiveNAVPS(LiveNAVPS):
 
 class LeveragedTadbirPardaz(BaseTadbirPardaz):
     async def navps_history(self) -> _DataFrame:
-        j: list = await self._json('Chart/TotalNAV?type=getnavtotal')
+        j: list = await self._json(
+            'Chart/TotalNAV', params={'type': 'getnavtotal'}
+        )
 
         frames = []
         for i, name in zip(

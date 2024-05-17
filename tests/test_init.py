@@ -162,6 +162,19 @@ async def test_tadbirpardas_multinav_hist_path():
         with raises(NotImplementedError):
             await khodran.navps_history()
     get_mock.assert_called_once_with(
-        'https://mofidsectorfund.com/Chart/TotalNAV?type=getnavtotal&basketId=3',
-        cookies=None,
+        'https://mofidsectorfund.com/Chart/TotalNAV',
+        {'type': 'getnavtotal', 'basketId': '3'},
+        None,
+    )
+
+
+async def test_tadbirpardas_multinav_live_navps_path():
+    khodran = BaseSite.from_l18('خودران')
+    with patch('iranetf._get', side_effect=NotImplementedError) as get_mock:
+        with raises(NotImplementedError):
+            await khodran.live_navps()
+    get_mock.assert_called_once_with(
+        'https://mofidsectorfund.com/Fund/GetETFNAV',
+        {'basketId': '3'},
+        None,
     )
