@@ -300,7 +300,7 @@ class TadbirPardaz(BaseTadbirPardaz):
     async def dividend_history(self) -> _DataFrame:
         path = 'Reports/FundDividendProfitReport'
         all_rows = []
-        while True:
+        while path:
             html = (await _read(f'{self.url}{path}')).decode()
             table, _, after_table = html.partition('<tbody>')[2].rpartition(
                 '</tbody>'
@@ -309,8 +309,6 @@ class TadbirPardaz(BaseTadbirPardaz):
                 _findall(r'<td>([^<]*)</td>', r)
                 for r in _split(r'</tr>\s*<tr>', table)
             ]
-            if '<span class="disabled">»</span>' in after_table:
-                break
             path = after_table.rpartition('" title="Next page">')[
                 0
             ].rpartition('<a href="/')[2]
