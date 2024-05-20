@@ -6,6 +6,7 @@ from datetime import datetime as _datetime
 from json import JSONDecodeError as _JSONDecodeError, loads as _loads
 from logging import error as _error, info as _info, warning as _warning
 from pathlib import Path as _Path
+from re import findall as _findall, split as _split
 from typing import TypedDict as _TypedDict
 
 import pandas as _pd
@@ -294,6 +295,45 @@ class TadbirPardaz(BaseTadbirPardaz):
         )
         df['date'] = _to_datetime(df.date)
         df.set_index('date', inplace=True)
+        return df
+
+    async def dividend_history(self) -> _DataFrame:
+        path = 'Reports/FundDividendProfitReport'
+        all_rows = []
+        while True:
+            html = (await _read(f'{self.url}{path}')).decode()
+            table, _, after_table = html.partition('<tbody>')[2].rpartition(
+                '</tbody>'
+            )
+            all_rows += [
+                _findall(r'<td>([^<]*)</td>', r)
+                for r in _split(r'</tr>\s*<tr>', table)
+            ]
+            if '<span class="disabled">»</span>' in after_table:
+                break
+            path = after_table.rpartition('" title="Next page">')[
+                0
+            ].rpartition('<a href="/')[2]
+        # try to use the same column names as RayanHamafza.dividend_history
+        df = _DataFrame(
+            all_rows,
+            columns=[
+                'row',
+                'ProfitDate',
+                'FundUnit',
+                'UnitProfit',
+                'SUMAllProfit',
+                'ProfitPercent',
+            ],
+        )
+        df['ProfitDate'] = df['ProfitDate'].apply(
+            lambda i: _jdatetime.strptime(i, format='%Y/%m/%d').togregorian()
+        )
+        comma_cols = ['FundUnit', 'SUMAllProfit']
+        df[comma_cols] = df[comma_cols].map(_comma_int)
+        int_cols = ['row', 'UnitProfit']
+        df[int_cols] = df[int_cols].map(_comma_int)
+        df['ProfitPercent'] = df['ProfitPercent'].astype(float)
         return df
 
 

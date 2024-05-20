@@ -181,3 +181,23 @@ async def test_tadbirpardas_multinav_live_navps_path():
         {'basketId': '3'},
         None,
     )
+
+
+@files(
+    'tp_dividend_history_1.html',
+    'tp_dividend_history_2.html',
+    'tp_dividend_history_3.html',
+)
+async def test_tadbirpardaz_multinav():
+    site = BaseSite.from_l18('آفاق')
+    assert type(site) is TadbirPardaz
+    df = await site.dividend_history()
+    assert len(df) >= 22
+    assert [*df.dtypes.items()] == [
+        ('row', dtype('int64')),
+        ('ProfitDate', dtype('<M8[ns]')),
+        ('FundUnit', dtype('int64')),
+        ('UnitProfit', dtype('int64')),
+        ('SUMAllProfit', dtype('int64')),
+        ('ProfitPercent', dtype('float64')),
+    ]
