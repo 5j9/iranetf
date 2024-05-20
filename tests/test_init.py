@@ -94,7 +94,7 @@ async def test_navps_history_ltp():
 
 @file('homay_profit.json')
 async def test_rayanhamafza_fund_profit():
-    df = await RayanHamafza('https://www.homayeagah.ir/').fund_profit()
+    df = await RayanHamafza('https://www.homayeagah.ir/').dividend_history()
     assert [*df.dtypes.items()] == [
         ('ProfitDate', dtype('<M8[ns]')),
         ('FundUnit', dtype('int64')),

@@ -215,7 +215,7 @@ class RayanHamafza(BaseSite):
     async def asset_allocation(self) -> dict:
         return await self._json('MixAsset')
 
-    async def fund_profit(self) -> _DataFrame:
+    async def dividend_history(self) -> _DataFrame:
         j = await self._json('FundProfit')
         df = _DataFrame(j['data'])
         df['ProfitDate'] = df['ProfitDate'].apply(
