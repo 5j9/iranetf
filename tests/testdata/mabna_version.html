@@ -26,7 +26,10 @@
     <script src="/content/scripts/spin.min.js" type="text/javascript"></script>
     <script src="/assets/numeral/numeral.min.js" type="text/javascript"></script>
     <script src="/content/scripts/custom.js" type="text/javascript"></script>
-
+    <link href="assets/css/select2.min.css" rel="stylesheet" />
+    <script src="../../assets/js/select2.min.js"></script>
+    <script src="../../assets/js/SearchPortfolio.js"></script>
+    <script src="/app/helper/cookies.js"></script>
     <!--datatable-->
     <link rel="stylesheet" href="/assets/css/jquery.dataTables.min.css" />
     <script src="/assets/js/jquery.dataTables.min.js"></script>
@@ -69,116 +72,103 @@
     <link href="/assets/css/custom-datatable.css" rel="stylesheet" title="default">
     <div id="sb-site">
         <div class="boxed">
-            <header id="header-full-top" class="hidden-xs header-full">
-                <div class="container">
-                    <div class="header-lisence">
-                        <div style="text-align: right;">ثبت شده به شماره ۱۱۹۲۴ نزد سازمان بورس و اوراق بهادار</div>
-<div style="text-align: right;">ثبت شده به شماره ۵۲۸۶۷نزد مرجع ثبت شرکت ها و مؤسسات غیر تجاری</div>
-                    </div>
-                    <div id="logo">
-                        <a href="/">
-                            <img src="/content/file?key=Header.Logo" height="70" />
-                        </a>
-                        <span style="font-size: 20px;">صندوق سرمایه گذاری قابل معامله شاخصی کیان</span>
-                    </div>
-                    <div class="clear"></div>
-                </div>
-                <!-- container -->
-            </header>
-            <!-- header-full -->
-            <nav class="navbar navbar-static-top navbar-default navbar-header-full navbar-dark yamm" role="navigation" id="header">
-                <div class="container" style="padding: 0">
+            <nav class="navbar navbar-expand-lg" role="navigation" id="header">
+                <div class="nav-container" style="padding: 0">
                     <!-- Brand and toggle get grouped for better mobile display -->
                     <div class="navbar-header">
                         <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
                             <span class="sr-only">Toggle navigation</span>
                             <i class="fa fa-bars"></i>
                         </button>
-                        <a href="/" class="navbar-logo hidden-lg hidden-md hidden-sm">
-                            <img src="/content/file?key=Header.Logo" height="50" />
-                        </a>
                     </div>
                     <!-- navbar-header -->
                     <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
                         <ul class="nav navbar-nav">
                             <li>
-                                <a href="/">صفحه اصلی</a>
+                                <div id="logo">
+                                <a href="/">
+                                    <img src="/content/file?key=Header.Logo"/>
+                                </a>
+                            </div>
                             </li>
-                            <li>
+                            <li class="nav-items">
+                                <a href="/">خانه</a>
+                            </li>
+                            <li class="nav-items">
                                 <a href="/news">اخبار</a>
                             </li>
                             <li class="dropdown">
                                 <a href="/info" class="dropdown-toggle" data-toggle="dropdown">قوانین و دستور العمل ها</a>
-                                <ul class="dropdown-menu dropdown-menu-left">
+                               <ul class="dropdown-menu dropdown-menu-left dropdown-ul" style="width:auto; height:auto;margin-top: 2px !important; border-radius: 10px;background-color: #ffffff;box-shadow: 0px 0px 10px #0000009c;text-align: right;padding: 11px; right: 0px;">
                                     
-                                    <li><a href="/info/stockprice-calculation">دستور العمل نحوه تعیین قیمت</a></li>
+                                    <li class="dropdown-item"><a href="/info/stockprice-calculation">دستور العمل نحوه تعیین قیمت</a></li>
                                     
                                 </ul>
                             </li>
                             
                             <li class="dropdown">
                                 <a href="/forms" class="dropdown-toggle" data-toggle="dropdown">فرم‌ها</a>
-                                <ul class="dropdown-menu dropdown-menu-left">
-                                    <li><a href="/forms/customers">مشخصات مشتریان</a></li>
-                                    <li><a href="/forms/purchase-request">درخواست صدور</a></li>
-                                    <li><a href="/forms/redemption_request">درخواست ابطال</a></li>
+                                <ul class="dropdown-menu" style="width:auto; height:auto;margin-top: 2px !important; border-radius: 10px;background-color: #ffffff;box-shadow: 0px 0px 10px #0000009c;text-align: right;padding: 11px; right: 0px;">
+                                    <li class="dropdown-item"><a href="/forms/customers">مشخصات مشتریان</a></li>
+                                    <li class="dropdown-item"><a href="/forms/purchase-request">درخواست صدور</a></li>
+                                    <li class="dropdown-item"><a href="/forms/redemption_request">درخواست ابطال</a></li>
                                 </ul>
                             </li>
                             
                             <li class="dropdown">
                                 <a href="/reports" class="dropdown-toggle" data-toggle="dropdown">گزارش ها</a>
-                                <ul class="dropdown-menu dropdown-menu-left">
+                                <ul class="dropdown-menu" style="width: 320px; height:auto;margin-top: 2px !important; border-radius: 10px;background-color: #ffffff;box-shadow: 0px 0px 10px #0000009c;text-align: right;padding: 11px; right: 0px;">
                                     
-                                    <li><a href="/reports/funds">مجامع صندوق</a></li>
-                                    <li><a href="/reports/financial">صورت های مالی</a></li>
-                                    <li><a href="/reports/dailyassets">ترکیب روزانه دارایی‌های صندوق</a></li>
-                                    <li><a href="/reports/assets">ترکیب دارایی‌های صندوق برای دوره‌های زمانی مختلف</a></li>
-                                    <li><a href="/reports/funds_owners">دارندگان واحدهای سرمایه گذاری ممتاز</a></li>
-                                    <li><a href="/reports/return/daily">بازدهی روزانه</a></li>
-                                    <li><a href="/reports/return/weekly">بازدهی هفتگی</a></li>
-                                    <li><a href="/reports/return/monthly">بازدهی ماهانه</a></li>
-                                    <li><a href="/reports/return">بازدهی</a></li>
-                                    <li><a href="/reports/navps">روند NAV</a></li>
+                                    <li class="dropdown-item"><a href="/reports/funds">مجامع صندوق</a></li>
+                                    <li class="dropdown-item"><a href="/reports/financial">صورت های مالی</a></li>
+                                    <li class="dropdown-item"><a href="/reports/dailyassets">ترکیب روزانه دارایی‌های صندوق</a></li>
+                                    <li class="dropdown-item"><a href="/reports/assets">ترکیب دارایی‌های صندوق برای دوره‌های زمانی مختلف</a></li>
+                                    <li class="dropdown-item"><a href="/reports/funds_owners">دارندگان واحدهای سرمایه گذاری ممتاز</a></li>
+                                    <li class="dropdown-item"><a href="/reports/return/daily">بازدهی روزانه</a></li>
+                                    <li class="dropdown-item"><a href="/reports/return/weekly">بازدهی هفتگی</a></li>
+                                    <li class="dropdown-item"><a href="/reports/return/monthly">بازدهی ماهانه</a></li>
+                                    <li class="dropdown-item"><a href="/reports/return">بازدهی</a></li>
+                                    <li class="dropdown-item"><a href="/reports/navps">روند NAV</a></li>
                                     
                                 </ul>
                             </li>
                             
                             <li class="dropdown">
                                 <a href="/portfoliorole" class="dropdown-toggle" data-toggle="dropdown">ارکان</a>
-                                <ul class="dropdown-menu dropdown-menu-left">
-                                    <li><a href="/portfolio-role/managers">مدیر</a></li>
-                                    <li><a href="/portfolio-role/investmentmanagers">مدیران سرمایه گذاری</a></li>
-                                    <li><a href="/portfolio-role/trustee">متولی</a></li>
-                                    <li><a href="/portfolio-role/financial_auditer">حسابرس</a></li>
+                                <ul class="dropdown-menu" style="width:auto; height:auto;margin-top: 2px !important; border-radius: 10px;background-color: #ffffff;box-shadow: 0px 0px 10px #0000009c;text-align: right;padding: 11px; right: 0px;">
+                                    <li class="dropdown-item"><a href="/portfolio-role/managers">مدیر</a></li>
+                                    <li class="dropdown-item"><a href="/portfolio-role/investmentmanagers">مدیران سرمایه گذاری</a></li>
+                                    <li class="dropdown-item"><a href="/portfolio-role/trustee">متولی</a></li>
+                                    <li class="dropdown-item"><a href="/portfolio-role/financial_auditer">حسابرس</a></li>
                                     
-                                    <li><a href="/portfolio-role/marketmaker">بازارگردان</a></li>
+                                    <li class="dropdown-item"><a href="/portfolio-role/marketmaker">بازارگردان</a></li>
                                     
                                 </ul>
                             </li>
                             
                             <li class="dropdown">
                                 <a href="/about" class="dropdown-toggle" data-toggle="dropdown">درباره ما</a>
-                                <ul class="dropdown-menu dropdown-menu-left">
-                                    <li><a href="/about/introduction">معرفی شرکت</a></li>
+                                <ul class="dropdown-menu" style="width:260px; height:auto;margin-top: 2px !important; border-radius: 10px;background-color: #ffffff;box-shadow: 0px 0px 10px #0000009c;text-align: right;padding: 11px; right: 0px;">
+                                    <li class="dropdown-item"><a href="/about/introduction">معرفی شرکت</a></li>
                                     
-                                    <li><a href="/about/prospectus">امیدنامه</a></li>
-                                    <li><a href="/about/statute">اساسنامه صندوق</a></li>
-                                    <li><a href="/about/mission">اهداف و الزامات</a></li>
-                                    <li><a href="/about/gettingstarted">مراحل سرمایه گذاری</a></li>
-                                    <li><a href="/about/fundexpenses">هزینه‌های صندوق</a></li>
-                                    <li><a href="/about/investmentpolicy">بیانیه سیاست سرمایه‌گذاری</a></li>
+                                    <li class="dropdown-item"><a href="/about/prospectus">امیدنامه</a></li>
+                                    <li class="dropdown-item"><a href="/about/statute">اساسنامه صندوق</a></li>
+                                    <li class="dropdown-item"><a href="/about/mission">اهداف و الزامات</a></li>
+                                    <li class="dropdown-item"><a href="/about/gettingstarted">مراحل سرمایه گذاری</a></li>
+                                    <li class="dropdown-item"><a href="/about/fundexpenses">هزینه‌های صندوق</a></li>
+                                    <li class="dropdown-item"><a href="/about/investmentpolicy">بیانیه سیاست سرمایه‌گذاری</a></li>
                                     
                                 </ul>
                             </li>
-                            <li>
+                            <li class="nav-items">
                                 <a href="/contact">تماس</a>
                             </li>
                         </ul>
                         <ul class="nav navbar-nav navbar-left">
 
 
-                            
-                            <li><a href="https://manage.kianfunds6.ir/">ورود کاربر</a></li>
+                           
+                                       <li class="btn-login"><a href="https://manage.kianfunds6.ir/" class="login-btn" style="display: flex; color: black" margin-top: -7px>ورود</a></li>
                             
                         </ul>
                     </div>
@@ -186,19 +176,21 @@
                 </div>
                 <!-- container -->
             </nav>
+            <div class="container">
+                <div class="license-container">
+                  <div class="licnse-item">صندوق سرمایه گذاری قابل معامله شاخصی کیان</div>
+                  <div class="licnse-item">ثبت شده به شماره 52867 نزد مرجع ثبت شرکت‌ها و مؤسسات غیر تجاری</div>
+                  <div class="licnse-item">ثبت شده به شماره11924 نزد سازمان بورس و اوراق بهادار </div>
+                  <div class="licnse-item">آغاز فعالیت: ۱401/۰3/08</div>
+            </div>
+            </div>
             <div>
                 
             </div>
             <div id="main-wrap">
                 
     
-        <script type="text/javascript">
-            $(window).load(function () {
-                $('#myModal').modal('show');
-            });
-        </script>
-        <div class="container">
-            <div class="modal fade" id="myModal" role="dialog">
+            <div class="modal fade in" id="myModal" role="dialog" style="display:block">
                 <div class="modal-dialog">
                     <div class="modal-content">
                         <div class="modal-header">
@@ -208,43 +200,44 @@
                             <p style="text-align: right;"><span style="color: #172b4d; font-family: Samim, Tahoma; font-size: 12px; background-color: #ffffff;">لطفا اطلاعات صندوق سرمایه&zwnj;گذاری قابل معامله شاخصی کیان را از طریق همین سایت ملاحظه و برای کسب اطلاعات بیشتر با شماره 02188770123 تماس حاصل فرمایید. لطفا جهت جلوگیری از گسترش بیماری کرونا از مراجعه حضوری خودداری فرموده و از طریق اپلیکیشن کیان دیجیتال ( به آدرس سایت </span><a class="external-link" style="font-size: 12px; font-family: Samim, Tahoma; color: #0052cc; text-decoration-line: none; cursor: pointer; background-color: #ffffff;" title="Follow link" href="http://kiandigital.com/" target="_blank" rel="nofollow noopener">kiandigital.com</a><span style="color: #172b4d; font-family: Samim, Tahoma; font-size: 12px; background-color: #ffffff;">) کلیه فرآیندهای ثبت نام، خرید و فروش را به .صورت کاملا غیرحضوری و آنلاین انجام دهید</span></p>
                         </div>
                         <div class="modal-footer">
-                            <button type="button" class="btn btn-default pull-left" data-dismiss="modal">بستن</button>
+                            <script>
+                                function closeModal() {
+                                    let myModalElement = $("#myModal");
+                                    let backdropElement = $("#modal-backdrop-overlay");
+
+                                    myModalElement.addClass('out');
+                                    backdropElement.addClass('out');
+
+                                    myModalElement.removeClass('in');
+                                    backdropElement.removeClass('in');
+
+                                    setTimeout(() => {
+                                        myModalElement.css('display', 'none');
+                                        backdropElement.css('display', 'none');
+                                    },500)
+                                }
+                            </script>
+                            <button type="button" class="btn btn-default pull-left" data-dismiss="modal" onclick="closeModal()">بستن</button>
                         </div>
                     </div>
       
                 </div>
             </div>
-  
-        </div>
     
-        <style>
-            .imgbox {
-                display: grid;
-                height: 100%;
-            }
-            .center-fit {
-                max-width: 100%;
-                width: 100%;
-                max-height: 100%;
-                margin: auto;
-                object-fit: cover;
-            }
-        </style>
-        <div class="imgbox">
-            <img class="center-fit" src="/content/file?key=Banner.Image">
-        </div>
-    
+      <div class="carousel-container">
+          
+                  <div class="mySlides animate">
+                    <img src="/content/file?key=Slider.Image.1" alt="slide" />
+                  </div>
+             
+  <div class="dots-container">
+        
+                  <span class="dots" value=1></span>
+             
+  </div>
+</div>
+ 
                 
-    <!--nav-navbar-->
-    
-    <nav class="navbar navbar-dark yamm">
-        <div class="container text-center">
-            <div class="row" id="navNavbar"></div>
-        </div>
-    </nav>
-    
-    <!--nav-navbar-->
-
                 <div id="content-wrap" class="container">
                     <div class="row system-message">
                         <div class="col-md-3">
@@ -262,168 +255,456 @@
                         </div>
                         
     <div class="container">
-        
-            <div class="row">
-                <div class="col-xs-12 col-md-4">
-                    <div class="content-box box-default animated fadeIn animation-delay-12">    
-                        <div>مدیر: شرکت مشاور سرمایه گذاری پرتو آفتاب کیان</div>
-<div>متولی: موسسه حسابرسی بهراد مشار</div>
-<div>حسابرس: موسسه حسابرسی بیات رایان</div>
-<div>بازارگردان:صندوق اختصاصی بازارگردانی کیان</div>
-<div>مدیر سرمایه گذاری: آقای سهندی، خانم قصابی، آقای دم ثنا</div>
-<div>&nbsp;</div>
-                    </div>
-                </div>
-                <div class="col-xs-12 col-md-4">
-                    <div class="content-box box-default animated fadeIn animation-delay-12">
-                        <div>
-                            تاریخ محاسبه:
-                            <span class="pid-0" id="date"></span>
-                        </div>
-                        <div>
-                            صدور:
-                            <span class="pid-0" id="purchase"></span>
-                        </div>
-                        <div>
-                            ابطال:
-                            <span class="pid-0" id="redeption"></span>
-                        </div>
-                        <div>
-                            آماری:
-                            <span class="pid-0" id="statistical"></span>
-                        </div>    
-                    </div>
-                </div>
-                <div class="col-xs-12 col-md-4">
-                    <div class="content-box box-default animated fadeIn animation-delay-12">
-                        <div>
-                            <div>
-                                کل ارزش خالص:
-                                <span class="pid-0" id="total-net"></span>
-                            </div>
-                            <div>
-                                تعداد واحدها:
-                                <span class="pid-0" id="total-unit-count"></span>
-                            </div>
-                            <div>
-                                تعداد واحدها ممتاز:
-                                <span class="pid-0" id="total-preferred-unit-count"></span>
-                            </div>
-                            <div>
-                                تعداد واحدها عادی:
-                                <span class="pid-0" id="total-common-unit-count"></span>
-                            </div>
-                        </div>
-                    </div>
-                </div>        
-            </div>
-        
 
-        <div class="row">
-            <h3 class="title">اخبار</h3>
-            <div class="col-md-12">
-                
-                <div class="news-item" >
-                    <a href="/news/6">
-                        <span dir="ltr">۱۴۰۲/۱/۲۶</span>
-                        <span style="padding: 0 3px 0 3px;">&#8212;</span> 
-                        <span>
-                            افزایش سقف واحد های سرمایه گذاری
-                        </span>
-                    </a>
-                </div>
-                
-                <div class="news-item" >
-                    <a href="/news/5">
-                        <span dir="ltr">۱۴۰۱/۵/۲۶</span>
-                        <span style="padding: 0 3px 0 3px;">&#8212;</span> 
-                        <span>
-                            لیست صنایع کیان
-                        </span>
-                    </a>
-                </div>
-                
-                <div class="news-item" >
-                    <a href="/news/3">
-                        <span dir="ltr">۱۴۰۱/۳/۸</span>
-                        <span style="padding: 0 3px 0 3px;">&#8212;</span> 
-                        <span>
-                            دریافت مجوز شروع فعالیت صندوق شاخصی هم وزن کیان
-                        </span>
-                    </a>
-                </div>
-                
-                <div class="news-item" >
-                    <a href="/news/2">
-                        <span dir="ltr">۱۴۰۱/۳/۴</span>
-                        <span style="padding: 0 3px 0 3px;">&#8212;</span> 
-                        <span>
-                            پایان پذیره‌نویسی صندوق شاخصی هم وزن کیان
-                        </span>
-                    </a>
-                </div>
-                
-                <div class="news-item" >
-                    <a href="/news/1">
-                        <span dir="ltr">۱۴۰۱/۲/۲۴</span>
-                        <span style="padding: 0 3px 0 3px;">&#8212;</span> 
-                        <span>
-                            شروع فرایند پذیره ‎نویسی صندوق شاخصی هم وزن کیان
-                        </span>
-                    </a>
-                </div>
-                
+        
+             <strong class="title-block">ارکان صندوق</strong>
+        <div class="portfolio-roles-container">
+            <div class="move-right">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="transform: rotate(180deg);">
+                <path d="M15 6L9 12L15 18" stroke="#242424" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </div>
+             <div class="roles-container">
+                 
+                      <div class="roles-item">
+                                  <div class="role-info">
+                                    <div class="role-title">مدیر</div>
+                                    <div class="role-description">شرکت مشاور سرمایه گذاری پرتو آفتاب کیان</div>
+                                  </div>
+                             </div>
+                     
+                     <div class="roles-item">
+                              <div class="role-info">
+                                <div class="role-title">متولی</div>
+                                 <div class="role-description">موسسه حسابرسی بهرادمشار</div>
+                              </div>
+                         </div>
+                  
+                  <div class="roles-item">
+                              <div class="role-info">
+                                <div class="role-title">حسابرس</div>
+                                <div class="role-description">موسسه حسابرسی بیات رایان</div>
+                              </div>
+                         </div>
+                  
+                  <div class="roles-item">
+                              <div class="role-info">
+                                <div class="role-title">بازارگردان</div>
+                                <div class="role-description">صندوق اختصاصی بازارگردانی کیان</div>
+                              </div>
+                         </div>
+                  
+                    <div class="roles-item">
+                              <div class="role-info">
+                                <div class="role-title">مدیر سرمایه‌گذاری</div>
+                                <div class="role-description">آقای سهندی، آقای مهدی محمدی، آقای دم ثنا
+ </div>
+                              </div>
+                         </div>
+                 
+        
+            </div>
+             <div class="move-left">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M15 6L9 12L15 18" stroke="#242424" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
             </div>
         </div>
+
+        
+
+    <div class="row" id="live-data" style="display:none">
+            <strong class="title-block" id="live-title"></strong>
+         <div class="live-data">
+      <div class="live-data-items">
+        <div style="font-size: 14px;">قیمت صدور هر واحد سرمایه گذاری</div>
+        <strong class="purchase-live-price live-box" id="purchase-live-price"></strong>
+      </div>
+      <div class="live-data-items">
+        <div style="font-size: 14px;">قیمت ابطال هر واحد سرمایه گذاری</div>
+        <strong class="redemption-live-price live-box" id="redemption-live-price"></strong>
+      </div>
+        </div>
+    </div>
+   
+
+
         
         
-            <div class="row">
-                <div id="navps-charts"></div>
+        <strong class="title-block">آخرین NAV محاسبه شده</strong>
+ <div class="row">
+  <div class="fund-details">
+     <div class="fund-item">
+       <div class="img"><img class="fund-logo" src="../../../../assets/img/Image Pasted at 2023-5-28 21-49555.png" alt=""></div>
+       <div class="details">
+       <div class="content-title">تاریخ محاسبه</div>
+       <strong class="content-value pid-0" id="date"></strong>
+     </div>
+   </div>
+         <div class="fund-item">
+       <div class="img"><img class="fund-logo"  src="../../../../assets/img/Image Pasted at 2023-5-28 21-49.png" alt=""></div>
+       <div class="details">
+       <div class="content-title">صدور</div>
+       <strong class="content-value pid-0" id="purchase"></strong>
+     </div>
+   </div>
+         <div class="fund-item">
+       <div class="img"><img class="fund-logo"  src="../../../../assets/img/Image Pasted at 2023-5-28 21-492.png" alt=""></div>
+       <div class="details">
+       <div class="content-title">ابطال</div>
+       <strong class="content-value pid-0" id="redeption"></strong>
+     </div>
+   </div>
+         <div class="fund-item">
+       <div class="img"><img class="fund-logo"  src="../../../../assets/img/Image Pasted at 2023-5-28 21-47.png" alt=""></div>
+       <div class="details">
+       <div class="content-title">آماری</div>
+       <strong class="content-value pid-0" id="statistical"></strong>
+     </div>
+   </div>
+         <div class="fund-item">
+       <div class="img"><img class="fund-logo"  src="../../../../assets/img/Image Pasted at 2023-5-28 21-471.png" alt=""></div>
+       <div class="details">
+       <div class="content-title">کل ارزش خالص</div>
+       <strong class="content-value pid-0" id="total-net"></strong>
+     </div>
+   </div>
+         <div class="fund-item">
+       <div class="img"><img class="fund-logo"  src="../../../../assets/img/Image Pasted at 2023-5-28 21-50.png" alt=""></div>
+       <div class="details">
+       <div class="content-title">تعداد واحدها</div>
+       <strong class="content-value pid-0" id="total-unit-count"></strong>
+     </div>
+     </div>
+  </div>
+ </div>
+
+        <div class="filter-block">
+              <strong class="title-block">روندNAV</strong>
+            <div class="filter">
+                <div class="filter-item" id="navps-six-months">شش ماهه</div>
+                <div class="filter-item" id="navps-yearly">یک ساله</div>
+                <div class="filter-item" id="navps-beginning-of-activity">از ابتدای فعالیت</div>
+            </div>
+        </div>
+            <div>
+                <div id="navps-charts" style="margin-bottom: 15px;"></div>
             
             </div>
-            <div class="row">
-                <div class="col-lg-6" style="direction: ltr">
-                    <div id="dailyvalue" style="width: 100%; height: 300px"></div>
+            <div class="chart-container">
+                <strong class="title-block dailyvalue-title">ترکیب دارایی</strong>
+                <strong class="title-block assetstatusbyindustry-title">سهم صنایع در سبد دارایی</strong>
+                <div class="col-lg-6 dailyvalue-container" style="direction: ltr">
+                    <div id="dailyvalue"></div>
+                    <div id="dailyValuPercentage"></div>
                 </div>
-                <div class="col-lg-6" style="direction: ltr">
-                    <div id="assetstatusbyindustry" style="width: 100%; height: 300px"></div>
+                <div class="col-lg-6 assetstatusbyindustry-container" style="direction: ltr">
+                    <div id="assetstatusbyindustry"></div>
+                    <div id="assetstatusbyindustryPercentage"></div>
                 </div>
             </div>
             <br/><br/>
-            <h3>روند ارزش خالص دارائی‌های ترکیبی صندوق سرمایه گذاری قابل معامله شاخصی کیان</h3>
+                <div class="filter-block">
+              <strong class="title-block">روند خالص ارزش دارایی‌های ترکیبی</strong>
+            <div class="filter">
+                <div class="filter-item" id="netassetvalue-six-months">شش ماهه</div>
+                <div class="filter-item" id="netassetvalue-yearly">یک ساله</div>
+                <div class="filter-item" id="netassetvalue-beginning-of-activity">از ابتدای فعالیت</div>
+            </div>
+        </div>
             <div id="netassetvalue-pid-0" class="line-chart-container"></div>
         
-    </div>
     
+    </div>
+        <div class="notification-block">
+            <div class="news-block">
+             <strong class="title-block">اخبار</strong>
+            <div class="news">
+               
+                
+                <div class="news-item" >
+                    <a class="news-part" href="/news/6">
+                        <div class ="news-title">
+                            <strong>افزایش سقف واحد های سرمایه گذاری</strong> 
+                        </div>
+                        <div class="news-date" dir="ltr">۱۴۰۲/۱/۲۶</div>
+                    </a>
+                </div>
+                
+                <div class="news-item" >
+                    <a class="news-part" href="/news/5">
+                        <div class ="news-title">
+                            <strong>لیست صنایع کیان</strong> 
+                        </div>
+                        <div class="news-date" dir="ltr">۱۴۰۱/۵/۲۶</div>
+                    </a>
+                </div>
+                
+                <div class="news-item" >
+                    <a class="news-part" href="/news/3">
+                        <div class ="news-title">
+                            <strong>دریافت مجوز شروع فعالیت صندوق شاخصی هم وزن کیان</strong> 
+                        </div>
+                        <div class="news-date" dir="ltr">۱۴۰۱/۳/۸</div>
+                    </a>
+                </div>
+                
+                <div class="news-item" >
+                    <a class="news-part" href="/news/2">
+                        <div class ="news-title">
+                            <strong>پایان پذیره‌نویسی صندوق شاخصی هم وزن کیان</strong> 
+                        </div>
+                        <div class="news-date" dir="ltr">۱۴۰۱/۳/۴</div>
+                    </a>
+                </div>
+                
+                <div class="news-item" >
+                    <a class="news-part" href="/news/1">
+                        <div class ="news-title">
+                            <strong>شروع فرایند پذیره ‎نویسی صندوق شاخصی هم وزن کیان</strong> 
+                        </div>
+                        <div class="news-date" dir="ltr">۱۴۰۱/۲/۲۴</div>
+                    </a>
+                </div>
+                
+            </div>
+            </div>
+               <div class="relatedlink">
+             <strong class="title-block">گزارش‌های مالی</strong>
+                  <div class="news">
+                
+                <div class="news-item" >
+                    <a class="news-part" href="/reports/view/1">
+                        <div class ="news-title">
+                            <strong>گزارش صورت وضعيت پورتفوي ماهانه منتهي به 1401/03/31 صندوق سرمايه گذاري قابل معامله شاخصی کيان	</strong> 
+                        </div>
+                        <div class="news-date" dir="ltr">۱۴۰۱/۴/۹</div>
+                    </a>
+                </div>
+                
+                <div class="news-item" >
+                    <a class="news-part" href="/reports/view/2">
+                        <div class ="news-title">
+                            <strong>صورتجلسه مجمع موسس صندوق سرمایه گذاری قابل معامله شاخصی کیان مورخ 1400/07/12 ساعت 12:00	
+</strong> 
+                        </div>
+                        <div class="news-date" dir="ltr">۱۴۰۱/۴/۱۱</div>
+                    </a>
+                </div>
+                
+                <div class="news-item" >
+                    <a class="news-part" href="/reports/view/3">
+                        <div class ="news-title">
+                            <strong>گزارش صورت مالی صندوق سرمایه گذاری قابل معامله شاخصی کیان   منتهی به 1401/3/31	
+</strong> 
+                        </div>
+                        <div class="news-date" dir="ltr">۱۴۰۱/۵/۱</div>
+                    </a>
+                </div>
+                
+                <div class="news-item" >
+                    <a class="news-part" href="/reports/view/4">
+                        <div class ="news-title">
+                            <strong>گزارش عملکرد صندوق سرمایه گذاری قابل معامله شاخصی کیان   منتهی به 1401/03/31
+</strong> 
+                        </div>
+                        <div class="news-date" dir="ltr">۱۴۰۱/۵/۱</div>
+                    </a>
+                </div>
+                
+                <div class="news-item" >
+                    <a class="news-part" href="/reports/view/5">
+                        <div class ="news-title">
+                            <strong>آگهی دعوت به مجمع صندوق سرمایه گذاری  قابل معامله شاخصی کیان مورخ 1401/05/18 ساعت 14:00</strong> 
+                        </div>
+                        <div class="news-date" dir="ltr">۱۴۰۱/۵/۵</div>
+                    </a>
+                </div>
+                
+                <div class="news-item" >
+                    <a class="news-part" href="/reports/view/6">
+                        <div class ="news-title">
+                            <strong>گزارش صورت وضعيت پورتفوي ماهانه منتهي به 1401/04/31 صندوق سرمايه گذاري قابل معامله شاخصی کيان</strong> 
+                        </div>
+                        <div class="news-date" dir="ltr">۱۴۰۱/۵/۱۰</div>
+                    </a>
+                </div>
+                
+                <div class="news-item" >
+                    <a class="news-part" href="/reports/view/7">
+                        <div class ="news-title">
+                            <strong>آگهی دعوت به مجمع صندوق سرمایه گذاری قابل معامله شاخصی کیان مورخ 1401/05/30 (اصلاحیه )</strong> 
+                        </div>
+                        <div class="news-date" dir="ltr">۱۴۰۱/۵/۱۸</div>
+                    </a>
+                </div>
+                
+                <div class="news-item" >
+                    <a class="news-part" href="/reports/view/8">
+                        <div class ="news-title">
+                            <strong>لیست حاضرین در مجمع مورخ 1401/05/30</strong> 
+                        </div>
+                        <div class="news-date" dir="ltr">۱۴۰۱/۵/۳۰</div>
+                    </a>
+                </div>
+                
+                <div class="news-item-continue" >
+                    <a class="news-continue-btn" href="/reports/financial">
+                     <div class="news-date-continue" dir="ltr">...ادامه</div>
+                    </a>
+                </div>
+                
+            </div>
+            </div>
+        </div>
+    <div>
+        
+        <div class="modal-backdrop fade in" id="modal-backdrop-overlay"></div>
+    
+    </div>
+
     <script type="text/javascript" src="/assets/js/loadchart.js?1"></script>
     <script type="text/javascript">
 
         $(document).ready(function () {
+
+            $(".move-right").hide();
+
             var navpAction = "/api/v1/overall/navps.json";
             var dailyValueAction = "/api/v1/overall/dailyvalue.json";
             var assetStatus = "/api/v1/overall/asset/assetbyindustry.json";
             var navEtf = "/api/v1/overall/navetf.json";
 
             
-                    var realTimeNavData = $("#navNavbar");
+            $("#live-data").show();
+            $(".portfolio-select").hide();
                     LoadNavNavbar();
                     setInterval(LoadNavNavbar, 120000);
 
                     function LoadNavNavbar() {
                         $.getJSON(navEtf, function (data) {
-                            var htmlString = '<div class="col-md-4"><label> اطلاعات لحظه‌ای: ' + data.date_time.toString() + '</label></div>';
-                            htmlString += '<div class="col-md-4"><label> قیمت صدور هر واحد سرمایه گذاری: ' + data.purchase_price.toString() + " ریال" + '</label></div>';
-                            htmlString += '<div class="col-md-4"><label> قیمت ابطال هر واحد سرمایه گذاری: ' + data.redemption_price.toString() + " ریال" + '</label></div>';
-                            realTimeNavData.html(htmlString);
+                            $("#live-title").text('اطلاعات لحظه‌ای:' + data.date_time.toString());
+                            $("#purchase-live-price").text(data.purchase_price.toString() + " ریال");
+                            $("#redemption-live-price").text(data.redemption_price.toString() + " ریال");
                         });
                     }
 
             
             var loadChart = new LoadChart(navpAction, dailyValueAction, assetStatus, 3);
             loadChart.Load();
-        });
 
+            $(".flex-select .move-left").click(() => {
+                var scrollDistance = 220;
+                $(".flex-select .move-right").show();
+                $(".item-container").animate({
+                    scrollLeft: '-=' + scrollDistance
+                }, 500);
+            });
+
+            $(".flex-select .move-right").click(() => {
+                var scrollDistance = 220;
+                $(".item-container").animate({
+                    scrollLeft: '+=' + scrollDistance
+                }, 500, () => {
+                    if ($(".item-container").scrollLeft() == 0) {
+                        $(".flex-select .move-right").hide();
+                    }
+                });
+            });
+
+            $(".portfolio-roles-container .move-left").click(() => {
+                var scrollDistance = 220;
+                $(".portfolio-roles-container .move-right").show();
+                $(".roles-container").animate({
+                    scrollLeft: '-=' + scrollDistance
+                }, 500);
+            });
+
+            $(".portfolio-roles-container .move-right").click(() => {
+                var scrollDistance = 220;
+                $(".roles-container").animate({
+                    scrollLeft: '+=' + scrollDistance
+                }, 500, () => {
+                    if ($(".roles-container").scrollLeft() == 0) {
+                        $(".portfolio-roles-container .move-right").hide();
+                    }
+                });
+            });
+
+            let slides = document.querySelectorAll(".mySlides");
+            let dots = document.querySelectorAll(".dots");
+            if (slides.length > 0 && dots.length > 0) {
+                let slideIndex = 0;
+                showSlides();
+                $(".next").click(() => {
+                    nextSlide();
+                });
+
+                $(".prev").click(() => {
+                    prevSlide();
+                });
+
+                $(".dots").click((event) => {
+                    var n = event.target.attributes.value.value;
+                    currentSlide(n);
+                });
+
+                function nextSlide() {
+                    slideIndex++;
+                    showSlides();
+                    timer = _timer;
+                }
+
+                function prevSlide() {
+                    slideIndex--;
+                    showSlides();
+                    timer = _timer;
+                }
+
+                function currentSlide(n) {
+                    slideIndex = n - 1;
+                    showSlides();
+                    timer = _timer;
+                }
+
+
+                function showSlides() {
+
+
+                    if (slideIndex > slides.length - 1) slideIndex = 0;
+                    if (slideIndex < 0) slideIndex = slides.length - 1;
+
+                    slides.forEach((slide) => {
+                        slide.style.display = "none";
+                    });
+
+                    slides[slideIndex].style.display = "block";
+
+                    dots.forEach((dot) => {
+                        dot.classList.remove("active");
+                    });
+
+                    dots[slideIndex].classList.add("active");
+
+                }
+                let timer = 7; // sec
+                const _timer = timer;
+
+                setInterval(() => {
+                    timer--;
+
+                    if (timer < 1) {
+                        nextSlide();
+                        timer = _timer; // reset timer
+                    }
+                }, 1000); // 1sec
+            }
+         });   
     </script>
+<style>
+  
+
+</style>
 
                     </div>
                 </div>
@@ -435,7 +716,7 @@
                         <div class="col-xs-12">
                             <div class="col-xs-6 col-md-2">
                                 <ul class="list-unstyled ">
-                                    <li class="dropdown">
+                                    <li>
                                         <h6>قوانین و دستور العمل ها</h6>
                                     </li>
                                     
@@ -444,9 +725,9 @@
                                 </ul>
                             </div>
                             
-                            <div class="col-xs-6 col-md-3">
+                            <div class="col-xs-6 col-md-2">
                                 <ul class="list-unstyled ">
-                                    <li class="dropdown">
+                                    <li>
                                         <h6>فرم‌ها</h6>
                                     </li>
                                     <li><a href="/forms/customers">مشخصات مشتریان</a></li>
@@ -455,9 +736,9 @@
                                 </ul>
                             </div>
                             
-                            <div class="col-xs-6 col-md-3">
+                            <div class="col-xs-6 col-md-2">
                                 <ul class="list-unstyled ">
-                                    <li class="dropdown">
+                                    <li>
                                         <h6>گزارش ها</h6>
                                     </li>
                                     
@@ -477,7 +758,7 @@
                             
                             <div class="col-xs-6 col-md-2">
                                 <ul class="list-unstyled ">
-                                    <li class="dropdown">
+                                    <li>
                                         <h6>ارکان</h6>
                                     </li>
                                     <li><a href="/portfolio-role/managers">مدیر</a></li>
@@ -492,35 +773,30 @@
                             
                             <div class="col-xs-6 col-md-2">
                                 <ul class="list-unstyled ">
-                                    <li class="dropdown">
+                                    <li>
                                         <h6>درباره ما</h6>
                                     </li>
                                     <li><a href="/about/introduction">معرفی شرکت</a></li>
                                     
                                 </ul>
                             </div>
+                                 <div class="col-xs-6 col-md-2">
+                                <ul class="list-unstyled ">
+                                    <li>
+                                        <h6>نمادها</h6>
+                                    </li>
+                                    <li><a referrerpolicy="origin" target="_blank" href="https://trustseal.enamad.ir/?id=259878&amp;Code=2eslZds0Fq5TCH0XM5U4"><img referrerpolicy="origin" src="https://Trustseal.eNamad.ir/logo.aspx?id=259878&amp;Code=2eslZds0Fq5TCH0XM5U4" alt="" style="cursor:pointer" id="2eslZds0Fq5TCH0XM5U4"></a></li>
+                                    <li><img referrerpolicy='origin' id = 'nbqeoeuksizpsizpwlaofukz' style = 'cursor:pointer' onclick = 'window.open("https://logo.samandehi.ir/Verify.aspx?id=289946&p=uiwkmcsipfvlpfvlaodsgvka", "Popup","toolbar=no, scrollbars=no, location=no, statusbar=no, menubar=no, resizable=0, width=450, height=630, top=30")' alt = 'logo-samandehi' src = 'https://logo.samandehi.ir/logo.aspx?id=289946&p=odrfaqgwbsiybsiyshwlwlbq' /></li>
+                                </ul>
+                            </div>
                         </div>
                         <!-- row -->
                     </div>
-                    <!-- container -->
-                    <div class="row">
-                        <div class="col-xs-1" style="position: absolute; bottom: 5%; left: 3%;">
-                            <a referrerpolicy="origin" target="_blank" href="https://trustseal.enamad.ir/?id=259878&amp;Code=2eslZds0Fq5TCH0XM5U4"><img referrerpolicy="origin" src="https://Trustseal.eNamad.ir/logo.aspx?id=259878&amp;Code=2eslZds0Fq5TCH0XM5U4" alt="" style="cursor:pointer" id="2eslZds0Fq5TCH0XM5U4"></a>
-                        </div>
-                        <div class="col-xs-1" style="position: absolute; bottom: 5%; left: 12%">
-                            <img referrerpolicy='origin' id = 'nbqeoeuksizpsizpwlaofukz' style = 'cursor:pointer' onclick = 'window.open("https://logo.samandehi.ir/Verify.aspx?id=289946&p=uiwkmcsipfvlpfvlaodsgvka", "Popup","toolbar=no, scrollbars=no, location=no, statusbar=no, menubar=no, resizable=0, width=450, height=630, top=30")' alt = 'logo-samandehi' src = 'https://logo.samandehi.ir/logo.aspx?id=289946&p=odrfaqgwbsiybsiyshwlwlbq' />
-                        </div>
-                    </div>
                 </div>
+                <hr style="margin: 0 2%;background-color: #A4AECF;opacity: 0.5;height: 1px;margin-bottom: 9px;"/>
+                 <span class="copy"> &copy; 2024 -  طراحی و تولید توسط شرکت <a href="http://mabnadp.com/" target="_blank">پردازش اطلاعات مالی مبنا</a></span>
+                <span class="version">  نسخه 2.15 </span>
             </aside>
-            <!-- footer-widgets -->
-            <footer id="footer">
-
-                <p>&copy; 2023 طراحی و تولید توسط شرکت <a href="http://mabnadp.com/" target="_blank">پردازش اطلاعات مالی مبنا</a></p>
-                نگارش 2.5
-                <p></p>
-            </footer>
-
         </div>
         <!-- boxed -->
     </div>
@@ -569,5 +845,8 @@
             //$('.time').mask("00:00");
         });
     </script>
+    <style>
+
+    </style>
 </body>
 </html>

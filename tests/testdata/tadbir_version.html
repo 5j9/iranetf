@@ -17,7 +17,7 @@
     <link href="/Content/Style/CustomStyles.css" rel="stylesheet" />
     <script src="/Scripts/jquery-3.6.1.min.js" type="text/javascript"></script>
     <script src="/Scripts/jquery-ui.min.js" type="text/javascript"></script>
-    <script src="/Scripts/jquery-migrate-1.2.1.js" type="text/javascript"></script>
+    <script src="/Scripts/jquery-migrate-3.4.1.min.js" type="text/javascript"></script>
 
     <script type="text/javascript">
         function alertx(msg, title, btnText) {
@@ -90,6 +90,7 @@
                                 <li class="nav-item"><a class='dropdown-item ' href="/Pillar/Auditor">حسابرس صندوق</a></li>
                                 <li class="nav-item"><a class='dropdown-item ' href="/Pillar/InvestmentManager">مدیر سرمایه‌گذاری</a></li>
                                 <li class="nav-item"><a class='dropdown-item ' href="/Pillar/Manager">مدیر صندوق</a></li>
+                                <li class="nav-item"><a class='dropdown-item ' href="/Pillar/OperationManager">مدیر بهره برداری</a></li>
                                 <li class="nav-item"><a class='dropdown-item ' href="/Pillar/Trustee">متولی صندوق</a></li>
                                 <li class="nav-item"><a class='dropdown-item ' href="/Pillar/FundBroker">کارگزار صندوق</a></li>
                                 <li class="nav-item"><a class='dropdown-item ' href="/Pillar/MarketMaker">بازارگردان</a></li>
@@ -104,10 +105,12 @@
                                 <li class="nav-item"><a class='dropdown-item ' href="/Reports/FundSuperUnits">دارندگان واحدهای ممتاز</a></li>
                                 <li class="nav-item"><a class='dropdown-item ' href="/Reports/FundFinancialStatements">صورت‌های مالی صندوق</a></li>
                                 <li class="nav-item"><a class='dropdown-item ' href="/Reports/FundMeeting">مجامع صندوق</a></li>
+                                <li class="nav-item"><a class='dropdown-item ' href="/Reports/ManagerReports">گزارشات مدیر</a></li>
                                         <li class="nav-item"><a class="dropdown-item " href="/Reports/FundEfficiencyForDifferentPeriods">بازده دوره‌ای صندوق</a></li>
                                         <li class="nav-item"><a class="dropdown-item " href="/Reports/FundDailyEfficiency">بازدهی روزانه صندوق</a></li>
                                 <li class="nav-item"><a class='dropdown-item ' href="/Reports/FundAssetDistributionForDifferentPeriods">ترکیب دارایی‌های دوره‌ای</a></li>
                                 <li class="nav-item"><a class='dropdown-item ' href="/Reports/FundDailyAssetDistribution">ترکیب دارایی‌های روزانه</a></li>
+                                <li class="nav-item"><a class='dropdown-item ' href="/Reports/FundStorageValueDividendProfitReport">گزارش تقسیم ذخیره تغییر ارزش</a></li>
                 </ul>
             </div>
 
@@ -197,6 +200,7 @@
 
 <div class="row top-cards  pt-3 m-0 mb-3">
 </div>
+
 <div class="row mb-3">
  
 
@@ -207,35 +211,35 @@
                     <div class="data-box">
                         <div class="data-row" style=display:none>
                             <div class="data-label">تاریخ محاسبه NAV صندوق</div>
-                            <div class="data-value" id="Date">۱۴۰۲/۰۷/۰۹</div>
+                            <div class="data-value" id="Date">۱۴۰۳/۰۲/۳۱</div>
                         </div>
                         <div class="data-row" >
                             <div class="data-label">تعداد واحدهای سرمایه گذاری</div>
-                            <div class="data-value">۳۳۲,۵۵۹,۲۲۸</div>
+                            <div class="data-value">۲۹۶,۲۱۸,۰۹۹</div>
                         </div>
                         <div class="data-row" >
                             <div class="data-label">تعداد واحدهای باقی مانده</div>
-                            <div class="data-value">۶۶۷,۴۴۰,۷۷۲ </div>
+                            <div class="data-value">۷۰۳,۷۸۱,۹۰۱ </div>
                         </div>
                         <div class="data-row" >
                             <div class="data-label">کل خالص ارزش دارایی‌ها (ریال)</div>
-                            <div class="data-value">۵,۵۵۲,۱۸۲,۶۷۰,۶۹۹</div>
+                            <div class="data-value">۴,۹۲۸,۶۱۱,۹۶۸,۸۸۹</div>
                         </div>
                         <div class="data-row" >
                             <div class="data-label">قیمت صدور هر واحد (ریال)</div>
-                            <div class="data-value" id="SubscriptionNAV" style="color: #85ca5f;">۱۶,۸۹۰</div>
+                            <div class="data-value" id="SubscriptionNAV" style="color: #85ca5f;">۱۶,۸۲۲</div>
                         </div>
                         <div class="data-row" >
                             <div class="data-label">قیمت ابطال هر واحد (ریال)</div>
-                            <div class="data-value" id="CancelNAV" style="color: #d25d5e;">۱۶,۷۸۳</div>
+                            <div class="data-value" id="CancelNAV" style="color: #d25d5e;">۱۶,۷۱۹</div>
                         </div>
                         <div class="data-row" >
                             <div class="data-label">قیمت آماری هر واحد (ریال)</div>
-                            <div class="data-value" id="EsmiNAV">۱۶,۷۸۳</div>
+                            <div class="data-value" id="EsmiNAV">۱۶,۷۱۹</div>
                         </div>
                         <div class="data-row" id="trdate" style=display:none>
                             <div class="data-label">تاریخ انتشار</div>
-                            <div class="data-value datatype-date" id="PublishDate">۱۴۰۲/۰۷/۱۰ ۱۵:۵۸:۱۲</div>
+                            <div class="data-value datatype-date" id="PublishDate">۱۴۰۳/۰۳/۰۱ ۱۵:۵۸:۱۴</div>
                         </div>
                     </div>
                 </div>
@@ -263,8 +267,10 @@
 
                                 <div class="data-row" >
                                     <div class="data-label">مدیران سرمایه‌گذاری</div>
-                                    <div class="data-value"><a href="/Pillar/InvestmentManager" target="_blank">شهاب خدابخشیان خوانساری، معصومه میرمحمدی، مهدی رسولی</a></div>
+                                    <div class="data-value"><a href="/Pillar/InvestmentManager" target="_blank">شهاب خدابخشیان خوانساری، معصومه میرمحمدی، محسن مهدی نسب</a></div>
                                 </div>
+
+
 
 
 
@@ -293,10 +299,16 @@
 
 
 <script type="text/javascript">
+    var basketId = 1;
     function publishNAV() {
-        var isEtfMode=true;
-        var isLeveragedMode=false;
-        if (isEtfMode) {
+
+        var isEtfMode =true;
+        var isETFMultiNavMode=false;
+        var isLeveragedMode =false;
+        if (isETFMultiNavMode) {
+            getETFMultiNavData();
+        }
+        else if (isEtfMode) {
             $.ajax({
                 url: '/Fund/GetETFNAV',
                 type: 'GET',
@@ -342,6 +354,57 @@
         }
     }
     var refreshId = setInterval("publishNAV()", 5000);
+
+    $('#basketId').on('change', function () {
+        basketId = this.value;
+        var message = "در حال دریافت اطلاعات";
+        $('#SubscriptionNAV').html(message);
+        $('#CancelNAV').html(message);
+        $('#EsmiNAV').html(message);
+        $('#trdate').show();
+        $('#PublishDate').html(message);
+        $('#TotalUnit').html(message);
+        $('#MaxUnit').html(message);
+        $('#TotalNetAssetValue').html(message);
+        $('#FinalSubscriptionNAV').html(message);
+        $('#FinalCancelNAV').html(message);
+        $('#FinalEsmiNAV').html(message);
+        $('#Date').html(message);
+        $('#DailyTotalUnit').html(message);
+        $('#DailyTotalNetAssetValue').html(message);
+    });
+
+    function getETFMultiNavData() {
+        basketId = $("#basketId").val();
+        if (basketId == undefined) return;
+        $.ajax({
+            url: `/Fund/GetETFNAV?basketId=${basketId}`,
+                type: 'GET',
+                dataType: 'json',
+                cache: false,
+                success: function (results) {
+                    if (results !== "") {
+                        var obj = JSON.parse(results);
+                            $('#SubscriptionNAV').html(obj.subNav);
+                            $('#CancelNAV').html(obj.cancelNav);
+                            $('#EsmiNAV').html(obj.esmiNav);
+                            $('#trdate').show();
+                            $('#PublishDate').html(obj.publishDate);
+                            $('#TotalUnit').html(obj.totalUnit);
+                            $('#MaxUnit').html(obj.maxUnit);
+                            $('#TotalNetAssetValue').html(obj.totalNetAssetValue);
+                            $('#Date').html(obj.navDate);
+                            $('#FinalSubscriptionNAV').html(obj.finalSubscriptionNAV);
+                            $('#FinalCancelNAV').html(obj.finalCancelNAV);
+                            $('#FinalEsmiNAV').html(obj.finalEsmiNAV);
+                            $('#DailyTotalUnit').html(obj.dailyTotalUnit);
+                            $('#DailyTotalNetAssetValue').html(obj.dailyTotalNetAssetValue);
+                    }
+                },
+                error: function () {
+                }
+            });
+    }
 </script>
 
 </div>
@@ -353,16 +416,16 @@
         <div class="news-header">خبرها: </div>
         <div id="newsTitle">
                         <span class="news-span">
-                            [ ۱۴۰۲/۰۳/۲۳ ]
-                                <a target="_blank">تصمیمات مجمع صندوق مورخ ۱۴۰۲/۰۳/۲۰(تغییر هزینه متولی صندوق)</a>
+                            [ ۱۴۰۳/۰۲/۰۳ ]
+                                <a target="_blank">تصمیمات مجمع صندوق مورخ ۱۴۰۳/۰۲/۰۱ ساعت ۱۰:۳۰(تغییر هزینه های متولی و حسابرس صندوق)</a>
                         </span>
                         <span class="news-span">
-                            [ ۱۴۰۲/۰۳/۲۳ ]
-                                <a target="_blank">تصمیمات مجمع صندوق مورخ ۱۴۰۲/۰۳/۲۰(تغییر متولی صندوق)</a>
+                            [ ۱۴۰۳/۰۲/۰۳ ]
+                                <a target="_blank">تصمیمات مجمع صندوق مورخ ۱۴۰۳/۰۲/۰۱ساعت ۱۰:۰۰(تصویب ابلاغیه ۱۲۰۲۰۲۶۰ درخصوص وظایف حسابرس)</a>
                         </span>
                         <span class="news-span">
-                            [ ۱۴۰۲/۰۳/۲۰ ]
-                                <a target="_blank">اسامی حاضرین در مجمع مورخ ۱۴۰۲/۰۳/۲۰</a>
+                            [ ۱۴۰۳/۰۲/۰۳ ]
+                                <a target="_blank">تصمیمات مجمع صندوق مورخ ۱۴۰۳/۰۲/۰۱ ساعت ۰۹:۰۰ در خصوص تصویب صورتهای مالی صندوق</a>
                         </span>
 
         </div>
@@ -512,283 +575,283 @@
             <tbody>
                         <tr>
                             <td class="d-none d-lg-table-cell">۱</td>
-                            <td>۱۴۰۲/۰۷/۰۹</td>
-                            <td>۱۶,۸۰۲</td>
-                            <td>۱۶,۶۹۵</td>
-                            <td>۱۶,۶۹۵</td>
+                            <td>۱۴۰۳/۰۲/۳۱</td>
+                            <td>۱۶,۷۴۴</td>
+                            <td>۱۶,۶۳۸</td>
+                            <td>۱۶,۶۳۸</td>
                             <td class="d-none d-sm-table-cell" style="direction: ltr;">۰</td>
                             <td class="d-none d-md-table-cell">۰</td>
-                            <td class="d-none d-xl-table-cell">۴۲۲,۵۵۳,۷۵۴</td>
+                            <td class="d-none d-xl-table-cell">۴۴۳,۳۸۶,۷۵۴</td>
                             <td class="d-none d-md-table-cell">۰</td>
-                            <td class="d-none d-xl-table-cell">۸۹,۹۹۴,۵۲۶</td>
-                            <td class="d-none d-md-table-cell">۳۳۲,۵۵۹,۲۲۸</td>
-                            <td class="d-none d-sm-table-cell">۵,۵۵۲,۱۸۲,۶۷۰,۶۹۹</td>
+                            <td class="d-none d-xl-table-cell">۱۴۷,۱۶۸,۶۵۵</td>
+                            <td class="d-none d-md-table-cell">۲۹۶,۲۱۸,۰۹۹</td>
+                            <td class="d-none d-sm-table-cell">۴,۹۲۸,۶۱۱,۹۶۸,۸۸۹</td>
                         </tr>
                         <tr>
                             <td class="d-none d-lg-table-cell">۲</td>
-                            <td>۱۴۰۲/۰۷/۰۸</td>
-                            <td>۱۶,۹۳۵</td>
-                            <td>۱۶,۸۲۷</td>
-                            <td>۱۶,۸۲۷</td>
+                            <td>۱۴۰۳/۰۲/۳۰</td>
+                            <td>۱۶,۷۴۶</td>
+                            <td>۱۶,۶۴۰</td>
+                            <td>۱۶,۶۴۰</td>
                             <td class="d-none d-sm-table-cell" style="direction: ltr;">۰</td>
                             <td class="d-none d-md-table-cell">۰</td>
-                            <td class="d-none d-xl-table-cell">۴۲۲,۵۵۳,۷۵۴</td>
+                            <td class="d-none d-xl-table-cell">۴۴۳,۳۸۶,۷۵۴</td>
                             <td class="d-none d-md-table-cell">۰</td>
-                            <td class="d-none d-xl-table-cell">۸۹,۹۹۴,۵۲۶</td>
-                            <td class="d-none d-md-table-cell">۳۳۲,۵۵۹,۲۲۸</td>
-                            <td class="d-none d-sm-table-cell">۵,۵۹۶,۰۰۲,۹۹۲,۸۶۵</td>
+                            <td class="d-none d-xl-table-cell">۱۴۷,۱۶۸,۶۵۵</td>
+                            <td class="d-none d-md-table-cell">۲۹۶,۲۱۸,۰۹۹</td>
+                            <td class="d-none d-sm-table-cell">۴,۹۲۹,۲۱۵,۸۸۶,۹۸۶</td>
                         </tr>
                         <tr>
                             <td class="d-none d-lg-table-cell">۳</td>
-                            <td>۱۴۰۲/۰۷/۰۷</td>
-                            <td>۱۷,۰۷۱</td>
-                            <td>۱۶,۹۶۰</td>
-                            <td>۱۶,۹۶۰</td>
+                            <td>۱۴۰۳/۰۲/۲۹</td>
+                            <td>۱۷,۱۲۶</td>
+                            <td>۱۷,۰۱۸</td>
+                            <td>۱۷,۰۱۸</td>
                             <td class="d-none d-sm-table-cell" style="direction: ltr;">۰</td>
                             <td class="d-none d-md-table-cell">۰</td>
-                            <td class="d-none d-xl-table-cell">۴۲۲,۵۵۳,۷۵۴</td>
+                            <td class="d-none d-xl-table-cell">۴۴۳,۳۸۶,۷۵۴</td>
                             <td class="d-none d-md-table-cell">۰</td>
-                            <td class="d-none d-xl-table-cell">۸۹,۹۹۴,۵۲۶</td>
-                            <td class="d-none d-md-table-cell">۳۳۲,۵۵۹,۲۲۸</td>
-                            <td class="d-none d-sm-table-cell">۵,۶۴۰,۲۴۰,۸۶۷,۶۴۹</td>
+                            <td class="d-none d-xl-table-cell">۱۴۷,۱۶۸,۶۵۵</td>
+                            <td class="d-none d-md-table-cell">۲۹۶,۲۱۸,۰۹۹</td>
+                            <td class="d-none d-sm-table-cell">۵,۰۴۱,۰۶۲,۶۵۳,۷۱۲</td>
                         </tr>
                         <tr>
                             <td class="d-none d-lg-table-cell">۴</td>
-                            <td>۱۴۰۲/۰۷/۰۶</td>
-                            <td>۱۷,۰۷۱</td>
-                            <td>۱۶,۹۶۰</td>
-                            <td>۱۶,۹۶۰</td>
+                            <td>۱۴۰۳/۰۲/۲۸</td>
+                            <td>۱۷,۳۳۳</td>
+                            <td>۱۷,۲۲۲</td>
+                            <td>۱۷,۲۲۲</td>
                             <td class="d-none d-sm-table-cell" style="direction: ltr;">۰</td>
                             <td class="d-none d-md-table-cell">۰</td>
-                            <td class="d-none d-xl-table-cell">۴۲۲,۵۵۳,۷۵۴</td>
+                            <td class="d-none d-xl-table-cell">۴۴۳,۳۸۶,۷۵۴</td>
                             <td class="d-none d-md-table-cell">۰</td>
-                            <td class="d-none d-xl-table-cell">۸۹,۹۹۴,۵۲۶</td>
-                            <td class="d-none d-md-table-cell">۳۳۲,۵۵۹,۲۲۸</td>
-                            <td class="d-none d-sm-table-cell">۵,۶۴۰,۲۳۷,۷۹۴,۰۱۰</td>
+                            <td class="d-none d-xl-table-cell">۱۴۷,۱۶۸,۶۵۵</td>
+                            <td class="d-none d-md-table-cell">۲۹۶,۲۱۸,۰۹۹</td>
+                            <td class="d-none d-sm-table-cell">۵,۱۰۱,۶۱۰,۰۰۳,۳۷۹</td>
                         </tr>
                         <tr>
                             <td class="d-none d-lg-table-cell">۵</td>
-                            <td>۱۴۰۲/۰۷/۰۵</td>
-                            <td>۱۷,۰۷۵</td>
-                            <td>۱۶,۹۶۴</td>
-                            <td>۱۶,۹۶۴</td>
+                            <td>۱۴۰۳/۰۲/۲۷</td>
+                            <td>۱۷,۳۳۲</td>
+                            <td>۱۷,۲۲۲</td>
+                            <td>۱۷,۲۲۲</td>
                             <td class="d-none d-sm-table-cell" style="direction: ltr;">۰</td>
                             <td class="d-none d-md-table-cell">۰</td>
-                            <td class="d-none d-xl-table-cell">۴۲۲,۵۵۳,۷۵۴</td>
+                            <td class="d-none d-xl-table-cell">۴۴۳,۳۸۶,۷۵۴</td>
                             <td class="d-none d-md-table-cell">۰</td>
-                            <td class="d-none d-xl-table-cell">۸۹,۹۹۴,۵۲۶</td>
-                            <td class="d-none d-md-table-cell">۳۳۲,۵۵۹,۲۲۸</td>
-                            <td class="d-none d-sm-table-cell">۵,۶۴۱,۴۶۵,۸۹۹,۶۵۰</td>
+                            <td class="d-none d-xl-table-cell">۱۴۷,۱۶۸,۶۵۵</td>
+                            <td class="d-none d-md-table-cell">۲۹۶,۲۱۸,۰۹۹</td>
+                            <td class="d-none d-sm-table-cell">۵,۱۰۱,۴۹۴,۱۰۹,۹۰۷</td>
                         </tr>
                         <tr>
                             <td class="d-none d-lg-table-cell">۶</td>
-                            <td>۱۴۰۲/۰۷/۰۴</td>
-                            <td>۱۷,۰۴۰</td>
-                            <td>۱۶,۹۲۹</td>
-                            <td>۱۶,۹۲۹</td>
+                            <td>۱۴۰۳/۰۲/۲۶</td>
+                            <td>۱۷,۳۳۲</td>
+                            <td>۱۷,۲۲۲</td>
+                            <td>۱۷,۲۲۲</td>
                             <td class="d-none d-sm-table-cell" style="direction: ltr;">۰</td>
                             <td class="d-none d-md-table-cell">۰</td>
-                            <td class="d-none d-xl-table-cell">۴۲۲,۵۵۳,۷۵۴</td>
+                            <td class="d-none d-xl-table-cell">۴۴۳,۳۸۶,۷۵۴</td>
                             <td class="d-none d-md-table-cell">۰</td>
-                            <td class="d-none d-xl-table-cell">۸۹,۹۹۴,۵۲۶</td>
-                            <td class="d-none d-md-table-cell">۳۳۲,۵۵۹,۲۲۸</td>
-                            <td class="d-none d-sm-table-cell">۵,۶۲۹,۸۷۰,۲۰۲,۱۹۳</td>
+                            <td class="d-none d-xl-table-cell">۱۴۷,۱۶۸,۶۵۵</td>
+                            <td class="d-none d-md-table-cell">۲۹۶,۲۱۸,۰۹۹</td>
+                            <td class="d-none d-sm-table-cell">۵,۱۰۱,۳۷۷,۹۷۶,۸۸۱</td>
                         </tr>
                         <tr>
                             <td class="d-none d-lg-table-cell">۷</td>
-                            <td>۱۴۰۲/۰۷/۰۳</td>
-                            <td>۱۷,۰۳۹</td>
-                            <td>۱۶,۹۲۷</td>
-                            <td>۱۶,۹۲۷</td>
+                            <td>۱۴۰۳/۰۲/۲۵</td>
+                            <td>۱۷,۱۶۶</td>
+                            <td>۱۷,۰۵۶</td>
+                            <td>۱۷,۰۵۶</td>
                             <td class="d-none d-sm-table-cell" style="direction: ltr;">۰</td>
                             <td class="d-none d-md-table-cell">۰</td>
-                            <td class="d-none d-xl-table-cell">۴۲۲,۵۵۳,۷۵۴</td>
+                            <td class="d-none d-xl-table-cell">۴۴۳,۳۸۶,۷۵۴</td>
                             <td class="d-none d-md-table-cell">۰</td>
-                            <td class="d-none d-xl-table-cell">۸۹,۹۹۴,۵۲۶</td>
-                            <td class="d-none d-md-table-cell">۳۳۲,۵۵۹,۲۲۸</td>
-                            <td class="d-none d-sm-table-cell">۵,۶۲۹,۳۳۸,۶۶۶,۰۳۱</td>
+                            <td class="d-none d-xl-table-cell">۱۴۷,۱۶۸,۶۵۵</td>
+                            <td class="d-none d-md-table-cell">۲۹۶,۲۱۸,۰۹۹</td>
+                            <td class="d-none d-sm-table-cell">۵,۰۵۲,۳۸۶,۷۷۲,۸۹۹</td>
                         </tr>
                         <tr>
                             <td class="d-none d-lg-table-cell">۸</td>
-                            <td>۱۴۰۲/۰۷/۰۲</td>
-                            <td>۱۷,۲۳۶</td>
-                            <td>۱۷,۱۲۲</td>
-                            <td>۱۷,۱۲۲</td>
+                            <td>۱۴۰۳/۰۲/۲۴</td>
+                            <td>۱۷,۱۹۰</td>
+                            <td>۱۷,۰۸۲</td>
+                            <td>۱۷,۰۸۲</td>
                             <td class="d-none d-sm-table-cell" style="direction: ltr;">۰</td>
                             <td class="d-none d-md-table-cell">۰</td>
-                            <td class="d-none d-xl-table-cell">۴۲۲,۵۵۳,۷۵۴</td>
+                            <td class="d-none d-xl-table-cell">۴۴۳,۳۸۶,۷۵۴</td>
                             <td class="d-none d-md-table-cell">۰</td>
-                            <td class="d-none d-xl-table-cell">۸۹,۹۹۴,۵۲۶</td>
-                            <td class="d-none d-md-table-cell">۳۳۲,۵۵۹,۲۲۸</td>
-                            <td class="d-none d-sm-table-cell">۵,۶۹۴,۲۲۵,۷۲۵,۴۲۰</td>
+                            <td class="d-none d-xl-table-cell">۱۴۷,۱۶۸,۶۵۵</td>
+                            <td class="d-none d-md-table-cell">۲۹۶,۲۱۸,۰۹۹</td>
+                            <td class="d-none d-sm-table-cell">۵,۰۶۰,۰۲۷,۰۸۸,۳۲۱</td>
                         </tr>
                         <tr>
                             <td class="d-none d-lg-table-cell">۹</td>
-                            <td>۱۴۰۲/۰۷/۰۱</td>
-                            <td>۱۷,۲۳۶</td>
-                            <td>۱۷,۱۲۲</td>
-                            <td>۱۷,۱۲۲</td>
+                            <td>۱۴۰۳/۰۲/۲۳</td>
+                            <td>۱۷,۴۴۱</td>
+                            <td>۱۷,۳۳۱</td>
+                            <td>۱۷,۳۳۱</td>
                             <td class="d-none d-sm-table-cell" style="direction: ltr;">۰</td>
                             <td class="d-none d-md-table-cell">۰</td>
-                            <td class="d-none d-xl-table-cell">۴۲۲,۵۵۳,۷۵۴</td>
+                            <td class="d-none d-xl-table-cell">۴۴۳,۳۸۶,۷۵۴</td>
                             <td class="d-none d-md-table-cell">۰</td>
-                            <td class="d-none d-xl-table-cell">۸۹,۹۹۴,۵۲۶</td>
-                            <td class="d-none d-md-table-cell">۳۳۲,۵۵۹,۲۲۸</td>
-                            <td class="d-none d-sm-table-cell">۵,۶۹۴,۱۷۸,۲۵۸,۲۲۳</td>
+                            <td class="d-none d-xl-table-cell">۱۴۷,۱۶۸,۶۵۵</td>
+                            <td class="d-none d-md-table-cell">۲۹۶,۲۱۸,۰۹۹</td>
+                            <td class="d-none d-sm-table-cell">۵,۱۳۳,۸۸۳,۸۶۳,۰۷۶</td>
                         </tr>
                         <tr>
                             <td class="d-none d-lg-table-cell">۱۰</td>
-                            <td>۱۴۰۲/۰۶/۳۱</td>
-                            <td>۱۷,۲۶۲</td>
-                            <td>۱۷,۱۴۸</td>
-                            <td>۱۷,۱۴۸</td>
+                            <td>۱۴۰۳/۰۲/۲۲</td>
+                            <td>۱۷,۶۳۶</td>
+                            <td>۱۷,۵۲۴</td>
+                            <td>۱۷,۵۲۴</td>
                             <td class="d-none d-sm-table-cell" style="direction: ltr;">۰</td>
                             <td class="d-none d-md-table-cell">۰</td>
-                            <td class="d-none d-xl-table-cell">۴۲۲,۵۵۳,۷۵۴</td>
+                            <td class="d-none d-xl-table-cell">۴۴۳,۳۸۶,۷۵۴</td>
                             <td class="d-none d-md-table-cell">۰</td>
-                            <td class="d-none d-xl-table-cell">۸۹,۹۹۴,۵۲۶</td>
-                            <td class="d-none d-md-table-cell">۳۳۲,۵۵۹,۲۲۸</td>
-                            <td class="d-none d-sm-table-cell">۵,۷۰۲,۶۶۸,۲۶۱,۴۳۳</td>
+                            <td class="d-none d-xl-table-cell">۱۴۷,۱۶۸,۶۵۵</td>
+                            <td class="d-none d-md-table-cell">۲۹۶,۲۱۸,۰۹۹</td>
+                            <td class="d-none d-sm-table-cell">۵,۱۹۱,۰۲۰,۲۴۰,۷۶۴</td>
                         </tr>
                         <tr>
                             <td class="d-none d-lg-table-cell">۱۱</td>
-                            <td>۱۴۰۲/۰۶/۳۰</td>
-                            <td>۱۷,۲۶۱</td>
-                            <td>۱۷,۱۴۷</td>
-                            <td>۱۷,۱۴۷</td>
+                            <td>۱۴۰۳/۰۲/۲۱</td>
+                            <td>۱۷,۷۲۱</td>
+                            <td>۱۷,۶۰۹</td>
+                            <td>۱۷,۶۰۹</td>
                             <td class="d-none d-sm-table-cell" style="direction: ltr;">۰</td>
                             <td class="d-none d-md-table-cell">۰</td>
-                            <td class="d-none d-xl-table-cell">۴۲۲,۵۵۳,۷۵۴</td>
+                            <td class="d-none d-xl-table-cell">۴۴۳,۳۸۶,۷۵۴</td>
                             <td class="d-none d-md-table-cell">۰</td>
-                            <td class="d-none d-xl-table-cell">۸۹,۹۹۴,۵۲۶</td>
-                            <td class="d-none d-md-table-cell">۳۳۲,۵۵۹,۲۲۸</td>
-                            <td class="d-none d-sm-table-cell">۵,۷۰۲,۵۱۲,۴۵۲,۷۲۹</td>
+                            <td class="d-none d-xl-table-cell">۱۴۷,۱۶۸,۶۵۵</td>
+                            <td class="d-none d-md-table-cell">۲۹۶,۲۱۸,۰۹۹</td>
+                            <td class="d-none d-sm-table-cell">۵,۲۱۵,۹۷۵,۲۹۱,۶۵۸</td>
                         </tr>
                         <tr>
                             <td class="d-none d-lg-table-cell">۱۲</td>
-                            <td>۱۴۰۲/۰۶/۲۹</td>
-                            <td>۱۷,۲۶۲</td>
-                            <td>۱۷,۱۴۸</td>
-                            <td>۱۷,۱۴۸</td>
+                            <td>۱۴۰۳/۰۲/۲۰</td>
+                            <td>۱۷,۷۲۱</td>
+                            <td>۱۷,۶۰۸</td>
+                            <td>۱۷,۶۰۸</td>
                             <td class="d-none d-sm-table-cell" style="direction: ltr;">۰</td>
                             <td class="d-none d-md-table-cell">۰</td>
-                            <td class="d-none d-xl-table-cell">۴۲۲,۵۵۳,۷۵۴</td>
+                            <td class="d-none d-xl-table-cell">۴۴۳,۳۸۶,۷۵۴</td>
                             <td class="d-none d-md-table-cell">۰</td>
-                            <td class="d-none d-xl-table-cell">۸۹,۹۹۴,۵۲۶</td>
-                            <td class="d-none d-md-table-cell">۳۳۲,۵۵۹,۲۲۸</td>
-                            <td class="d-none d-sm-table-cell">۵,۷۰۲,۸۹۱,۱۸۹,۸۳۲</td>
+                            <td class="d-none d-xl-table-cell">۱۴۷,۱۶۸,۶۵۵</td>
+                            <td class="d-none d-md-table-cell">۲۹۶,۲۱۸,۰۹۹</td>
+                            <td class="d-none d-sm-table-cell">۵,۲۱۵,۸۹۹,۲۷۰,۲۵۹</td>
                         </tr>
                         <tr>
                             <td class="d-none d-lg-table-cell">۱۳</td>
-                            <td>۱۴۰۲/۰۶/۲۸</td>
-                            <td>۱۷,۳۰۷</td>
-                            <td>۱۷,۱۹۳</td>
-                            <td>۱۷,۱۹۳</td>
+                            <td>۱۴۰۳/۰۲/۱۹</td>
+                            <td>۱۷,۷۲۰</td>
+                            <td>۱۷,۶۰۸</td>
+                            <td>۱۷,۶۰۸</td>
                             <td class="d-none d-sm-table-cell" style="direction: ltr;">۰</td>
                             <td class="d-none d-md-table-cell">۰</td>
-                            <td class="d-none d-xl-table-cell">۴۲۲,۵۵۳,۷۵۴</td>
+                            <td class="d-none d-xl-table-cell">۴۴۳,۳۸۶,۷۵۴</td>
                             <td class="d-none d-md-table-cell">۰</td>
-                            <td class="d-none d-xl-table-cell">۸۹,۹۹۴,۵۲۶</td>
-                            <td class="d-none d-md-table-cell">۳۳۲,۵۵۹,۲۲۸</td>
-                            <td class="d-none d-sm-table-cell">۵,۷۱۷,۸۱۲,۴۳۳,۹۶۹</td>
+                            <td class="d-none d-xl-table-cell">۱۴۷,۱۶۸,۶۵۵</td>
+                            <td class="d-none d-md-table-cell">۲۹۶,۲۱۸,۰۹۹</td>
+                            <td class="d-none d-sm-table-cell">۵,۲۱۵,۸۲۳,۲۱۹,۵۲۹</td>
                         </tr>
                         <tr>
                             <td class="d-none d-lg-table-cell">۱۴</td>
-                            <td>۱۴۰۲/۰۶/۲۷</td>
-                            <td>۱۷,۳۱۱</td>
-                            <td>۱۷,۱۹۷</td>
-                            <td>۱۷,۱۹۷</td>
+                            <td>۱۴۰۳/۰۲/۱۸</td>
+                            <td>۱۷,۸۲۷</td>
+                            <td>۱۷,۷۱۴</td>
+                            <td>۱۷,۷۱۴</td>
                             <td class="d-none d-sm-table-cell" style="direction: ltr;">۰</td>
                             <td class="d-none d-md-table-cell">۰</td>
-                            <td class="d-none d-xl-table-cell">۴۲۲,۵۵۳,۷۵۴</td>
+                            <td class="d-none d-xl-table-cell">۴۴۳,۳۸۶,۷۵۴</td>
                             <td class="d-none d-md-table-cell">۰</td>
-                            <td class="d-none d-xl-table-cell">۸۹,۹۹۴,۵۲۶</td>
-                            <td class="d-none d-md-table-cell">۳۳۲,۵۵۹,۲۲۸</td>
-                            <td class="d-none d-sm-table-cell">۵,۷۱۹,۱۲۵,۵۱۶,۲۶۳</td>
+                            <td class="d-none d-xl-table-cell">۱۴۷,۱۶۸,۶۵۵</td>
+                            <td class="d-none d-md-table-cell">۲۹۶,۲۱۸,۰۹۹</td>
+                            <td class="d-none d-sm-table-cell">۵,۲۴۷,۱۰۷,۳۹۷,۲۳۲</td>
                         </tr>
                         <tr>
                             <td class="d-none d-lg-table-cell">۱۵</td>
-                            <td>۱۴۰۲/۰۶/۲۶</td>
-                            <td>۱۷,۴۲۷</td>
-                            <td>۱۷,۳۱۳</td>
-                            <td>۱۷,۳۱۳</td>
+                            <td>۱۴۰۳/۰۲/۱۷</td>
+                            <td>۱۷,۸۴۷</td>
+                            <td>۱۷,۷۳۳</td>
+                            <td>۱۷,۷۳۳</td>
                             <td class="d-none d-sm-table-cell" style="direction: ltr;">۰</td>
                             <td class="d-none d-md-table-cell">۰</td>
-                            <td class="d-none d-xl-table-cell">۴۲۲,۵۵۳,۷۵۴</td>
+                            <td class="d-none d-xl-table-cell">۴۴۳,۳۸۶,۷۵۴</td>
                             <td class="d-none d-md-table-cell">۰</td>
-                            <td class="d-none d-xl-table-cell">۸۹,۹۹۴,۵۲۶</td>
-                            <td class="d-none d-md-table-cell">۳۳۲,۵۵۹,۲۲۸</td>
-                            <td class="d-none d-sm-table-cell">۵,۷۵۷,۶۵۰,۹۹۰,۲۹۴</td>
+                            <td class="d-none d-xl-table-cell">۱۴۷,۱۶۸,۶۵۵</td>
+                            <td class="d-none d-md-table-cell">۲۹۶,۲۱۸,۰۹۹</td>
+                            <td class="d-none d-sm-table-cell">۵,۲۵۲,۸۷۳,۷۹۹,۰۱۹</td>
                         </tr>
                         <tr>
                             <td class="d-none d-lg-table-cell">۱۶</td>
-                            <td>۱۴۰۲/۰۶/۲۵</td>
-                            <td>۱۷,۳۴۹</td>
-                            <td>۱۷,۲۳۵</td>
-                            <td>۱۷,۲۳۵</td>
+                            <td>۱۴۰۳/۰۲/۱۶</td>
+                            <td>۱۷,۹۸۱</td>
+                            <td>۱۷,۸۶۶</td>
+                            <td>۱۷,۸۶۶</td>
                             <td class="d-none d-sm-table-cell" style="direction: ltr;">۰</td>
                             <td class="d-none d-md-table-cell">۰</td>
-                            <td class="d-none d-xl-table-cell">۴۲۲,۵۵۳,۷۵۴</td>
+                            <td class="d-none d-xl-table-cell">۴۴۳,۳۸۶,۷۵۴</td>
                             <td class="d-none d-md-table-cell">۰</td>
-                            <td class="d-none d-xl-table-cell">۸۹,۹۹۴,۵۲۶</td>
-                            <td class="d-none d-md-table-cell">۳۳۲,۵۵۹,۲۲۸</td>
-                            <td class="d-none d-sm-table-cell">۵,۷۳۱,۶۷۴,۹۶۷,۹۹۰</td>
+                            <td class="d-none d-xl-table-cell">۱۴۷,۱۶۸,۶۵۵</td>
+                            <td class="d-none d-md-table-cell">۲۹۶,۲۱۸,۰۹۹</td>
+                            <td class="d-none d-sm-table-cell">۵,۲۹۲,۳۶۷,۰۰۸,۴۱۵</td>
                         </tr>
                         <tr>
                             <td class="d-none d-lg-table-cell">۱۷</td>
-                            <td>۱۴۰۲/۰۶/۲۴</td>
-                            <td>۱۷,۳۴۹</td>
-                            <td>۱۷,۲۳۵</td>
-                            <td>۱۷,۲۳۵</td>
+                            <td>۱۴۰۳/۰۲/۱۵</td>
+                            <td>۱۸,۱۸۰</td>
+                            <td>۱۸,۰۶۵</td>
+                            <td>۱۸,۰۶۵</td>
                             <td class="d-none d-sm-table-cell" style="direction: ltr;">۰</td>
                             <td class="d-none d-md-table-cell">۰</td>
-                            <td class="d-none d-xl-table-cell">۴۲۲,۵۵۳,۷۵۴</td>
+                            <td class="d-none d-xl-table-cell">۴۴۳,۳۸۶,۷۵۴</td>
                             <td class="d-none d-md-table-cell">۰</td>
-                            <td class="d-none d-xl-table-cell">۸۹,۹۹۴,۵۲۶</td>
-                            <td class="d-none d-md-table-cell">۳۳۲,۵۵۹,۲۲۸</td>
-                            <td class="d-none d-sm-table-cell">۵,۷۳۱,۷۸۰,۲۹۵,۲۹۳</td>
+                            <td class="d-none d-xl-table-cell">۱۴۷,۱۶۸,۶۵۵</td>
+                            <td class="d-none d-md-table-cell">۲۹۶,۲۱۸,۰۹۹</td>
+                            <td class="d-none d-sm-table-cell">۵,۳۵۱,۱۶۷,۴۱۱,۹۷۰</td>
                         </tr>
                         <tr>
                             <td class="d-none d-lg-table-cell">۱۸</td>
-                            <td>۱۴۰۲/۰۶/۲۳</td>
-                            <td>۱۷,۳۴۹</td>
-                            <td>۱۷,۲۳۵</td>
-                            <td>۱۷,۲۳۵</td>
+                            <td>۱۴۰۳/۰۲/۱۴</td>
+                            <td>۱۸,۱۸۰</td>
+                            <td>۱۸,۰۶۵</td>
+                            <td>۱۸,۰۶۵</td>
                             <td class="d-none d-sm-table-cell" style="direction: ltr;">۰</td>
                             <td class="d-none d-md-table-cell">۰</td>
-                            <td class="d-none d-xl-table-cell">۴۲۲,۵۵۳,۷۵۴</td>
+                            <td class="d-none d-xl-table-cell">۴۴۳,۳۸۶,۷۵۴</td>
                             <td class="d-none d-md-table-cell">۰</td>
-                            <td class="d-none d-xl-table-cell">۸۹,۹۹۴,۵۲۶</td>
-                            <td class="d-none d-md-table-cell">۳۳۲,۵۵۹,۲۲۸</td>
-                            <td class="d-none d-sm-table-cell">۵,۷۳۱,۷۲۲,۰۱۲,۶۹۰</td>
+                            <td class="d-none d-xl-table-cell">۱۴۷,۱۶۸,۶۵۵</td>
+                            <td class="d-none d-md-table-cell">۲۹۶,۲۱۸,۰۹۹</td>
+                            <td class="d-none d-sm-table-cell">۵,۳۵۱,۱۰۱,۷۶۷,۲۴۴</td>
                         </tr>
                         <tr>
                             <td class="d-none d-lg-table-cell">۱۹</td>
-                            <td>۱۴۰۲/۰۶/۲۲</td>
-                            <td>۱۷,۳۵۴</td>
-                            <td>۱۷,۲۴۰</td>
-                            <td>۱۷,۲۴۰</td>
+                            <td>۱۴۰۳/۰۲/۱۳</td>
+                            <td>۱۸,۱۷۹</td>
+                            <td>۱۸,۰۶۴</td>
+                            <td>۱۸,۰۶۴</td>
                             <td class="d-none d-sm-table-cell" style="direction: ltr;">۰</td>
                             <td class="d-none d-md-table-cell">۰</td>
-                            <td class="d-none d-xl-table-cell">۴۲۲,۵۵۳,۷۵۴</td>
+                            <td class="d-none d-xl-table-cell">۴۴۳,۳۸۶,۷۵۴</td>
                             <td class="d-none d-md-table-cell">۰</td>
-                            <td class="d-none d-xl-table-cell">۸۹,۹۹۴,۵۲۶</td>
-                            <td class="d-none d-md-table-cell">۳۳۲,۵۵۹,۲۲۸</td>
-                            <td class="d-none d-sm-table-cell">۵,۷۳۳,۳۶۴,۱۴۷,۲۷۱</td>
+                            <td class="d-none d-xl-table-cell">۱۴۷,۱۶۸,۶۵۵</td>
+                            <td class="d-none d-md-table-cell">۲۹۶,۲۱۸,۰۹۹</td>
+                            <td class="d-none d-sm-table-cell">۵,۳۵۰,۷۸۷,۴۵۴,۸۲۵</td>
                         </tr>
                         <tr>
                             <td class="d-none d-lg-table-cell">۲۰</td>
-                            <td>۱۴۰۲/۰۶/۲۱</td>
-                            <td>۱۷,۳۰۹</td>
-                            <td>۱۷,۱۹۶</td>
-                            <td>۱۷,۱۹۶</td>
+                            <td>۱۴۰۳/۰۲/۱۲</td>
+                            <td>۱۸,۱۸۷</td>
+                            <td>۱۸,۰۷۱</td>
+                            <td>۱۸,۰۷۱</td>
                             <td class="d-none d-sm-table-cell" style="direction: ltr;">۰</td>
                             <td class="d-none d-md-table-cell">۰</td>
-                            <td class="d-none d-xl-table-cell">۴۲۲,۵۵۳,۷۵۴</td>
+                            <td class="d-none d-xl-table-cell">۴۴۳,۳۸۶,۷۵۴</td>
                             <td class="d-none d-md-table-cell">۰</td>
-                            <td class="d-none d-xl-table-cell">۸۹,۹۹۴,۵۲۶</td>
-                            <td class="d-none d-md-table-cell">۳۳۲,۵۵۹,۲۲۸</td>
-                            <td class="d-none d-sm-table-cell">۵,۷۱۸,۶۸۰,۳۸۲,۷۹۸</td>
+                            <td class="d-none d-xl-table-cell">۱۴۷,۱۶۸,۶۵۵</td>
+                            <td class="d-none d-md-table-cell">۲۹۶,۲۱۸,۰۹۹</td>
+                            <td class="d-none d-sm-table-cell">۵,۳۵۳,۰۰۱,۰۱۷,۶۹۱</td>
                         </tr>
 
             </tbody>
@@ -1140,7 +1203,7 @@
         Copyright © 2020 <a href='http://modirfund.ir'> </a>. All rights reserved.
     </div>
     <div class="text ltr">
-        version number:  9.2.2
+        version number:  9.2.5
     </div>
     <div class="mt-2 mx-auto"></div>
 </div>
