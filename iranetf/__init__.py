@@ -434,8 +434,7 @@ def load_dataset(*, site=True, inst=False) -> _DataFrame:
             'name': 'string',
             'type': 'category',
             'insCode': 'string',
-            # in case there is an ETF not registered on fipiran
-            'regNo': 'Int64',
+            'regNo': 'string',
             'url': 'string',
             'siteType': 'category',
         },
