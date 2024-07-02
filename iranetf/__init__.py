@@ -123,6 +123,9 @@ class BaseSite(_ABC):
     @_abstractmethod
     async def navps_history(self) -> _DataFrame: ...
 
+    @_abstractmethod
+    async def cache(self) -> float: ...
+
     @classmethod
     def from_l18(
         cls, l18: str
@@ -183,6 +186,18 @@ class MabnaDP(BaseSite):
         end = content.find(b'<', start)
         return content[start:end].strip().decode()
 
+    async def asset_allocation(self) -> dict:
+        j: dict = await self._json(
+            'dailyvalue.json', params={'portfolioIds': '0'}
+        )
+        d = {i['name']: i['percentage'] for i in j['values']}
+        # assert d.keys == {'سهام', 'سایر دارایی ها', 'وجه نقد', 'سایر'}
+        return d
+
+    async def cache(self) -> float:
+        aa = await self.asset_allocation()
+        return aa['وجه نقد']
+
 
 class RayanHamafza(BaseSite):
     async def _json(self, path, **kwa) -> _JSON_OR_DF:
@@ -224,6 +239,14 @@ class RayanHamafza(BaseSite):
         )
         return df
 
+    async def cache(self) -> float:
+        aa = await self.asset_allocation()
+        return (
+            aa['DepositTodayPercent']
+            + aa['CashTodayPercent']
+            + aa['BondTodayPercent']
+        ) / 100.0
+
 
 class RayanHamafzaMultiNAV(RayanHamafza):
     """Same as RayanHamafza, only send fundId as a cookie."""
@@ -249,6 +272,15 @@ class BaseTadbirPardaz(BaseSite):
         start = content.find(b'version number:')
         end = content.find(b'\n', start)
         return content[start + 15 : end].strip().decode()
+
+    async def asset_allocation(self) -> dict:
+        j: dict = await self._json('Chart/AssetCompositions')
+        d = {i['x']: i['y'] for i in j['List']}
+        return d
+
+    async def cache(self) -> float:
+        aa = await self.asset_allocation()
+        return (aa['نقد و بانک (سپرده)'] + aa['اوراق مشارکت']) / 100.0
 
 
 class TadbirPardaz(BaseTadbirPardaz):

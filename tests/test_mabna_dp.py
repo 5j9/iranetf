@@ -1,3 +1,5 @@
+from math import isclose
+
 from aiohutils.tests import assert_dict_type, file
 
 from iranetf import LiveNAVPS, MabnaDP
@@ -28,3 +30,16 @@ async def test_mabna_version():
 @file('old_mabna_version.html')
 async def test_old_mabna_version():
     assert (await MabnaDP('https://gitidamavandfund.ir/').version()) == '2.12'
+
+
+@file('mabna_aa.json')
+async def test_asset_allocation():
+    aa = await mabna_dp.asset_allocation()
+    assert aa.keys() == {'سهام', 'سایر دارایی ها', 'وجه نقد', 'سایر'}
+    assert isclose(sum(aa.values()), 1.0, abs_tol=0.0000000001)
+
+
+@file('mabna_aa.json')
+async def test_cache():
+    cache = await mabna_dp.cache()
+    assert 0.0 <= cache <= 0.6

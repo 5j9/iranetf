@@ -1,3 +1,5 @@
+from math import isclose
+
 from aiohutils.tests import assert_dict_type, file, files
 from numpy import dtype
 
@@ -38,13 +40,37 @@ async def test_fund_profit():
     ]
 
 
+petro_agah = BaseSite.from_l18('پتروآگاه')
+auto_agah = BaseSite.from_l18('اتوآگاه')
+
+
 @files('petroagah.json', 'autoagah.json')
 async def test_multinav():
-    petro = BaseSite.from_l18('پتروآگاه')
-    auto = BaseSite.from_l18('اتوآگاه')
-    assert type(auto) is RayanHamafzaMultiNAV
-    assert petro.url == auto.url
-    petro_nav = await petro.live_navps()
-    auto_nav = await auto.live_navps()
+    assert type(auto_agah) is RayanHamafzaMultiNAV
+    assert petro_agah.url == auto_agah.url
+    petro_nav = await petro_agah.live_navps()
+    auto_nav = await auto_agah.live_navps()
     assert petro_nav.keys() == auto_nav.keys()
     assert petro_nav != auto_nav
+
+
+@file('petro_agah_aa.json')
+async def test_asset_allocation():
+    aa = await petro_agah.asset_allocation()
+    assert aa.keys() == {
+        'DepositTodayPercent',
+        'TopFiveStockTodayPercent',
+        'CashTodayPercent',
+        'OtherAssetTodayPercent',
+        'BondTodayPercent',
+        'OtherStock',
+        'JalaliDate',
+    }
+    assert type(aa.pop('JalaliDate')) is str
+    assert isclose(sum(aa.values()), 100.0)
+
+
+@file('petro_agah_aa.json')
+async def test_cache():
+    cache = await petro_agah.cache()
+    assert 0.0 <= cache <= 0.6

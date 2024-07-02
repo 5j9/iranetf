@@ -1,3 +1,4 @@
+from math import isclose
 from unittest.mock import patch
 
 from aiohutils.tests import assert_dict_type, file, files
@@ -116,3 +117,22 @@ async def test_version():
 @file('leveraged_tadbir_version.html')
 async def test_leveraged_version():
     assert (await ltp.version()) == EXPECTED_TP_VER
+
+
+@file('ahrom_aa.json')
+async def test_asset_allocation():
+    aa = await ltp.asset_allocation()
+    assert aa.keys() == {
+        'اوراق مشارکت',
+        'سایر دارایی\u200cها',
+        'سایر سهم\u200cها',
+        'سهم\u200cهای برتر',
+        'نقد و بانک (سپرده)',
+    }
+    assert isclose(sum(aa.values()), 100.0)
+
+
+@file('ahrom_aa.json')
+async def test_cache():
+    cache = await ltp.cache()
+    assert 0.0 <= cache <= 0.6
