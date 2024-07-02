@@ -9,13 +9,13 @@ from iranetf import (
     LeveragedTadbirPardaz,
     LeveragedTadbirPardazLiveNAVPS,
     LiveNAVPS,
-    MabnaDP,
     RayanHamafza,
     RayanHamafzaMultiNAV,
     TadbirPardaz,
     TadbirPardazMultiNAV,
     TPLiveNAVPS,
 )
+from tests import assert_navps_history
 
 tadbir = TadbirPardaz('https://modirfund.ir/')
 rayan = RayanHamafza('https://yaghootfund.ir/')
@@ -32,18 +32,6 @@ async def test_rayan_live_navps():
     assert_dict_type(await rayan.live_navps(), LiveNAVPS)
 
 
-async def assert_navps_history(site: BaseSite, has_statistical=True):
-    df = await site.navps_history()
-    assert df.index.dtype == dtype('<M8[ns]')
-    assert df.index.name == 'date'
-    numeric_types = ('int64', 'float64')
-    assert df['creation'].dtype in numeric_types
-    assert df['redemption'].dtype in numeric_types
-    assert (df['redemption'] <= df['creation']).all()
-    if has_statistical:
-        assert df['statistical'].dtype in numeric_types
-
-
 @file('modir_navps_history.json')
 async def test_navps_history_tadbir():
     await assert_navps_history(tadbir)
@@ -58,23 +46,6 @@ async def test_navps_history_rayan():
 async def test_navps_date_ends_with_space():
     d = await TadbirPardaz('https://icpfvc.ir/').live_navps()
     assert_dict_type(d, TPLiveNAVPS)
-
-
-mabna_dp = MabnaDP('https://kianfunds6.ir/')
-
-
-@file('hamvasn_live.json')
-async def test_live_navps_mabna():
-    d = await mabna_dp.live_navps()
-    assert type(d.pop('date_time')) is str
-    assert type(d.pop('statistical_price')) is float
-    assert type(d.pop('unit_count')) is int
-    assert_dict_type(d, LiveNAVPS)
-
-
-@file('hamvazn_navps_history.json')
-async def test_navps_history_mabna():
-    await assert_navps_history(mabna_dp)
 
 
 ltp = LeveragedTadbirPardaz('https://ahrom.charisma.ir/')
@@ -123,16 +94,6 @@ async def test_tadbir_version():
 @file('leveraged_tadbir_version.html')
 async def test_leveraged_tadbir_version():
     assert (await ltp.version()) == EXPECTED_TP_VER
-
-
-@file('mabna_version.html')
-async def test_mabna_version():
-    assert (await mabna_dp.version()) == '2.15'
-
-
-@file('old_mabna_version.html')
-async def test_old_mabna_version():
-    assert (await MabnaDP('https://gitidamavandfund.ir/').version()) == '2.12'
 
 
 @files('petroagah.json', 'autoagah.json')
