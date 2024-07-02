@@ -8,9 +8,6 @@ from iranetf import (
     BaseSite,
     LeveragedTadbirPardaz,
     LeveragedTadbirPardazLiveNAVPS,
-    LiveNAVPS,
-    RayanHamafza,
-    RayanHamafzaMultiNAV,
     TadbirPardaz,
     TadbirPardazMultiNAV,
     TPLiveNAVPS,
@@ -18,7 +15,6 @@ from iranetf import (
 from tests import assert_navps_history
 
 tadbir = TadbirPardaz('https://modirfund.ir/')
-rayan = RayanHamafza('https://yaghootfund.ir/')
 
 
 @file('modir_live.json')
@@ -27,85 +23,15 @@ async def test_tadbir_live_navps():
     assert_dict_type(d, TPLiveNAVPS)
 
 
-@file('almas_live.json')
-async def test_rayan_live_navps():
-    assert_dict_type(await rayan.live_navps(), LiveNAVPS)
-
-
 @file('modir_navps_history.json')
 async def test_navps_history_tadbir():
     await assert_navps_history(tadbir)
-
-
-@file('almas_navps_history.json')
-async def test_navps_history_rayan():
-    await assert_navps_history(rayan)
 
 
 @file('icpfvc_navps_date_space.json')
 async def test_navps_date_ends_with_space():
     d = await TadbirPardaz('https://icpfvc.ir/').live_navps()
     assert_dict_type(d, TPLiveNAVPS)
-
-
-ltp = LeveragedTadbirPardaz('https://ahrom.charisma.ir/')
-
-
-@file('ahrom_live.json')
-async def test_live_navps_ltp():
-    live = await ltp.live_navps()
-    assert_dict_type(live, LeveragedTadbirPardazLiveNAVPS)
-
-
-@file('ahrom_navps_history.json')
-async def test_navps_history_ltp():
-    # leveraged ETFs do not have statistical history for preferred shares
-    await assert_navps_history(ltp, has_statistical=False)
-
-
-@file('homay_profit.json')
-async def test_rayanhamafza_fund_profit():
-    df = await RayanHamafza('https://www.homayeagah.ir/').dividend_history()
-    assert [*df.dtypes.items()] == [
-        ('ProfitDate', dtype('<M8[ns]')),
-        ('FundUnit', dtype('int64')),
-        ('ProfitGuaranteeUnit', dtype('int64')),
-        ('UnitProfit', dtype('int64')),
-        ('ExtraProfit', dtype('int64')),
-        ('SumUnitProfit', dtype('int64')),
-        ('SumExtraProfit', dtype('int64')),
-        ('SumProfitGuarantee', dtype('int64')),
-        ('SUMAllProfit', dtype('int64')),
-    ]
-
-
-def test_from_l18():
-    assert BaseSite.from_l18('استیل').url == 'https://mofidsectorfund.com/'
-
-
-EXPECTED_TP_VER = '9.2.5'
-
-
-@file('tadbir_version.html')
-async def test_tadbir_version():
-    assert (await tadbir.version()) == EXPECTED_TP_VER
-
-
-@file('leveraged_tadbir_version.html')
-async def test_leveraged_tadbir_version():
-    assert (await ltp.version()) == EXPECTED_TP_VER
-
-
-@files('petroagah.json', 'autoagah.json')
-async def test_rayanhamafza_multinav():
-    petro = BaseSite.from_l18('پتروآگاه')
-    auto = BaseSite.from_l18('اتوآگاه')
-    assert type(auto) is RayanHamafzaMultiNAV
-    assert petro.url == auto.url
-    petro_nav = await petro.live_navps()
-    auto_nav = await auto.live_navps()
-    assert petro_nav.keys() == auto_nav.keys()
-    assert petro_nav != auto_nav
 
 
 @files('still.json', 'khodran.json')
@@ -162,3 +88,31 @@ async def test_tadbirpardaz_multinav():
         ('SUMAllProfit', dtype('int64')),
         ('ProfitPercent', dtype('float64')),
     ]
+
+
+ltp = LeveragedTadbirPardaz('https://ahrom.charisma.ir/')
+
+
+@file('ahrom_live.json')
+async def test_live_navps_ltp():
+    live = await ltp.live_navps()
+    assert_dict_type(live, LeveragedTadbirPardazLiveNAVPS)
+
+
+@file('ahrom_navps_history.json')
+async def test_navps_history_ltp():
+    # leveraged ETFs do not have statistical history for preferred shares
+    await assert_navps_history(ltp, has_statistical=False)
+
+
+EXPECTED_TP_VER = '9.2.5'
+
+
+@file('tadbir_version.html')
+async def test_tadbir_version():
+    assert (await tadbir.version()) == EXPECTED_TP_VER
+
+
+@file('leveraged_tadbir_version.html')
+async def test_leveraged_tadbir_version():
+    assert (await ltp.version()) == EXPECTED_TP_VER

@@ -16,3 +16,7 @@ async def assert_navps_history(site: BaseSite, has_statistical=True):
     assert (df['redemption'] <= df['creation']).all()
     if has_statistical:
         assert df['statistical'].dtype in numeric_types
+
+
+def test_from_l18():
+    assert BaseSite.from_l18('استیل').url == 'https://mofidsectorfund.com/'
