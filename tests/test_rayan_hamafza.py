@@ -40,8 +40,8 @@ async def test_fund_profit():
     ]
 
 
-petro_agah = BaseSite.from_l18('پتروآگاه')
-auto_agah = BaseSite.from_l18('اتوآگاه')
+petro_agah: RayanHamafzaMultiNAV = BaseSite.from_l18('پتروآگاه')
+auto_agah: RayanHamafzaMultiNAV = BaseSite.from_l18('اتوآگاه')
 
 
 @files('petroagah.json', 'autoagah.json')
