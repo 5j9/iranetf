@@ -626,7 +626,9 @@ async def _fipiran_data(ds) -> _DataFrame:
 
     reg_not_in_fipiran = ds[~ds['regNo'].isin(fipiran_df['regNo'])]
     if not reg_not_in_fipiran.empty:
-        _warning('some dataset rows were not found on fipiran')
+        _warning(
+            f'Some dataset rows were not found on fipiran:\n{reg_not_in_fipiran}'
+        )
 
     df = fipiran_df[
         (fipiran_df['typeOfInvest'] == 'Negotiable')
