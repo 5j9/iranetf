@@ -122,13 +122,7 @@ async def test_leveraged_version():
 @file('ahrom_aa.json')
 async def test_asset_allocation():
     aa = await ltp.asset_allocation()
-    assert aa.keys() == {
-        'اوراق مشارکت',
-        'سایر دارایی\u200cها',
-        'سایر سهم\u200cها',
-        'سهم\u200cهای برتر',
-        'نقد و بانک (سپرده)',
-    }
+    assert aa.keys() <= ltp._aa_keys
     assert isclose(sum(aa.values()), 100.0)
 
 

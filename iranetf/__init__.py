@@ -92,7 +92,9 @@ _JSON_OR_DF = list | dict | str | _DataFrame
 
 class BaseSite(_ABC):
     __slots__ = 'url', 'last_response'
+
     ds: _DataFrame
+    _aa_keys: set
 
     def __init__(self, url: str):
         assert url[-1] == '/', 'the url must end with `/`'
@@ -129,12 +131,20 @@ class BaseSite(_ABC):
     @classmethod
     def from_l18(
         cls, l18: str
-    ) -> 'LeveragedTadbirPardaz | TadbirPardaz | RayanHamafza | MabnaDP':
+    ) -> 'LeveragedTadbirPardaz | TadbirPardaz | RayanHamafza | MabnaDP | RayanHamafzaMultiNAV':
         try:
             ds = cls.ds
         except AttributeError:
             ds = cls.ds = load_dataset(site=True).set_index('l18')
         return ds.loc[l18, 'site']
+
+    @classmethod
+    def _check_aa_keys(cls, d: dict):
+        if d.keys() <= cls._aa_keys:
+            return
+        _warning(
+            f'Unknown keys in {cls.__qualname__}: {d.keys() - cls._aa_keys}'
+        )
 
 
 def _comma_int(s: str) -> int:
@@ -186,17 +196,20 @@ class MabnaDP(BaseSite):
         end = content.find(b'<', start)
         return content[start:end].strip().decode()
 
+    _aa_keys = {'سهام', 'سایر دارایی ها', 'وجه نقد', 'سایر', 'سپرده بانکی'}
+
     async def asset_allocation(self) -> dict:
         j: dict = await self._json(
             'dailyvalue.json', params={'portfolioIds': '0'}
         )
         d = {i['name']: i['percentage'] for i in j['values']}
-        # assert d.keys == {'سهام', 'سایر دارایی ها', 'وجه نقد', 'سایر'}
+        self._check_aa_keys(d)
         return d
 
     async def cache(self) -> float:
         aa = await self.asset_allocation()
-        return aa['وجه نقد']
+        g = aa.get
+        return (g('وجه نقد', 0.0) + g('سپرده بانکی', 0.0)) / 100.0
 
 
 class RayanHamafza(BaseSite):
@@ -228,8 +241,20 @@ class RayanHamafza(BaseSite):
     async def portfolio_industries(self) -> _DataFrame:
         return await self._json('Industries', df=True)
 
+    _aa_keys = {
+        'DepositTodayPercent',
+        'TopFiveStockTodayPercent',
+        'CashTodayPercent',
+        'OtherAssetTodayPercent',
+        'BondTodayPercent',
+        'OtherStock',
+        'JalaliDate',
+    }
+
     async def asset_allocation(self) -> dict:
-        return await self._json('MixAsset')
+        d = await self._json('MixAsset')
+        self._check_aa_keys(d)
+        return d
 
     async def dividend_history(self) -> _DataFrame:
         j = await self._json('FundProfit')
@@ -273,14 +298,30 @@ class BaseTadbirPardaz(BaseSite):
         end = content.find(b'\n', start)
         return content[start + 15 : end].strip().decode()
 
+    _aa_keys = {
+        'اوراق مشارکت',
+        'سایر دارایی\u200cها',
+        'سایر سهم\u200cها',
+        'سهم\u200cهای برتر',
+        'نقد و بانک (سپرده)',
+        'نقد و بانک (جاری)',
+        'صندوق سرمایه\u200cگذاری در سهام',
+    }
+
     async def asset_allocation(self) -> dict:
         j: dict = await self._json('Chart/AssetCompositions')
         d = {i['x']: i['y'] for i in j['List']}
+        self._check_aa_keys(d)
         return d
 
     async def cache(self) -> float:
         aa = await self.asset_allocation()
-        return (aa['نقد و بانک (سپرده)'] + aa['اوراق مشارکت']) / 100.0
+        g = aa.get
+        return (
+            g('نقد و بانک (سپرده)', 0.0)
+            + g('نقد و بانک (جاری)', 0.0)
+            + g('اوراق مشارکت', 0.0)
+        ) / 100.0
 
 
 class TadbirPardaz(BaseTadbirPardaz):

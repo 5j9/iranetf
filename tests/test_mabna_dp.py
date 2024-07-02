@@ -35,7 +35,7 @@ async def test_old_mabna_version():
 @file('mabna_aa.json')
 async def test_asset_allocation():
     aa = await mabna_dp.asset_allocation()
-    assert aa.keys() == {'سهام', 'سایر دارایی ها', 'وجه نقد', 'سایر'}
+    assert aa.keys() <= mabna_dp._aa_keys
     assert isclose(sum(aa.values()), 1.0, abs_tol=0.0000000001)
 
 
