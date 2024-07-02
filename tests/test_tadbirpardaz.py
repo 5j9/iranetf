@@ -18,13 +18,13 @@ tadbir = TadbirPardaz('https://modirfund.ir/')
 
 
 @file('modir_live.json')
-async def test_tadbir_live_navps():
+async def test_live_navps():
     d = await tadbir.live_navps()
     assert_dict_type(d, TPLiveNAVPS)
 
 
 @file('modir_navps_history.json')
-async def test_navps_history_tadbir():
+async def test_navps_history():
     await assert_navps_history(tadbir)
 
 
@@ -35,7 +35,7 @@ async def test_navps_date_ends_with_space():
 
 
 @files('still.json', 'khodran.json')
-async def test_tadbirpardaz_multinav():
+async def test_multinav():
     still = BaseSite.from_l18('استیل')
     khodran = BaseSite.from_l18('خودران')
     assert type(khodran) is TadbirPardazMultiNAV
@@ -46,7 +46,7 @@ async def test_tadbirpardaz_multinav():
     assert still_nav != khodran_nav
 
 
-async def test_tadbirpardas_multinav_hist_path():
+async def test_multinav_hist_path():
     khodran = BaseSite.from_l18('خودران')
     with patch('iranetf._get', side_effect=NotImplementedError) as get_mock:
         with raises(NotImplementedError):
@@ -58,7 +58,7 @@ async def test_tadbirpardas_multinav_hist_path():
     )
 
 
-async def test_tadbirpardas_multinav_live_navps_path():
+async def test_multinav_live_navps_path():
     khodran = BaseSite.from_l18('خودران')
     with patch('iranetf._get', side_effect=NotImplementedError) as get_mock:
         with raises(NotImplementedError):
@@ -75,7 +75,7 @@ async def test_tadbirpardas_multinav_live_navps_path():
     'tp_dividend_history_2.html',
     'tp_dividend_history_3.html',
 )
-async def test_tadbirpardaz_multinav():
+async def test_dividend_history():
     site = BaseSite.from_l18('آفاق')
     assert type(site) is TadbirPardaz
     df = await site.dividend_history()
@@ -94,13 +94,13 @@ ltp = LeveragedTadbirPardaz('https://ahrom.charisma.ir/')
 
 
 @file('ahrom_live.json')
-async def test_live_navps_ltp():
+async def test_live_navps_leveraged():
     live = await ltp.live_navps()
     assert_dict_type(live, LeveragedTadbirPardazLiveNAVPS)
 
 
 @file('ahrom_navps_history.json')
-async def test_navps_history_ltp():
+async def test_navps_history_leveraged():
     # leveraged ETFs do not have statistical history for preferred shares
     await assert_navps_history(ltp, has_statistical=False)
 
@@ -109,10 +109,10 @@ EXPECTED_TP_VER = '9.2.5'
 
 
 @file('tadbir_version.html')
-async def test_tadbir_version():
+async def test_version():
     assert (await tadbir.version()) == EXPECTED_TP_VER
 
 
 @file('leveraged_tadbir_version.html')
-async def test_leveraged_tadbir_version():
+async def test_leveraged_version():
     assert (await ltp.version()) == EXPECTED_TP_VER

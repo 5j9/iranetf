@@ -13,17 +13,17 @@ rayan = RayanHamafza('https://yaghootfund.ir/')
 
 
 @file('almas_live.json')
-async def test_rayan_live_navps():
+async def test_live_navps():
     assert_dict_type(await rayan.live_navps(), LiveNAVPS)
 
 
 @file('almas_navps_history.json')
-async def test_navps_history_rayan():
+async def test_navps_history():
     await assert_navps_history(rayan)
 
 
 @file('homay_profit.json')
-async def test_rayanhamafza_fund_profit():
+async def test_fund_profit():
     df = await RayanHamafza('https://www.homayeagah.ir/').dividend_history()
     assert [*df.dtypes.items()] == [
         ('ProfitDate', dtype('<M8[ns]')),
@@ -39,7 +39,7 @@ async def test_rayanhamafza_fund_profit():
 
 
 @files('petroagah.json', 'autoagah.json')
-async def test_rayanhamafza_multinav():
+async def test_multinav():
     petro = BaseSite.from_l18('پتروآگاه')
     auto = BaseSite.from_l18('اتوآگاه')
     assert type(auto) is RayanHamafzaMultiNAV
