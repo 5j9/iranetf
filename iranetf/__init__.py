@@ -39,7 +39,7 @@ _pd.options.future.no_silent_downcasting = True
 session_manager = SessionManager()
 
 
-SSL = None
+SSL = False  # as horrible as this is, many sites fail ssl verification
 
 
 async def _get(
