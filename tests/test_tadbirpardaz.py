@@ -130,3 +130,12 @@ async def test_asset_allocation():
 async def test_cache():
     cache = await ltp.cache()
     assert 0.0 <= cache <= 0.6
+
+
+tavan = BaseSite.from_l18('توان')
+
+
+@file('tavan_float.json')
+async def test_float_base_units_value():
+    nav = await tavan.live_navps()
+    assert type(nav['BaseUnitsCancelNAV']) is float

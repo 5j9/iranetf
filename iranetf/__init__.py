@@ -151,6 +151,10 @@ def _comma_int(s: str) -> int:
     return int(s.replace(',', ''))
 
 
+def _comma_float(s: str) -> float:
+    return float(s.replace(',', ''))
+
+
 class MabnaDP(BaseSite):
     async def _json(self, path, **kwa) -> _JSON_OR_DF:
         return await super()._json(f'api/v1/overall/{path}', **kwa)
@@ -433,11 +437,11 @@ class TadbirPardazMultiNAV(TadbirPardaz):
 
 
 class LeveragedTadbirPardazLiveNAVPS(LiveNAVPS):
-    BaseUnitsCancelNAV: int
-    BaseUnitsTotalNetAssetValue: int
+    BaseUnitsCancelNAV: float
+    BaseUnitsTotalNetAssetValue: float
     BaseUnitsTotalSubscription: int
     SuperUnitsTotalSubscription: int
-    SuperUnitsTotalNetAssetValue: int
+    SuperUnitsTotalNetAssetValue: float
 
 
 class LeveragedTadbirPardaz(BaseTadbirPardaz):
@@ -469,22 +473,35 @@ class LeveragedTadbirPardaz(BaseTadbirPardaz):
         return df
 
     async def live_navps(self) -> LeveragedTadbirPardazLiveNAVPS:
-        d = await self._json('Fund/GetLeveragedNAV')
+        j = await self._json('Fund/GetLeveragedNAV')
         # the json is escaped twice, so it needs to be loaded again
-        d = _loads(d)
+        j = _loads(j)
 
-        date = d.pop('PublishDate')
-        d = {k: _comma_int(v) for k, v in d.items()}
+        pop = j.pop
+        date = j.pop('PublishDate')
+
+        result = {}
+
+        for k in (
+            'BaseUnitsCancelNAV',
+            'BaseUnitsTotalNetAssetValue',
+            'SuperUnitsTotalNetAssetValue',
+        ):
+            result[k] = _comma_float(pop(k))
+
+        result['creation'] = _comma_int(pop('SuperUnitsSubscriptionNAV'))
+        result['redemption'] = _comma_int(pop('SuperUnitsCancelNAV'))
+
+        for k, v in j.items():
+            result[k] = _comma_int(v)
 
         try:
             date = _jdatetime.strptime(date, '%Y/%m/%d %H:%M:%S')
         except ValueError:
             date = _jdatetime.strptime(date, '%Y/%m/%d ')
-        d['date'] = date.togregorian()
+        result['date'] = date.togregorian()
 
-        d['creation'] = d.pop('SuperUnitsSubscriptionNAV')
-        d['redemption'] = d.pop('SuperUnitsCancelNAV')
-        return d
+        return result
 
 
 _DATASET_PATH = _Path(__file__).parent / 'dataset.csv'
