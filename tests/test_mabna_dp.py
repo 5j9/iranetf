@@ -29,7 +29,7 @@ async def test_mabna_version():
 
 @file('old_mabna_version.html')
 async def test_old_mabna_version():
-    assert (await MabnaDP('https://gitidamavandfund.ir/').version()) == '2.12'
+    assert (await MabnaDP('https://gitidamavandfund.ir/').version()) == '2.21'
 
 
 @file('mabna_aa.json')
