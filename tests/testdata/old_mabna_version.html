@@ -62,7 +62,21 @@
     <script src="/assets/js/store2.min.js"></script>
     <script src="/assets/js/foreach.min.js"></script>
     <script src="/assets/js/jDate.js"></script>
-    </head>
+    
+    <!-- Google Tag Manager -->
+
+    <script>(function (w, d, s, l, i) {
+        w[l] = w[l] || []; w[l].push({
+            'gtm.start':
+                new Date().getTime(), event: 'gtm.js'
+        }); var f = d.getElementsByTagName(s)[0],
+            j = d.createElement(s), dl = l != 'dataLayer' ? '&l=' + l : ''; j.async = true; j.src =
+                'https://www.googletagmanager.com/gtm.js?id=' + i + dl; f.parentNode.insertBefore(j, f);
+    })(window, document, 'script', 'dataLayer', 'GTM-NCW8HRGP');</script>
+    <!-- End Google Tag Manager -->
+
+
+</head>
 <body>
     
     <link href="/assets/css/style-Blue.css" rel="stylesheet" title="default">
@@ -135,7 +149,7 @@
                             
                             <li class="dropdown">
                                 <a href="/portfoliorole" class="dropdown-toggle" data-toggle="dropdown">ارکان</a>
-                                <ul class="dropdown-menu" style="width:auto; height:auto;margin-top: 2px !important; border-radius: 10px;background-color: #ffffff;box-shadow: 0px 0px 10px #0000009c;text-align: right;padding: 11px; right: 0px;">
+                                <ul class="dropdown-menu" style="width:auto; height:auto;margin-top: 2px !important; border-radius: 10px;background-color: #ffffff;box-shadow: 0px 0px 10px #0000009c;text-align: right;padding: 11px; right: 0px; min-width: 240px">
                                     <li class="dropdown-item"><a href="/portfolio-role/managers">مدیر</a></li>
                                     <li class="dropdown-item"><a href="/portfolio-role/investmentmanagers">مدیران سرمایه گذاری</a></li>
                                     <li class="dropdown-item"><a href="/portfolio-role/trustee">متولی</a></li>
@@ -143,12 +157,14 @@
                                     
                                     <li class="dropdown-item"><a href="/portfolio-role/marketmaker">بازارگردان</a></li>
                                     
+
+                                   
                                 </ul>
                             </li>
                             
                             <li class="dropdown">
                                 <a href="/about" class="dropdown-toggle" data-toggle="dropdown">درباره ما</a>
-                                <ul class="dropdown-menu" style="width:200px; height:auto;margin-top: 2px !important; border-radius: 10px;background-color: #ffffff;box-shadow: 0px 0px 10px #0000009c;text-align: right;padding: 11px; right: 0px;">
+                                <ul class="dropdown-menu" style="width:260px; height:auto;margin-top: 2px !important; border-radius: 10px;background-color: #ffffff;box-shadow: 0px 0px 10px #0000009c;text-align: right;padding: 11px; right: 0px;">
                                     <li class="dropdown-item"><a href="/about/introduction">معرفی شرکت</a></li>
                                     
                                     <li class="dropdown-item"><a href="/about/prospectus">امیدنامه</a></li>
@@ -232,7 +248,8 @@
                         
     <div class="container">
 
-     <strong class="title-block">ارکان صندوق</strong>
+        
+             <strong class="title-block">ارکان صندوق</strong>
         <div class="portfolio-roles-container">
             <div class="move-right">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="transform: rotate(180deg);">
@@ -272,10 +289,11 @@
                     <div class="roles-item">
                               <div class="role-info">
                                 <div class="role-title">مدیر سرمایه‌گذاری</div>
-                                <div class="role-description">امیرعلی عباس زاده، ابراهیم ساجد، مریم حسین پور</div>
+                                <div class="role-description">امیرعلی عباس زاده، ابراهیم ساجد، آزاده شکری</div>
                               </div>
                          </div>
                  
+
         
             </div>
              <div class="move-left">
@@ -284,37 +302,23 @@
                 </svg>
             </div>
         </div>
-   
-        
-        <div class="row portfolio-select">
-           <div class="flex-select">
-	         <select class="portfolio-container">
-            </select>
-               <div class="move-right">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="transform: rotate(180deg);">
-                <path d="M15 6L9 12L15 18" stroke="#242424" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                </svg>
-            </div>
-            <div class="item-container">
-            </div>
-            <div class="move-left">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M15 6L9 12L15 18" stroke="#242424" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                </svg>
-            </div>
-	    </div>
-   </div>
+
         
 
     <div class="row" id="live-data" style="display:none">
             <strong class="title-block" id="live-title"></strong>
          <div class="live-data">
       <div class="live-data-items">
-        <div style="font-size: 14px;">قیمت صدور هر واحد سرمایه گذاری</div>
+          
+              <div style="font-size: 14px;">قیمت صدور هر واحد سرمایه گذاری واحد ممتاز</div>
+                
         <strong class="purchase-live-price live-box" id="purchase-live-price"></strong>
       </div>
       <div class="live-data-items">
-        <div style="font-size: 14px;">قیمت ابطال هر واحد سرمایه گذاری</div>
+          
+              <div style="font-size: 14px;">قیمت ابطال هر واحد سرمایه گذاری واحد ممتاز</div>
+            
+        
         <strong class="redemption-live-price live-box" id="redemption-live-price"></strong>
       </div>
         </div>
@@ -324,7 +328,11 @@
 
         
         
-        <strong class="title-block">آخرین NAV محاسبه شده</strong>
+            <strong class="title-block">آخرین NAV محاسبه شده واحد ممتاز</strong>
+          
+        
+
+        
  <div class="row">
   <div class="fund-details">
      <div class="fund-item">
@@ -503,8 +511,11 @@
             </div>
             </div>
         </div>
+    <div>
+        
+    </div>
 
-    <script type="text/javascript" src="/assets/js/loadchart.js?1"></script>
+    <script type="text/javascript" src="/assets/js/loadchart.js?3"></script>
     <script type="text/javascript">
 
         $(document).ready(function () {
@@ -524,14 +535,16 @@
 
                     function LoadNavNavbar() {
                         $.getJSON(navEtf, function (data) {
-                            $("#live-title").text('اطلاعات لحظه‌ای:' + data.date_time.toString());
+                            
+                            $("#live-title").text('اطلاعات لحظه ای واحد ممتاز:' + data.date_time.toString());
                             $("#purchase-live-price").text(data.purchase_price.toString() + " ریال");
                             $("#redemption-live-price").text(data.redemption_price.toString() + " ریال");
+                                                        
                         });
                     }
 
             
-            var loadChart = new LoadChart(navpAction, dailyValueAction, assetStatus, 3);
+            var loadChart = new LoadChart(navpAction, dailyValueAction, assetStatus, 3, 12);
             loadChart.Load();
 
             $(".flex-select .move-left").click(() => {
@@ -735,8 +748,8 @@
                     </div>
                 </div>
                 <hr style="margin: 0 2%;background-color: #A4AECF;opacity: 0.5;height: 1px;margin-bottom: 9px;"/>
-                 <span class="copy"> &copy; 2023 -  طراحی و تولید توسط شرکت <a href="http://mabnadp.com/" target="_blank">پردازش اطلاعات مالی مبنا</a></span>
-                <span class="version">  نسخه 2.12 </span>
+                 <span class="copy"> &copy; 2024 -  طراحی و تولید توسط شرکت <a href="http://mabnadp.com/" target="_blank">پردازش اطلاعات مالی مبنا</a></span>
+                <span class="version">  نسخه 2.21 </span>
             </aside>
         </div>
         <!-- boxed -->
@@ -787,7 +800,13 @@
         });
     </script>
     <style>
-
     </style>
+<!-- Google Tag Manager (noscript) -->
+
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-NCW8HRGP"
+                  height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+<!-- End Google Tag Manager (noscript) -->
+
+
 </body>
 </html>
