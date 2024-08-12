@@ -519,7 +519,6 @@ def load_dataset(*, site=True, inst=False) -> _DataFrame:
 
     if site:
         df['site'] = df[df['siteType'].notna()].apply(_make_site, axis=1)
-        df.drop(columns=['url', 'siteType'], inplace=True)
 
     if inst:
         df['inst'] = df['insCode'].apply(_Instrument)
