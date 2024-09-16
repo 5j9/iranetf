@@ -4,10 +4,15 @@ from abc import ABC as _ABC, abstractmethod as _abstractmethod
 from asyncio import gather as _gather
 from datetime import datetime as _datetime
 from json import JSONDecodeError as _JSONDecodeError, loads as _loads
-from logging import error as _error, info as _info, warning as _warning
+from logging import (
+    debug as _debug,
+    error as _error,
+    info as _info,
+    warning as _warning,
+)
 from pathlib import Path as _Path
 from re import findall as _findall, split as _split
-from typing import TypedDict as _TypedDict
+from typing import TypeAlias as _TypeAlias, TypedDict as _TypedDict
 
 import pandas as _pd
 from aiohttp import (
@@ -89,6 +94,8 @@ class TPLiveNAVPS(LiveNAVPS):
 
 _JSON_OR_DF = list | dict | str | _DataFrame
 
+AnySite: _TypeAlias = 'LeveragedTadbirPardaz | TadbirPardaz | RayanHamafza | MabnaDP | RayanHamafzaMultiNAV'
+
 
 class BaseSite(_ABC):
     __slots__ = 'url', 'last_response'
@@ -129,9 +136,7 @@ class BaseSite(_ABC):
     async def cache(self) -> float: ...
 
     @classmethod
-    def from_l18(
-        cls, l18: str
-    ) -> 'LeveragedTadbirPardaz | TadbirPardaz | RayanHamafza | MabnaDP | RayanHamafzaMultiNAV':
+    def from_l18(cls, l18: str) -> AnySite:
         try:
             ds = cls.ds
         except AttributeError:
@@ -145,6 +150,31 @@ class BaseSite(_ABC):
         _warning(
             f'Unknown keys in {cls.__qualname__}: {d.keys() - cls._aa_keys}'
         )
+
+    @staticmethod
+    async def from_url(url: str) -> AnySite:
+        content = await (await _get(url)).read()
+        rfind = content.rfind
+        find = content.find
+
+        if rfind(b'<div class="tadbirLogo"></div>') != -1:
+            tp_site = TadbirPardaz(url)
+            info = await tp_site.info()
+            if info['isLeveragedMode']:
+                return LeveragedTadbirPardaz(url)
+            if info['isETFMultiNavMode']:
+                return TadbirPardazMultiNAV(url + '#2')
+            return tp_site
+
+        if rfind(b'Rayan Ham Afza') != -1:
+            if find(b'<body class="multi-fund">') != -1:
+                return RayanHamafzaMultiNAV(url + '#1')
+            return RayanHamafza(url)
+
+        if rfind(b'://mabnadp.com/') != -1:
+            return MabnaDP(url)
+
+        raise ValueError(f'Could not determine site type for {url}.')
 
 
 def _comma_int(s: str) -> int:
@@ -294,8 +324,6 @@ class RayanHamafzaMultiNAV(RayanHamafza):
 
 # noinspection PyAbstractClass
 class BaseTadbirPardaz(BaseSite):
-    # last checked version = '9.2.2'
-
     async def version(self) -> str:
         content = await _read(self.url)
         start = content.find(b'version number:')
@@ -326,7 +354,7 @@ class BaseTadbirPardaz(BaseSite):
         content = await (await _get(self.url)).read()
         d = {
             'isETFMultiNavMode': b'isETFMultiNavMode=true;' in content,
-            'isLeveragedMode': b'isLeveragedMode =true;' not in content,
+            'isLeveragedMode': b'isLeveragedMode =true;' in content,
             'isEtfMode': b'isEtfMode =true;' in content,
         }
         if d['isETFMultiNavMode']:
@@ -774,16 +802,22 @@ async def update_dataset(*, check_existing_sites=False) -> _DataFrame:
     return new_items[new_items['insCode'].isna()]
 
 
-async def _check_live_site(site: BaseSite):
+async def _check_site_type(site: BaseSite) -> None:
     if site != site:  # na
         return
 
     try:
-        navps = await site.live_navps()
+        detected = await BaseSite.from_url(site.url)
     except Exception as e:
-        _error(f'exception during checking of {site}: {e}')
-    else:
-        assert type(navps['creation']) is int
+        _error(f'Exception occured during checking of {site}: {e}')
+        return
+    if type(detected) is type(site):
+        _debug(f'checked {site.url}')
+        return
+    _error(
+        f'Detected site type for {site.url} is {type(detected).__name__},'
+        f' but dataset site type is {type(site).__name__}.'
+    )
 
 
 async def check_dataset(live=False):
@@ -793,14 +827,16 @@ async def check_dataset(live=False):
     assert ds['name'].is_unique
     assert ds['type'].unique().isin(_ETF_TYPES.values()).all()
     assert ds['insCode'].is_unique
-    assert ds['regNo'].is_unique
+    reg_numbers = ds['regNo']
+    known_reg_numbers = reg_numbers[reg_numbers.notna()]
+    assert known_reg_numbers.is_unique, ds[known_reg_numbers.duplicated()]
 
     if not live:
         return
 
     ds['site'] = ds[ds['siteType'].notna()].apply(_make_site, axis=1)
 
-    coros = ds['site'].apply(_check_live_site)
+    coros = ds['site'].apply(_check_site_type)
 
     ssl = SSL
     SSL = False  # many sites fail ssl verification
