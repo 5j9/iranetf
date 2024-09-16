@@ -322,6 +322,23 @@ class BaseTadbirPardaz(BaseSite):
         self._check_aa_keys(d)
         return d
 
+    async def info(self):
+        content = await (await _get(self.url)).read()
+        d = {
+            'isETFMultiNavMode': b'isETFMultiNavMode=true;' in content,
+            'isLeveragedMode': b'isLeveragedMode =true;' not in content,
+            'isEtfMode': b'isEtfMode =true;' in content,
+        }
+        if d['isETFMultiNavMode']:
+            baskets = _findall(
+                r'<option [^>]*?value="(\d+)">([^<]*)</option>',
+                content.partition(b'<div class="drp-basket-header">')[2]
+                .partition(b'</select>')[0]
+                .decode(),
+            )
+            d['basketIDs'] = dict(baskets)
+        return d
+
     async def cache(self) -> float:
         aa = await self.asset_allocation()
         g = aa.get

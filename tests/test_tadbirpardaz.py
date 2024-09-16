@@ -139,3 +139,19 @@ tavan = BaseSite.from_l18('توان')
 async def test_float_base_units_value():
     nav = await tavan.live_navps()
     assert type(nav['BaseUnitsCancelNAV']) is float
+
+
+@file('rouinfund.html')
+async def test_info():
+    steel = BaseSite.from_l18('استیل')
+    assert await steel.info() == {
+        'basketIDs': {
+            '1': 'صندوق سرمایه\u200cگذاری بخشی صنایع مفید',
+            '2': 'استیل',
+            '3': 'خودران',
+            '4': 'سیمانو',
+        },
+        'isETFMultiNavMode': True,
+        'isEtfMode': False,
+        'isLeveragedMode': True,
+    }
