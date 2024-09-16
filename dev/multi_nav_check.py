@@ -14,7 +14,6 @@ async def check(site: TadbirPardaz):
 async def main():
     ds = load_dataset()
     tp = ds[ds['siteType'] == 'TadbirPardaz']
-    site: TadbirPardaz
     await gather(*[check(site) for site in tp['site']])
 
 
