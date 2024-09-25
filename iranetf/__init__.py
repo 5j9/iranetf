@@ -12,7 +12,7 @@ from logging import (
 )
 from pathlib import Path as _Path
 from re import findall as _findall, split as _split
-from typing import TypeAlias as _TypeAlias, TypedDict as _TypedDict
+from typing import Any as _Any, TypedDict as _TypedDict
 
 import pandas as _pd
 from aiohttp import (
@@ -38,8 +38,8 @@ from tsetmc.instruments import (
 )
 
 _pd.options.mode.copy_on_write = True
-_pd.options.future.infer_string = True
-_pd.options.future.no_silent_downcasting = True
+_pd.options.future.infer_string = True  # type: ignore
+_pd.options.future.no_silent_downcasting = True  # type: ignore
 
 session_manager = SessionManager()
 
@@ -92,9 +92,9 @@ class TPLiveNAVPS(LiveNAVPS):
     totalUnit: int
 
 
-_JSON_OR_DF = list | dict | str | _DataFrame
+type _JSON_OR_DF = list | dict | str | _DataFrame
 
-AnySite: _TypeAlias = 'LeveragedTadbirPardaz | TadbirPardaz | RayanHamafza | MabnaDP | RayanHamafzaMultiNAV'
+type AnySite = 'LeveragedTadbirPardaz | TadbirPardaz | RayanHamafza | MabnaDP | RayanHamafzaMultiNAV'
 
 
 class BaseSite(_ABC):
@@ -141,7 +141,7 @@ class BaseSite(_ABC):
             ds = cls.ds
         except AttributeError:
             ds = cls.ds = load_dataset(site=True).set_index('l18')
-        return ds.loc[l18, 'site']
+        return ds.loc[l18, 'site']  # type: ignore
 
     @classmethod
     def _check_aa_keys(cls, d: dict):
@@ -190,16 +190,16 @@ class MabnaDP(BaseSite):
         return await super()._json(f'api/v1/overall/{path}', **kwa)
 
     async def live_navps(self) -> LiveNAVPS:
-        j = await self._json('navetf.json')
+        j: dict = await self._json('navetf.json')  # type: ignore
         j['date'] = _jdatetime.strptime(
             j['date_time'], '%H:%M %Y/%m/%d'
         ).togregorian()
         j['creation'] = _comma_int(j.pop('purchase_price'))
         j['redemption'] = _comma_int(j.pop('redemption_price'))
-        return j
+        return j  # type: ignore
 
     async def navps_history(self) -> _DataFrame:
-        j: list[dict] = await self._json('navps.json')
+        j: list[dict] = await self._json('navps.json')  # type: ignore
         df = _DataFrame(j[0]['values'])
         df['date'] = (
             df['date']
@@ -235,7 +235,7 @@ class MabnaDP(BaseSite):
     async def asset_allocation(self) -> dict:
         j: dict = await self._json(
             'dailyvalue.json', params={'portfolioIds': '0'}
-        )
+        )  # type: ignore
         d = {i['name']: i['percentage'] for i in j['values']}
         self._check_aa_keys(d)
         return d
@@ -251,29 +251,29 @@ class RayanHamafza(BaseSite):
         return await super()._json(f'Data/{path}', **kwa)
 
     async def live_navps(self) -> LiveNAVPS:
-        d = await self._json('FundLiveData')
+        d: dict = await self._json('FundLiveData')  # type: ignore
         d['creation'] = d.pop('PurchaseNAVPerShare')
         d['redemption'] = d.pop('SellNAVPerShare')
         d['date'] = _jdatetime.strptime(
             f"{d.pop('JalaliDate')} {d.pop('Time')}", '%Y/%m/%d %H:%M'
         ).togregorian()
-        return d
+        return d  # type: ignore
 
     async def navps_history(self) -> _DataFrame:
-        df = await self._json('NAVPerShare', df=True)
+        df: _DataFrame = await self._json('NAVPerShare', df=True)  # type: ignore
         df.columns = ['date', 'creation', 'redemption', 'statistical']
         df['date'] = df['date'].map(_j2g)
         df.set_index('date', inplace=True)
         return df
 
     async def nav_history(self) -> _DataFrame:
-        df = await self._json('PureAsset', df=True)
+        df: _DataFrame = await self._json('PureAsset', df=True)  # type: ignore
         df.columns = ['nav', 'date', 'redemption_navps']
         df['date'] = df['date'].map(_j2g)
         return df
 
     async def portfolio_industries(self) -> _DataFrame:
-        return await self._json('Industries', df=True)
+        return await self._json('Industries', df=True)  # type: ignore
 
     _aa_keys = {
         'DepositTodayPercent',
@@ -286,12 +286,12 @@ class RayanHamafza(BaseSite):
     }
 
     async def asset_allocation(self) -> dict:
-        d = await self._json('MixAsset')
+        d: dict = await self._json('MixAsset')  # type: ignore
         self._check_aa_keys(d)
         return d
 
     async def dividend_history(self) -> _DataFrame:
-        j = await self._json('FundProfit')
+        j: dict = await self._json('FundProfit')  # type: ignore
         df = _DataFrame(j['data'])
         df['ProfitDate'] = df['ProfitDate'].apply(
             lambda i: _jdatetime.strptime(i, format='%Y/%m/%d').togregorian()
@@ -345,14 +345,14 @@ class BaseTadbirPardaz(BaseSite):
     }
 
     async def asset_allocation(self) -> dict:
-        j: dict = await self._json('Chart/AssetCompositions')
+        j: dict = await self._json('Chart/AssetCompositions')  # type: ignore
         d = {i['x']: i['y'] for i in j['List']}
         self._check_aa_keys(d)
         return d
 
-    async def info(self):
+    async def info(self) -> dict[str, _Any]:
         content = await (await _get(self.url)).read()
-        d = {
+        d: dict[str, _Any] = {
             'isETFMultiNavMode': b'isETFMultiNavMode=true;' in content,
             'isLeveragedMode': b'isLeveragedMode =true;' in content,
             'isEtfMode': b'isEtfMode =true;' in content,
@@ -379,9 +379,9 @@ class BaseTadbirPardaz(BaseSite):
 
 class TadbirPardaz(BaseTadbirPardaz):
     async def live_navps(self) -> TPLiveNAVPS:
-        d = await self._json('Fund/GetETFNAV')
+        d: str = await self._json('Fund/GetETFNAV')  # type: ignore
         # the json is escaped twice, so it needs to be loaded again
-        d = _loads(d)
+        d: dict = _loads(d)  # type: ignore
 
         d['creation'] = d.pop('subNav')
         d['redemption'] = d.pop('cancelNav')
@@ -401,12 +401,12 @@ class TadbirPardaz(BaseTadbirPardaz):
             date = _jdatetime.strptime(date, '%Y/%m/%d ')
         d['date'] = date.togregorian()
 
-        return d
+        return d  # type: ignore
 
     async def navps_history(self) -> _DataFrame:
         j: list = await self._json(
             'Chart/TotalNAV', params={'type': 'getnavtotal'}
-        )
+        )  # type: ignore
         creation, statistical, redemption = [
             [d['y'] for d in i['List']] for i in j
         ]
@@ -472,7 +472,7 @@ class TadbirPardazMultiNAV(TadbirPardaz):
         super().__init__(url)
 
     async def _json(
-        self, path: str, /, params: dict = None, **kwa
+        self, path: str, params: dict = None, **kwa
     ) -> _JSON_OR_DF:
         return await super()._json(
             path,
@@ -493,7 +493,7 @@ class LeveragedTadbirPardaz(BaseTadbirPardaz):
     async def navps_history(self) -> _DataFrame:
         j: list = await self._json(
             'Chart/TotalNAV', params={'type': 'getnavtotal'}
-        )
+        )  # type: ignore
 
         frames = []
         for i, name in zip(
@@ -518,9 +518,9 @@ class LeveragedTadbirPardaz(BaseTadbirPardaz):
         return df
 
     async def live_navps(self) -> LeveragedTadbirPardazLiveNAVPS:
-        j = await self._json('Fund/GetLeveragedNAV')
+        j: str = await self._json('Fund/GetLeveragedNAV')  # type: ignore
         # the json is escaped twice, so it needs to be loaded again
-        j = _loads(j)
+        j: dict = _loads(j)  # type: ignore
 
         pop = j.pop
         date = j.pop('PublishDate')
@@ -546,7 +546,7 @@ class LeveragedTadbirPardaz(BaseTadbirPardaz):
             date = _jdatetime.strptime(date, '%Y/%m/%d ')
         result['date'] = date.togregorian()
 
-        return result
+        return result  # type: ignore
 
 
 _DATASET_PATH = _Path(__file__).parent / 'dataset.csv'
@@ -580,10 +580,10 @@ def load_dataset(*, site=True, inst=False) -> _DataFrame:
     )
 
     if site:
-        df['site'] = df[df['siteType'].notna()].apply(_make_site, axis=1)
+        df['site'] = df[df['siteType'].notna()].apply(_make_site, axis=1)  # type: ignore
 
     if inst:
-        df['inst'] = df['insCode'].apply(_Instrument)
+        df['inst'] = df['insCode'].apply(_Instrument)  # type: ignore
 
     return df
 
@@ -825,7 +825,7 @@ async def check_dataset(live=False):
     ds = load_dataset(site=False)
     assert ds['l18'].is_unique
     assert ds['name'].is_unique
-    assert ds['type'].unique().isin(_ETF_TYPES.values()).all()
+    assert ds['type'].unique().isin(_ETF_TYPES.values()).all()  # type: ignore
     assert ds['insCode'].is_unique
     reg_numbers = ds['regNo']
     known_reg_numbers = reg_numbers[reg_numbers.notna()]
@@ -834,9 +834,9 @@ async def check_dataset(live=False):
     if not live:
         return
 
-    ds['site'] = ds[ds['siteType'].notna()].apply(_make_site, axis=1)
+    ds['site'] = ds[ds['siteType'].notna()].apply(_make_site, axis=1)  # type: ignore
 
-    coros = ds['site'].apply(_check_site_type)
+    coros = ds['site'].apply(_check_site_type)  # type: ignore
 
     ssl = SSL
     SSL = False  # many sites fail ssl verification

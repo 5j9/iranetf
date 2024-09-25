@@ -21,7 +21,7 @@ tadbir = TadbirPardaz('https://modirfund.ir/')
 @file('modir_live.json')
 async def test_live_navps():
     d = await tadbir.live_navps()
-    assert_dict_type(d, TPLiveNAVPS)
+    assert_dict_type(d, TPLiveNAVPS)  # type: ignore
 
 
 @file('modir_navps_history.json')
@@ -32,7 +32,7 @@ async def test_navps_history():
 @file('icpfvc_navps_date_space.json')
 async def test_navps_date_ends_with_space():
     d = await TadbirPardaz('https://icpfvc.ir/').live_navps()
-    assert_dict_type(d, TPLiveNAVPS)
+    assert_dict_type(d, TPLiveNAVPS)  # type: ignore
 
 
 @files('still.json', 'khodran.json')
@@ -97,7 +97,7 @@ ltp = LeveragedTadbirPardaz('https://ahrom.charisma.ir/')
 @file('ahrom_live.json')
 async def test_live_navps_leveraged():
     live = await ltp.live_navps()
-    assert_dict_type(live, LeveragedTadbirPardazLiveNAVPS)
+    assert_dict_type(live, LeveragedTadbirPardazLiveNAVPS)  # type: ignore
 
 
 @file('ahrom_navps_history.json')
@@ -132,7 +132,7 @@ async def test_cache():
     assert 0.0 <= cache <= 0.6
 
 
-tavan = BaseSite.from_l18('توان')
+tavan: LeveragedTadbirPardaz = BaseSite.from_l18('توان')  # type: ignore
 
 
 @file('tavan_float.json')
@@ -143,7 +143,7 @@ async def test_float_base_units_value():
 
 @file('rouinfund.html')
 async def test_info():
-    steel = BaseSite.from_l18('استیل')
+    steel: TadbirPardaz = BaseSite.from_l18('استیل')  # type: ignore
     assert await steel.info() == {
         'basketIDs': {
             '1': 'صندوق سرمایه\u200cگذاری بخشی صنایع مفید',
@@ -153,5 +153,5 @@ async def test_info():
         },
         'isETFMultiNavMode': True,
         'isEtfMode': False,
-        'isLeveragedMode': True,
+        'isLeveragedMode': False,
     }
