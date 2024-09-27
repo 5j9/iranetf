@@ -50,3 +50,6 @@ addopts = '--quiet --tb=short'
 
 [tool.flit.sdist]
 exclude = ['tests', 'dev']
+
+[tool.pyright]
+reportUnnecessaryTypeIgnoreComment = true

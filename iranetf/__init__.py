@@ -48,7 +48,7 @@ SSL = False  # as horrible as this is, many sites fail ssl verification
 
 
 async def _get(
-    url: str, params: dict = None, cookies: dict = None
+    url: str, params: dict | None = None, cookies: dict | None = None
 ) -> _ClientResponse:
     return await session_manager.get(
         url, ssl=SSL, cookies=cookies, params=params
@@ -92,8 +92,6 @@ class TPLiveNAVPS(LiveNAVPS):
     totalUnit: int
 
 
-type _JSON_OR_DF = list | dict | str | _DataFrame
-
 type AnySite = 'LeveragedTadbirPardaz | TadbirPardaz | RayanHamafza | MabnaDP | RayanHamafzaMultiNAV'
 
 
@@ -114,10 +112,10 @@ class BaseSite(_ABC):
         self,
         path: str,
         *,
-        params: dict = None,
-        cookies: dict = None,
+        params: dict | None = None,
+        cookies: dict | None = None,
         df: bool = False,
-    ) -> _JSON_OR_DF:
+    ) -> _Any:
         r = await _get(self.url + path, params, cookies)
         self.last_response = r
         content = await r.read()
@@ -186,11 +184,11 @@ def _comma_float(s: str) -> float:
 
 
 class MabnaDP(BaseSite):
-    async def _json(self, path, **kwa) -> _JSON_OR_DF:
+    async def _json(self, path, **kwa) -> _Any:
         return await super()._json(f'api/v1/overall/{path}', **kwa)
 
     async def live_navps(self) -> LiveNAVPS:
-        j: dict = await self._json('navetf.json')  # type: ignore
+        j: dict = await self._json('navetf.json')
         j['date'] = _jdatetime.strptime(
             j['date_time'], '%H:%M %Y/%m/%d'
         ).togregorian()
@@ -199,7 +197,7 @@ class MabnaDP(BaseSite):
         return j  # type: ignore
 
     async def navps_history(self) -> _DataFrame:
-        j: list[dict] = await self._json('navps.json')  # type: ignore
+        j: list[dict] = await self._json('navps.json')
         df = _DataFrame(j[0]['values'])
         df['date'] = (
             df['date']
@@ -235,7 +233,7 @@ class MabnaDP(BaseSite):
     async def asset_allocation(self) -> dict:
         j: dict = await self._json(
             'dailyvalue.json', params={'portfolioIds': '0'}
-        )  # type: ignore
+        )
         d = {i['name']: i['percentage'] for i in j['values']}
         self._check_aa_keys(d)
         return d
@@ -247,11 +245,11 @@ class MabnaDP(BaseSite):
 
 
 class RayanHamafza(BaseSite):
-    async def _json(self, path, **kwa) -> _JSON_OR_DF:
+    async def _json(self, path, **kwa) -> _Any:
         return await super()._json(f'Data/{path}', **kwa)
 
     async def live_navps(self) -> LiveNAVPS:
-        d: dict = await self._json('FundLiveData')  # type: ignore
+        d: dict = await self._json('FundLiveData')
         d['creation'] = d.pop('PurchaseNAVPerShare')
         d['redemption'] = d.pop('SellNAVPerShare')
         d['date'] = _jdatetime.strptime(
@@ -260,20 +258,20 @@ class RayanHamafza(BaseSite):
         return d  # type: ignore
 
     async def navps_history(self) -> _DataFrame:
-        df: _DataFrame = await self._json('NAVPerShare', df=True)  # type: ignore
+        df: _DataFrame = await self._json('NAVPerShare', df=True)
         df.columns = ['date', 'creation', 'redemption', 'statistical']
         df['date'] = df['date'].map(_j2g)
         df.set_index('date', inplace=True)
         return df
 
     async def nav_history(self) -> _DataFrame:
-        df: _DataFrame = await self._json('PureAsset', df=True)  # type: ignore
+        df: _DataFrame = await self._json('PureAsset', df=True)
         df.columns = ['nav', 'date', 'redemption_navps']
         df['date'] = df['date'].map(_j2g)
         return df
 
     async def portfolio_industries(self) -> _DataFrame:
-        return await self._json('Industries', df=True)  # type: ignore
+        return await self._json('Industries', df=True)
 
     _aa_keys = {
         'DepositTodayPercent',
@@ -286,12 +284,12 @@ class RayanHamafza(BaseSite):
     }
 
     async def asset_allocation(self) -> dict:
-        d: dict = await self._json('MixAsset')  # type: ignore
+        d: dict = await self._json('MixAsset')
         self._check_aa_keys(d)
         return d
 
     async def dividend_history(self) -> _DataFrame:
-        j: dict = await self._json('FundProfit')  # type: ignore
+        j: dict = await self._json('FundProfit')
         df = _DataFrame(j['data'])
         df['ProfitDate'] = df['ProfitDate'].apply(
             lambda i: _jdatetime.strptime(i, format='%Y/%m/%d').togregorian()
@@ -318,7 +316,7 @@ class RayanHamafzaMultiNAV(RayanHamafza):
         self.cookies = {'fundId': fund_id}
         super().__init__(url)
 
-    async def _json(self, path, **kwa) -> _JSON_OR_DF:
+    async def _json(self, path, **kwa) -> _Any:
         return await super()._json(path, cookies=self.cookies, **kwa)
 
 
@@ -345,7 +343,7 @@ class BaseTadbirPardaz(BaseSite):
     }
 
     async def asset_allocation(self) -> dict:
-        j: dict = await self._json('Chart/AssetCompositions')  # type: ignore
+        j: dict = await self._json('Chart/AssetCompositions')
         d = {i['x']: i['y'] for i in j['List']}
         self._check_aa_keys(d)
         return d
@@ -406,7 +404,7 @@ class TadbirPardaz(BaseTadbirPardaz):
     async def navps_history(self) -> _DataFrame:
         j: list = await self._json(
             'Chart/TotalNAV', params={'type': 'getnavtotal'}
-        )  # type: ignore
+        )
         creation, statistical, redemption = [
             [d['y'] for d in i['List']] for i in j
         ]
@@ -472,8 +470,8 @@ class TadbirPardazMultiNAV(TadbirPardaz):
         super().__init__(url)
 
     async def _json(
-        self, path: str, params: dict = None, **kwa
-    ) -> _JSON_OR_DF:
+        self, path: str, params: dict | None = None, **kwa
+    ) -> _Any:
         return await super()._json(
             path,
             params=(params or {}) | {'basketId': self.basket_id},
@@ -493,7 +491,7 @@ class LeveragedTadbirPardaz(BaseTadbirPardaz):
     async def navps_history(self) -> _DataFrame:
         j: list = await self._json(
             'Chart/TotalNAV', params={'type': 'getnavtotal'}
-        )  # type: ignore
+        )
 
         frames = []
         for i, name in zip(
