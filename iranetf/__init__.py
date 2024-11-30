@@ -643,13 +643,16 @@ async def _url_type(domain: str) -> tuple:
 async def _add_url_and_type(
     fipiran_df: _DataFrame, known_domains: _Series | None
 ):
-    domains_to_be_checked = fipiran_df['domain']
+    domains_to_be_checked = fipiran_df['domain'][~fipiran_df['domain'].isna()]
     if known_domains is not None:
         domains_to_be_checked = domains_to_be_checked[
             ~domains_to_be_checked.isin(known_domains)
         ]
 
     _info(f'checking site types of {len(domains_to_be_checked)} domains')
+    if domains_to_be_checked.empty:
+        return
+
     # there will be a lot of redirection warnings, let's silent them
     with _w.catch_warnings():
         _w.filterwarnings(
