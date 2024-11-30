@@ -734,10 +734,7 @@ async def _tsetmc_dataset() -> _DataFrame:
     await update()
 
     df = LazyDS.df
-    df.drop(columns='l30', inplace=True)
-    df.columns = ['insCode', 'l18']
-    df.set_index('insCode', inplace=True)
-
+    df.drop(columns=['l30', 'isin', 'cisin'], inplace=True)
     return df
 
 
