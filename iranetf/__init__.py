@@ -774,7 +774,13 @@ async def _update_existing_rows_using_fipiran(
 
     ds.set_index('insCode', inplace=True)
     # Do not overwrite MultiNAV type and URL.
-    ds.update(regno.set_index('insCode'), overwrite=False)
+    regno.set_index('insCode', inplace=True)
+    ds.update(regno, overwrite=False)
+
+    # Update ds types using fipiran values
+    # ds['type'] = regno['type'] will create NA values in type column.
+    common_indices = regno.index.intersection(ds.index)
+    ds.loc[common_indices, 'type'] = regno.loc[common_indices, 'type']
 
     # use domain as URL for those who do not have any URL
     ds.loc[ds['url'].isna(), 'url'] = 'http://' + regno['domain'] + '/'
