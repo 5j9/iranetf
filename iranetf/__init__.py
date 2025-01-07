@@ -70,6 +70,10 @@ _ETF_TYPES = {  # numbers are according to fipiran
     5: 'Commodity',
     17: 'FOF',
     18: 'REIT',
+    21: 'Sector',
+    22: 'Leveraged',
+    23: 'Index',
+    24: 'Guarantee',
 }
 
 
@@ -569,7 +573,7 @@ def load_dataset(*, site=True, inst=False) -> _DataFrame:
         dtype={
             'l18': 'string',
             'name': 'string',
-            'type': 'category',
+            'type': _pd.CategoricalDtype([*_ETF_TYPES.values()]),
             'insCode': 'string',
             'regNo': 'string',
             'url': 'string',
