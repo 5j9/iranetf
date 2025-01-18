@@ -1,8 +1,6 @@
 ﻿l18,name,type,insCode,regNo,url,siteType
-زروان,صندوق س.پشتوانه طلاي ويستا,Commodity,28255729477187163,12359,https://goldvista.ir/,TadbirPardaz
-درخشان,صندوق س.پشتوانه طلادرخشان آبان,Commodity,61805666737517582,12356,https://dafund.ir/,TadbirPardaz
-آتش,صندوق س.پشتوانه طلا آتش فيروزه,Commodity,56987424987755487,12358,https://atash.fundz.ir/,TadbirPardaz
 آبنوس,سهام نگر کیمیا,Stock,40912525017440979,12270,https://kimiasahm.ir/,TadbirPardaz
+آتش,صندوق س.پشتوانه طلا آتش فيروزه,Commodity,56987424987755487,12358,https://atash.fundz.ir/,TadbirPardaz
 آتیمس,آرمان آتیه درخشان مس,Stock,22839330962768817,11378,http://armanmesetf.ir/,RayanHamafza
 آتیه ملت,آتیه ملت,Fixed,47492157735162813,10895,https://atiehmellat.ir/,TadbirPardaz
 آذرین,بخشی فلزات کیمیا,Sector,43358402418932595,12172,https://kimiasectorfund.ir/#2,TadbirPardazMultiNAV
@@ -90,6 +88,7 @@
 داریک,اعتماد داریک,Fixed,71076372178147339,11725,https://etemaddarik.ir/,RayanHamafza
 دامون,آسمان دامون,Fixed,43009306066217458,12160,https://admfund.ir/,TadbirPardaz
 دانیک,املاک و مستغلات نیک رای,REIT,67717913151786055,12111,https://nikrayreits.ir/,TadbirPardaz
+درخشان,صندوق س.پشتوانه طلادرخشان آبان,Commodity,61805666737517582,12356,https://dafund.ir/,TadbirPardaz
 درسا,قابل معامله سهامی درسا,Stock,34581754264880199,11962,http://dorsaetf.ir/,RayanHamafza
 دریا,دریای آبی فیروزه,Stock,11285885633824855,12039,https://daryaetf.ir/,TadbirPardaz
 درین,درین بها بازار,Fixed,21077182490095731,12086,http://dorinfund.com/,RayanHamafza
@@ -104,6 +103,7 @@
 رویین,بخشی فلزات رویین,Sector,53059909885484371,12179,https://rouinfund.ir/#2,TadbirPardazMultiNAV
 زر,پشتوانه سکه طلای زرافشان امید ایرانیان,Commodity,33254899395816171,11530,http://omidgoldfund.ir/,RayanHamafza
 زرفام,زرفام آشنا,Commodity,33144542989832366,11967,https://goldfund.ir/,RayanHamafza
+زروان,صندوق س.پشتوانه طلاي ويستا,Commodity,28255729477187163,12359,https://goldvista.ir/,TadbirPardaz
 زرین,زرین کوروش,Stock,50139638026536387,11774,https://zarinfunds.com/,RayanHamafza
 زمرد کوروش,زمرد کوروش,Fixed,57191287546444240,12334,https://zomorodkourosh.com/,RayanHamafza
 زیتون,زیتون نماد پایا,Mixed,28551661889797217,11888,https://zeytoon.fund/,RayanHamafza
