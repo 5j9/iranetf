@@ -14,7 +14,7 @@ logging.getLogger().setLevel(logging.INFO)
 
 
 async def main():
-    iranetf.SSL = False  # tolerate week ssl certs
+    iranetf.ssl = False  # tolerate week ssl certs
     return await update_dataset(
         check_existing_sites=config.check_existing_sites,
     )

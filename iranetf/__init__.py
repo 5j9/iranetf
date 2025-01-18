@@ -45,14 +45,14 @@ _pd.options.future.no_silent_downcasting = True  # type: ignore
 session_manager = SessionManager()
 
 
-SSL = False  # as horrible as this is, many sites fail ssl verification
+ssl: bool = False  # as horrible as this is, many sites fail ssl verification
 
 
 async def _get(
     url: str, params: dict | None = None, cookies: dict | None = None
 ) -> _ClientResponse:
     return await session_manager.get(
-        url, ssl=SSL, cookies=cookies, params=params
+        url, ssl=ssl, cookies=cookies, params=params
     )
 
 
@@ -831,7 +831,7 @@ async def _check_site_type(site: BaseSite) -> None:
 
 
 async def check_dataset(live=False):
-    global SSL
+    global ssl
     ds = load_dataset(site=False)
     assert ds['l18'].is_unique
     assert ds['name'].is_unique
@@ -848,12 +848,12 @@ async def check_dataset(live=False):
 
     coros = ds['site'].apply(_check_site_type)  # type: ignore
 
-    ssl = SSL
-    SSL = False  # many sites fail ssl verification
+    local_ssl = ssl
+    ssl = False  # many sites fail ssl verification
     try:
         await _gather(*coros)
     finally:
-        SSL = ssl
+        ssl = local_ssl
 
     if not (no_site := ds[ds['site'].isna()]).empty:
         _warning(
