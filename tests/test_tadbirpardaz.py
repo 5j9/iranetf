@@ -91,7 +91,7 @@ async def test_dividend_history():
     ]
 
 
-ltp = LeveragedTadbirPardaz('https://ahrom.charisma.ir/')
+ltp = BaseSite.from_l18('اهرم')
 
 
 @file('ahrom_live.json')
