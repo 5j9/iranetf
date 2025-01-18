@@ -19,6 +19,7 @@ from aiohttp import (
     ClientConnectorError as _ClientConnectorError,
     ClientOSError as _ClientOSError,
     ClientResponse as _ClientResponse,
+    ClientResponseError as _ClientResponseError,
     ServerDisconnectedError as _ServerDisconnectedError,
     ServerTimeoutError as _ServerTimeoutError,
     TooManyRedirects as _TooManyRedirects,
@@ -257,7 +258,7 @@ class RayanHamafza(BaseSite):
         d['creation'] = d.pop('PurchaseNAVPerShare')
         d['redemption'] = d.pop('SellNAVPerShare')
         d['date'] = _jdatetime.strptime(
-            f"{d.pop('JalaliDate')} {d.pop('Time')}", '%Y/%m/%d %H:%M'
+            f'{d.pop("JalaliDate")} {d.pop("Time")}', '%Y/%m/%d %H:%M'
         ).togregorian()
         return d  # type: ignore
 
@@ -617,6 +618,7 @@ async def _check_validity(site: BaseSite, retry=0) -> tuple[str, str] | None:
         _ClientOSError,
         _TooManyRedirects,
         _ServerDisconnectedError,
+        _ClientResponseError,
     ):
         if retry > 0:
             return await _check_validity(site, retry - 1)
