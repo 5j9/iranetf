@@ -11,9 +11,9 @@ mabna_dp = MabnaDP('https://kianfunds6.ir/')
 @file('hamvasn_live.json')
 async def test_live_navps_mabna():
     d = await mabna_dp.live_navps()
-    assert type(d.pop('date_time')) is str
-    assert type(d.pop('statistical_price')) is float
-    assert type(d.pop('unit_count')) is int
+    assert type(d.pop('date_time')) is str  # type: ignore
+    assert type(d.pop('statistical_price')) is float  # type: ignore
+    assert type(d.pop('unit_count')) is int  # type: ignore
     assert_dict_type(d, LiveNAVPS)
 
 
