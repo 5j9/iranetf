@@ -6,7 +6,7 @@ from tsetmc.instruments import Instrument
 
 from iranetf import load_dataset
 
-ignore_desc = {'نوع صندوق : خصوصی'}
+ignore_desc = {'نوع صندوق : خصوصی', 'نوع صندوق :  جسورانه'}
 
 
 async def is_valid(l18: str) -> bool:
