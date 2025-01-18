@@ -21,7 +21,7 @@ tadbir = TadbirPardaz('https://modirfund.ir/')
 @file('modir_live.json')
 async def test_live_navps():
     d = await tadbir.live_navps()
-    assert_dict_type(d, TPLiveNAVPS)  # type: ignore
+    assert_dict_type(d, TPLiveNAVPS)
 
 
 @file('modir_navps_history.json')
@@ -32,7 +32,7 @@ async def test_navps_history():
 @file('icpfvc_navps_date_space.json')
 async def test_navps_date_ends_with_space():
     d = await TadbirPardaz('https://icpfvc.ir/').live_navps()
-    assert_dict_type(d, TPLiveNAVPS)  # type: ignore
+    assert_dict_type(d, TPLiveNAVPS)
 
 
 @files('still.json', 'khodran.json')
@@ -91,13 +91,13 @@ async def test_dividend_history():
     ]
 
 
-ltp = BaseSite.from_l18('اهرم')
+ltp: LeveragedTadbirPardaz = BaseSite.from_l18('اهرم')  # type: ignore
 
 
 @file('ahrom_live.json')
 async def test_live_navps_leveraged():
     live = await ltp.live_navps()
-    assert_dict_type(live, LeveragedTadbirPardazLiveNAVPS)  # type: ignore
+    assert_dict_type(live, LeveragedTadbirPardazLiveNAVPS)
 
 
 @file('ahrom_navps_history.json')
