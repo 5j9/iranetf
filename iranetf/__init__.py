@@ -1,4 +1,4 @@
-__version__ = '0.22.1'
+__version__ = '0.22.2.dev0'
 import warnings as _w
 from abc import ABC as _ABC, abstractmethod as _abstractmethod
 from asyncio import gather as _gather
