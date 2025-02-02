@@ -11,7 +11,12 @@ from logging import (
     warning as _warning,
 )
 from pathlib import Path as _Path
-from re import findall as _findall, split as _split
+from re import (
+    ASCII as _ASCII,
+    findall as _findall,
+    search as _search,
+    split as _split,
+)
 from typing import Any as _Any, TypedDict as _TypedDict
 
 import pandas as _pd
@@ -356,9 +361,16 @@ class BaseTadbirPardaz(BaseSite):
     async def info(self) -> dict[str, _Any]:
         content = await (await _get(self.url)).read()
         d: dict[str, _Any] = {
-            'isETFMultiNavMode': b'isETFMultiNavMode=true;' in content,
-            'isLeveragedMode': b'isLeveragedMode =true;' in content,
-            'isEtfMode': b'isEtfMode =true;' in content,
+            'isETFMultiNavMode': _search(
+                rb'isETFMultiNavMode\s*=\s*true;', content, _ASCII
+            )
+            is not None,
+            'isLeveragedMode': _search(
+                rb'isLeveragedMode\s*=\s*true;', content, _ASCII
+            )
+            is not None,
+            'isEtfMode': _search(rb'isEtfMode\s*=\s*true;', content, _ASCII)
+            is not None,
         }
         if d['isETFMultiNavMode']:
             baskets = _findall(
