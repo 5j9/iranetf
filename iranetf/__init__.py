@@ -146,12 +146,11 @@ class BaseSite(_ABC):
             ds = cls.ds = load_dataset(site=True).set_index('l18')
         return ds.loc[l18, 'site']  # type: ignore
 
-    @classmethod
-    def _check_aa_keys(cls, d: dict):
-        if d.keys() <= cls._aa_keys:
+    def _check_aa_keys(self, d: dict):
+        if d.keys() <= self._aa_keys:
             return
         _warning(
-            f'Unknown keys in {cls.__qualname__}: {d.keys() - cls._aa_keys}'
+            f'Unknown asset allocation keys on {self!r}: {d.keys() - self._aa_keys}'
         )
 
     @staticmethod
@@ -334,17 +333,18 @@ class BaseTadbirPardaz(BaseSite):
         return content[start + 15 : end].strip().decode()
 
     _aa_keys = {
+        'اوراق گواهی سپرده',
         'اوراق مشارکت',
+        'پنج سهم برتر',
         'سایر دارایی\u200cها',
+        'سایر سهام',
         'سایر سهم\u200cها',
         'سهم\u200cهای برتر',
-        'نقد و بانک (سپرده)',
-        'نقد و بانک (جاری)',
-        'صندوق سرمایه\u200cگذاری در سهام',
-        'سایر سهام',
-        'پنج سهم برتر',
         'شمش و طلا',
-        'اوراق گواهی سپرده',
+        'صندوق سرمایه\u200cگذاری در سهام',
+        'صندوق های سرمایه گذاری',
+        'نقد و بانک (جاری)',
+        'نقد و بانک (سپرده)',
     }
 
     async def asset_allocation(self) -> dict:
