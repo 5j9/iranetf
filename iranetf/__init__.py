@@ -1,5 +1,5 @@
 __version__ = '0.22.3.dev0'
-import warnings as _w
+import logging as _logging
 from abc import ABC as _ABC, abstractmethod as _abstractmethod
 from asyncio import gather as _gather
 from datetime import datetime as _datetime
@@ -407,7 +407,7 @@ class TadbirPardaz(BaseTadbirPardaz):
                 try:
                     d[k] = _comma_int(d[k])
                 except KeyError:
-                    _w.warn(f'key {k!r} not found')
+                    _warning(f'key {k!r} not found')
 
         date = d.pop('publishDate')
         try:
@@ -672,13 +672,11 @@ async def _add_url_and_type(
         return
 
     # there will be a lot of redirection warnings, let's silent them
-    with _w.catch_warnings():
-        _w.filterwarnings(
-            'ignore', category=UserWarning, module='aiohutils.session'
-        )
-        list_of_tuples = await _gather(
-            *[_url_type(d) for d in domains_to_be_checked]
-        )
+    _logging.disable()  # to disable redirection warnings
+    list_of_tuples = await _gather(
+        *[_url_type(d) for d in domains_to_be_checked]
+    )
+    _logging.disable(_logging.NOTSET)
 
     url, site_type = zip(*list_of_tuples)
     fipiran_df.loc[:, ['url', 'siteType']] = _DataFrame(
