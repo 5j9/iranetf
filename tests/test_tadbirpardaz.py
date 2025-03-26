@@ -152,6 +152,7 @@ async def test_info():
             '4': 'سیمانو',
             '5': 'اکتان',
             '6': 'دارونو',
+            '7': 'معدن',
         },
         'isETFMultiNavMode': True,
         'isEtfMode': False,
