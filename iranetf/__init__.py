@@ -182,6 +182,8 @@ class BaseSite(_ABC):
 
         if rfind(b'Rayan Ham Afza') != -1:
             if find(b'<body class="multi-fund">') != -1:
+                if find(b'hybridInformationBox') != -1:
+                    return RayanHamafzaHybrid(url)
                 return RayanHamafzaMultiNAV(url + '#1')
             return RayanHamafza(url)
 
@@ -333,8 +335,10 @@ class LeveragedMabnaDP(BaseSite):
 
 
 class RayanHamafza(BaseSite):
+    _api_path = 'Data'
+
     async def _json(self, path, **kwa) -> _Any:
-        return await super()._json(f'Data/{path}', **kwa)
+        return await super()._json(f'{self._api_path}/{path}', **kwa)
 
     async def live_navps(self) -> LiveNAVPS:
         d: dict = await self._json('FundLiveData')
@@ -345,21 +349,27 @@ class RayanHamafza(BaseSite):
         ).togregorian()
         return d  # type: ignore
 
+    _navps_history_path = 'NAVPerShare'
+
     async def navps_history(self) -> _DataFrame:
-        df: _DataFrame = await self._json('NAVPerShare', df=True)
+        df: _DataFrame = await self._json(self._navps_history_path, df=True)
         df.columns = ['date', 'creation', 'redemption', 'statistical']
         df['date'] = df['date'].map(_j2g)
         df.set_index('date', inplace=True)
         return df
 
+    _nav_history_path = 'PureAsset'
+
     async def nav_history(self) -> _DataFrame:
-        df: _DataFrame = await self._json('PureAsset', df=True)
+        df: _DataFrame = await self._json(self._nav_history_path, df=True)
         df.columns = ['nav', 'date', 'redemption_navps']
         df['date'] = df['date'].map(_j2g)
         return df
 
+    _portfolio_industries_path = 'Industries'
+
     async def portfolio_industries(self) -> _DataFrame:
-        return await self._json('Industries', df=True)
+        return await self._json(self._portfolio_industries_path, df=True)
 
     _aa_keys = {
         'DepositTodayPercent',
@@ -371,8 +381,10 @@ class RayanHamafza(BaseSite):
         'JalaliDate',
     }
 
+    _asset_allocation_path = 'MixAsset'
+
     async def asset_allocation(self) -> dict:
-        d: dict = await self._json('MixAsset')
+        d: dict = await self._json(self._asset_allocation_path)
         self._check_aa_keys(d)
         return {k: v / 100 if type(v) is not str else v for k, v in d.items()}
 
@@ -406,6 +418,30 @@ class RayanHamafzaMultiNAV(RayanHamafza):
 
     async def _json(self, path, **kwa) -> _Any:
         return await super()._json(path, cookies=self.cookies, **kwa)
+
+
+class RayanHamafzaHybrid(RayanHamafza):
+    # Similar to RayanHamafzaMultiNAV but sends fundid using URL params.
+    _api_path = 'api/data'
+    _portfolio_industries_path = 'Industries/2'
+    _asset_allocation_path = 'MixAsset/2'
+
+    def __init__(self, url: str):
+        """Note: the url should end with #<fund_id> where fund_id is an int."""
+        url, _, fund_id = url.partition('#')
+        self.fund_id = fund_id
+        self._navps_history_path = f'NavPerShare/2?fundId={fund_id}'
+        self._nav_history_path = f'DailyNAVChart/2?fundId={fund_id}'
+        super().__init__(url)
+
+    async def live_navps(self) -> LiveNAVPS:
+        d: dict = await self._json(f'NavLight/{self.fund_id}')
+        d['creation'] = d.pop('PurchaseNav')
+        d['redemption'] = d.pop('SaleNav')
+        d['date'] = _jdatetime.strptime(
+            f'{d.pop("Date")} {d.pop("Time")}', '%Y/%m/%d %H:%M:%S'
+        ).togregorian()
+        return d  # type: ignore
 
 
 # noinspection PyAbstractClass
