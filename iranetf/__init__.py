@@ -265,7 +265,7 @@ class MabnaDP(BaseSite):
     async def cache(self) -> float:
         aa = await self.asset_allocation()
         g = aa.get
-        return (g('وجه نقد', 0.0) + g('سپرده بانکی', 0.0)) / 100.0
+        return g('وجه نقد', 0.0) + g('سپرده بانکی', 0.0)
 
 
 class LeveragedMabnaDP(BaseSite):
@@ -327,9 +327,7 @@ class LeveragedMabnaDP(BaseSite):
     async def cache(self) -> float:
         aa = await self.asset_allocation()
         g = aa.get
-        return (
-            sum(g(k, 0.0) for k in ('اوراق', 'وجه نقد', 'سپرده بانکی')) / 100.0
-        )
+        return sum(g(k, 0.0) for k in ('اوراق', 'وجه نقد', 'سپرده بانکی'))
 
 
 class RayanHamafza(BaseSite):
@@ -374,7 +372,7 @@ class RayanHamafza(BaseSite):
     async def asset_allocation(self) -> dict:
         d: dict = await self._json('MixAsset')
         self._check_aa_keys(d)
-        return d
+        return {k: v / 100 if type(v) is not str else v for k, v in d.items()}
 
     async def dividend_history(self) -> _DataFrame:
         j: dict = await self._json('FundProfit')
@@ -390,7 +388,7 @@ class RayanHamafza(BaseSite):
             aa['DepositTodayPercent']
             + aa['CashTodayPercent']
             + aa['BondTodayPercent']
-        ) / 100.0
+        )
 
 
 class RayanHamafzaMultiNAV(RayanHamafza):
@@ -433,7 +431,7 @@ class BaseTadbirPardaz(BaseSite):
 
     async def asset_allocation(self) -> dict:
         j: dict = await self._json('Chart/AssetCompositions')
-        d = {i['x']: i['y'] for i in j['List']}
+        d = {i['x']: i['y'] / 100 for i in j['List']}
         self._check_aa_keys(d)
         return d
 
@@ -468,7 +466,7 @@ class BaseTadbirPardaz(BaseSite):
             g('نقد و بانک (سپرده)', 0.0)
             + g('نقد و بانک (جاری)', 0.0)
             + g('اوراق مشارکت', 0.0)
-        ) / 100.0
+        )
 
 
 class TadbirPardaz(BaseTadbirPardaz):
