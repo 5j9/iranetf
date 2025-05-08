@@ -921,7 +921,7 @@ async def check_dataset(live=False):
     global ssl
     ds = load_dataset(site=False)
     assert ds['l18'].is_unique
-    assert ds['name'].is_unique
+    assert ds['name'].is_unique, ds['name'][ds['name'].duplicated()]
     assert ds['type'].unique().isin(_ETF_TYPES.values()).all()  # type: ignore
     assert ds['insCode'].is_unique
     reg_numbers = ds['regNo']
