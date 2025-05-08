@@ -118,6 +118,13 @@ class BaseSite(_ABC):
     def __repr__(self):
         return f"{type(self).__name__}('{self.url}')"
 
+    def __eq__(self, value):
+        if not isinstance(value, BaseSite):
+            return NotImplemented
+        if value.url == self.url and type(value) is type(self):
+            return True
+        return False
+
     async def _json(
         self,
         path: str,
@@ -178,14 +185,14 @@ class BaseSite(_ABC):
                 return RayanHamafzaMultiNAV(url + '#1')
             return RayanHamafza(url)
 
-        if rfind(b'://mabnadp.com/') != -1:
-            if rfind(b'"fundType":"leverage"') != -1:
+        if rfind(b'://mabnadp.com') != -1:
+            if rfind(rb'\"fundType\":\"leverage\"') != -1:
                 assert (
                     rfind(
-                        b'"isMultiNav":false,"isSingleNav":true,"isEtf":true'
+                        rb'\"isMultiNav\":false,\"isSingleNav\":true,\"isEtf\":true'
                     )
                     != -1
-                )
+                ), 'Uknown MabnaDP site type.'
                 return LeveragedMabnaDP(url)
             return MabnaDP(url)
 
@@ -263,17 +270,66 @@ class MabnaDP(BaseSite):
 
 class LeveragedMabnaDP(BaseSite):
     async def _json(self, path, **kwa) -> _Any:
-        return await super()._json(f'api/v2/public/{path}', **kwa)
+        params: dict | None = kwa.get('params')
+        if params is None:
+            kwa['params'] = {'portfolio_id': '1'}
+        else:
+            params.setdefalt('portfolio_id', '1')
+
+        return await super()._json(f'api/v2/public/fund/{path}', **kwa)
 
     async def live_navps(self) -> LiveNAVPS:
-        data: dict = (
-            await self._json('fund/etf/navps/latest?portfolio_id=1')
-        )['data']
-        return {
-            'date': _datetime.fromisoformat(data['date_time']),
-            'creation': data['purchase_price'],
-            'redemption': data['redemption_price'],
-        }
+        data = (await self._json('etf/navps/latest'))['data']
+        data['date'] = _datetime.fromisoformat(data.pop('date_time'))
+        data['creation'] = data.pop('purchase_price')
+        data['redemption'] = data.pop('redemption_price')
+        return data
+
+    async def navps_history(self) -> _DataFrame:
+        data: list[dict] = (await self._json('chart'))['data']
+        df = _DataFrame(data)
+        df['date'] = (
+            df.pop('date_time')
+            .astype('datetime64[ns, UTC+03:30]')  # type: ignore
+            .dt.tz_convert(None)
+        )
+        df.rename(
+            columns={
+                'redemption_price': 'redemption',
+                'statistical_value': 'statistical',
+                'purchase_price': 'creation',
+            },
+            inplace=True,
+        )
+        df.set_index('date', inplace=True)
+        return df
+
+    _aa_keys = {
+        'اوراق',
+        'سهام',
+        'سایر دارایی ها',
+        'سایر دارایی\u200cها',
+        'وجه نقد',
+        'سایر',
+        'سایر سهام',
+        'پنج سهم با بیشترین وزن',
+        'سپرده بانکی',
+    }
+
+    async def asset_allocation(self) -> dict:
+        assets: list[dict] = (await self._json('assets-classification'))[
+            'data'
+        ]['assets']
+        d = {i['title']: i['percentage'] / 100 for i in assets}
+        self._check_aa_keys(d)
+        return d
+
+    async def cache(self) -> float:
+        aa = await self.asset_allocation()
+        g = aa.get
+        return (
+            sum(g(k, 0.0) for k in ('اوراق', 'وجه نقد', 'سپرده بانکی')) / 100.0
+        )
 
 
 class RayanHamafza(BaseSite):
