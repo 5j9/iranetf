@@ -102,7 +102,7 @@ class TPLiveNAVPS(LiveNAVPS):
     totalUnit: int
 
 
-type AnySite = 'LeveragedTadbirPardaz | TadbirPardaz | RayanHamafza | MabnaDP | RayanHamafzaMultiNAV'
+type AnySite = 'LeveragedTadbirPardaz | TadbirPardaz | RayanHamafza | MabnaDP | RayanHamafzaMultiNAV | LeveragedMabnaDP'
 
 
 class BaseSite(_ABC):
@@ -179,6 +179,14 @@ class BaseSite(_ABC):
             return RayanHamafza(url)
 
         if rfind(b'://mabnadp.com/') != -1:
+            if rfind(b'"fundType":"leverage"') != -1:
+                assert (
+                    rfind(
+                        b'"isMultiNav":false,"isSingleNav":true,"isEtf":true'
+                    )
+                    != -1
+                )
+                return LeveragedMabnaDP(url)
             return MabnaDP(url)
 
         raise ValueError(f'Could not determine site type for {url}.')
@@ -251,6 +259,21 @@ class MabnaDP(BaseSite):
         aa = await self.asset_allocation()
         g = aa.get
         return (g('وجه نقد', 0.0) + g('سپرده بانکی', 0.0)) / 100.0
+
+
+class LeveragedMabnaDP(BaseSite):
+    async def _json(self, path, **kwa) -> _Any:
+        return await super()._json(f'api/v2/public/{path}', **kwa)
+
+    async def live_navps(self) -> LiveNAVPS:
+        data: dict = (
+            await self._json('fund/etf/navps/latest?portfolio_id=1')
+        )['data']
+        return {
+            'date': _datetime.fromisoformat(data['date_time']),
+            'creation': data['purchase_price'],
+            'redemption': data['redemption_price'],
+        }
 
 
 class RayanHamafza(BaseSite):
