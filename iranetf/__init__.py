@@ -280,7 +280,9 @@ class LeveragedMabnaDP(BaseSite):
 
     async def live_navps(self) -> LiveNAVPS:
         data = (await self._json('etf/navps/latest'))['data']
-        data['date'] = _datetime.fromisoformat(data.pop('date_time'))
+        data['date'] = _datetime.fromisoformat(data.pop('date_time')).replace(
+            tzinfo=None
+        )
         data['creation'] = data.pop('purchase_price')
         data['redemption'] = data.pop('redemption_price')
         return data
