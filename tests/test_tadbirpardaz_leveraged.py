@@ -1,4 +1,3 @@
-from datetime import datetime
 from math import isclose
 
 from aiohutils.tests import assert_dict_type, file, files
@@ -53,6 +52,4 @@ async def test_cache():
 
 @files('ahrom_live.json', 'ahrom_aa.json')
 async def test_leverage():
-    dt, lev = await tavan.leverage()
-    assert type(dt) is datetime
-    assert type(lev) is float
+    assert type(await tavan.leverage()) is float

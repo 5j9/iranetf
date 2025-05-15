@@ -66,3 +66,8 @@ async def test_asset_allocation():
 async def test_cache():
     cache = await petro_agah.cache()
     assert 0.0 <= cache <= 0.6
+
+
+@files('petro_agah_aa.json')
+async def test_leverage():
+    assert type(await petro_agah.leverage()) is float

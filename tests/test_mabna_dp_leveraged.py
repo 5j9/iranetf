@@ -1,4 +1,3 @@
-from datetime import datetime
 from math import isclose
 
 from aiohutils.tests import assert_dict_type, file, files
@@ -58,6 +57,4 @@ async def test_home_data():
 
 @files('home.html', 'lmdp_aa.json')
 async def test_leverage():
-    dt, lev = await site.leverage()
-    assert type(dt) is datetime
-    assert type(lev) is float
+    assert type(await site.leverage()) is float

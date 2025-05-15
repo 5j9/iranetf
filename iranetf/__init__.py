@@ -200,6 +200,9 @@ class BaseSite(_ABC):
 
         raise ValueError(f'Could not determine site type for {url}.')
 
+    async def leverage(self) -> float:
+        return 1.0 - await self.cache()
+
 
 def _comma_int(s: str) -> int:
     return int(s.replace(',', ''))
@@ -357,13 +360,16 @@ class LeveragedMabnaDP(BaseSite):
             ),
         }
 
-    async def leverage(self) -> tuple[_datetime, float]:
+    async def leverage(self) -> float:
         data, cache = await _gather(self.home_data(), self.cache())
-        state = data['__REACT_QUERY_STATE__']['queries'][9]['state']
-        preferred = state['data']['1']['preferredUnitRedemptionValueAmount']
-        common = state['data']['1']['commonUnitRedemptionValueAmount']
-        dt = _datetime.fromtimestamp(state['dataUpdatedAt'] / 1000)
-        return dt, (1.0 + common / preferred) * (1.0 - cache)
+        data = data['__REACT_QUERY_STATE__']['queries'][9]['state']['data'][
+            '1'
+        ]
+        return (
+            1.0
+            + data['commonUnitRedemptionValueAmount']
+            / data['preferredUnitRedemptionValueAmount']
+        ) * (1.0 - cache)
 
 
 class RayanHamafza(BaseSite):
@@ -710,9 +716,9 @@ class LeveragedTadbirPardaz(BaseTadbirPardaz):
 
         return result  # type: ignore
 
-    async def leverage(self) -> tuple[_datetime, float]:
+    async def leverage(self) -> float:
         navps, cache = await _gather(self.live_navps(), self.cache())
-        return navps['date'], (
+        return (
             1.0
             + navps['BaseUnitsTotalNetAssetValue']
             / navps['SuperUnitsTotalNetAssetValue']
