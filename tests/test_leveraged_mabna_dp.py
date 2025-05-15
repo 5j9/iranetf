@@ -1,6 +1,7 @@
+from datetime import datetime
 from math import isclose
 
-from aiohutils.tests import assert_dict_type, file
+from aiohutils.tests import assert_dict_type, file, files
 
 from iranetf import BaseSite, LeveragedMabnaDP, LiveNAVPS
 from tests import assert_navps_history
@@ -36,3 +37,27 @@ async def test_asset_allocation():
 async def test_cache():
     cache = await site.cache()
     assert 0.0 <= cache <= 0.6
+
+
+@file('home.html')
+async def test_home_data():
+    d = await site.home_data()
+    print(d.keys())
+    assert d['__REACT_QUERY_STATE__'].keys() == {'mutations', 'queries'}
+    assert d['__REACT_REDUX_STATE__'].keys() == {
+        'general',
+        'serverSideMeta',
+        'testConcurrency',
+    }
+    assert d['__ENV__'].keys() == {
+        'VITE_RUNTIME_THEME_OVERRIDE',
+        'VITE_API_GATEWAY',
+        'VITE_API_PREFIX',
+    }
+
+
+@files('home.html', 'lmdp_aa.json')
+async def test_leverage():
+    dt, lev = await site.leverage()
+    assert type(dt) is datetime
+    assert type(lev) is float

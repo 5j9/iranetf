@@ -333,6 +333,38 @@ class LeveragedMabnaDP(BaseSite):
         g = aa.get
         return sum(g(k, 0.0) for k in ('اوراق', 'وجه نقد', 'سپرده بانکی'))
 
+    async def home_data(self) -> dict:
+        html = await (await _get(self.url)).text()
+        return {
+            '__REACT_QUERY_STATE__': _loads(
+                _loads(
+                    html.rpartition('window.__REACT_QUERY_STATE__ = ')[
+                        2
+                    ].partition(';')[0]
+                )
+            ),
+            '__REACT_REDUX_STATE__': _loads(
+                _loads(
+                    html.rpartition('window.__REACT_REDUX_STATE__ = ')[
+                        2
+                    ].partition(';')[0]
+                )
+            ),
+            '__ENV__': _loads(
+                _loads(
+                    html.rpartition('window.__ENV__ = ')[2].partition('\n')[0]
+                )
+            ),
+        }
+
+    async def leverage(self) -> tuple[_datetime, float]:
+        data, cache = await _gather(self.home_data(), self.cache())
+        state = data['__REACT_QUERY_STATE__']['queries'][9]['state']
+        preferred = state['data']['1']['preferredUnitRedemptionValueAmount']
+        common = state['data']['1']['commonUnitRedemptionValueAmount']
+        dt = _datetime.fromtimestamp(state['dataUpdatedAt'] / 1000)
+        return dt, (1.0 + common / preferred) * (1.0 - cache)
+
 
 class RayanHamafza(BaseSite):
     _api_path = 'Data'
@@ -677,6 +709,14 @@ class LeveragedTadbirPardaz(BaseTadbirPardaz):
         result['date'] = date.togregorian()
 
         return result  # type: ignore
+
+    async def leverage(self) -> tuple[_datetime, float]:
+        navps, cache = await _gather(self.live_navps(), self.cache())
+        return navps['date'], (
+            1.0
+            + navps['BaseUnitsTotalNetAssetValue']
+            / navps['SuperUnitsTotalNetAssetValue']
+        ) * (1.0 - cache)
 
 
 _DATASET_PATH = _Path(__file__).parent / 'dataset.csv'
