@@ -1,6 +1,7 @@
+from datetime import datetime
 from math import isclose
 
-from aiohutils.tests import assert_dict_type, file
+from aiohutils.tests import assert_dict_type, file, files
 
 from iranetf import (
     BaseSite,
@@ -26,7 +27,7 @@ async def test_navps_history_leveraged():
     await assert_navps_history(ahrom, has_statistical=False)
 
 
-@file('tavan_float.json')
+@file('tavan_live.json')
 async def test_float_base_units_value():
     nav = await tavan.live_navps()
     assert type(nav['BaseUnitsCancelNAV']) is float
@@ -48,3 +49,10 @@ async def test_asset_allocation():
 async def test_cache():
     cache = await ahrom.cache()
     assert 0.0 <= cache <= 0.6
+
+
+@files('ahrom_live.json', 'ahrom_aa.json')
+async def test_leverage():
+    dt, lev = await tavan.leverage()
+    assert type(dt) is datetime
+    assert type(lev) is float
