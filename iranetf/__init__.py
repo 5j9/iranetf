@@ -106,7 +106,7 @@ type AnySite = 'LeveragedTadbirPardaz | TadbirPardaz | RayanHamafza | MabnaDP | 
 
 
 class BaseSite(_ABC):
-    __slots__ = 'url', 'last_response'
+    __slots__ = 'last_response', 'url'
 
     ds: _DataFrame
     _aa_keys: set
