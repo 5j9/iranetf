@@ -3,7 +3,7 @@ from math import isclose
 from aiohutils.tests import assert_dict_type, file, files
 
 from iranetf import BaseSite, LeveragedMabnaDP, LiveNAVPS
-from tests import assert_navps_history
+from tests import assert_leveraged_leverage, assert_navps_history
 
 site = LeveragedMabnaDP('https://kianfunds10.ir/')
 
@@ -57,4 +57,4 @@ async def test_home_data():
 
 @files('home.html', 'lmdp_aa.json')
 async def test_leverage():
-    assert type(await site.leverage()) is float
+    await assert_leveraged_leverage(site)

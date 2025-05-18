@@ -20,3 +20,9 @@ async def assert_navps_history(site: BaseSite, has_statistical=True):
 
 def test_from_l18():
     assert BaseSite.from_l18('استیل').url == 'https://mofidsectorfund.com/'
+
+
+async def assert_leveraged_leverage(site: BaseSite):
+    lev = await site.leverage()
+    assert type(lev) is float
+    assert lev > 1.0

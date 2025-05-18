@@ -7,7 +7,7 @@ from iranetf import (
     LeveragedTadbirPardaz,
     LeveragedTadbirPardazLiveNAVPS,
 )
-from tests import assert_navps_history
+from tests import assert_leveraged_leverage, assert_navps_history
 from tests.test_tadbirpardaz import EXPECTED_TP_VER
 
 tavan: LeveragedTadbirPardaz = BaseSite.from_l18('توان')  # type: ignore
@@ -52,4 +52,4 @@ async def test_cache():
 
 @files('ahrom_live.json', 'ahrom_aa.json')
 async def test_leverage():
-    assert type(await tavan.leverage()) is float
+    await assert_leveraged_leverage(ahrom)
