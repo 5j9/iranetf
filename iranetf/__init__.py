@@ -295,11 +295,6 @@ class LeveragedMabnaDP(BaseSite):
     async def navps_history(self) -> _DataFrame:
         data: list[dict] = (await self._json('chart'))['data']
         df = _DataFrame(data)
-        df['date'] = (
-            df.pop('date_time')
-            .astype('datetime64[ns, UTC+03:30]')  # type: ignore
-            .dt.tz_convert(None)
-        )
         df.rename(
             columns={
                 'redemption_price': 'redemption',
@@ -308,7 +303,11 @@ class LeveragedMabnaDP(BaseSite):
             },
             inplace=True,
         )
-        df.set_index('date', inplace=True)
+        df['date_time'] = df['date_time'].astype('datetime64[ns, UTC+03:30]')  # type: ignore
+        df.set_index(
+            df['date_time'].dt.normalize().dt.tz_localize(None), inplace=True
+        )
+        df.index.name = 'date'
         return df
 
     _aa_keys = {

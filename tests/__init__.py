@@ -1,5 +1,6 @@
 from aiohutils.tests import init_tests
 from numpy import dtype
+from pandas import DatetimeIndex
 
 from iranetf import BaseSite
 
@@ -8,8 +9,10 @@ init_tests()
 
 async def assert_navps_history(site: BaseSite, has_statistical=True):
     df = await site.navps_history()
-    assert df.index.dtype == dtype('<M8[ns]'), df.index.dtype
-    assert df.index.name == 'date'
+    index: DatetimeIndex = df.index  # type: ignore
+    assert index.dtype == dtype('<M8[ns]'), index.dtype
+    assert index.name == 'date'
+    assert (index.normalize() == index).all()
     numeric_types = ('int64', 'float64')
     assert df['creation'].dtype in numeric_types
     assert df['redemption'].dtype in numeric_types
