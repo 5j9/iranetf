@@ -41,7 +41,6 @@ async def test_cache():
 @file('home.html')
 async def test_home_data():
     d = await site.home_data()
-    print(d.keys())
     assert d['__REACT_QUERY_STATE__'].keys() == {'mutations', 'queries'}
     assert d['__REACT_REDUX_STATE__'].keys() == {
         'general',
