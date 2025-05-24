@@ -102,7 +102,7 @@ class TPLiveNAVPS(LiveNAVPS):
     totalUnit: int
 
 
-type AnySite = 'LeveragedTadbirPardaz | TadbirPardaz | RayanHamafza | MabnaDP | RayanHamafzaMultiNAV | LeveragedMabnaDP'
+type AnySite = 'LeveragedTadbirPardaz | TadbirPardaz | RayanHamafza | MabnaDP | LeveragedMabnaDP'
 
 
 class BaseSite(_ABC):
@@ -184,7 +184,7 @@ class BaseSite(_ABC):
             if find(b'<body class="multi-fund">') != -1:
                 if find(b'hybridInformationBox') != -1:
                     return RayanHamafzaHybrid(url)
-                return RayanHamafzaMultiNAV(url + '#1')
+                return RayanHamafza(url + '#1')
             return RayanHamafza(url)
 
         if rfind(b'://mabnadp.com') != -1:
@@ -371,39 +371,56 @@ class LeveragedMabnaDP(BaseSite):
         ) * (1.0 - cache)
 
 
+class _RHNavLight(_TypedDict):
+    NextTimeInterval: int
+    FundId: int
+    FundNavId: int
+    PurchaseNav: int
+    SaleNav: int
+    Date: str
+    Time: str
+
+
 class RayanHamafza(BaseSite):
-    _api_path = 'Data'
+    _api_path = 'api/data'
+    __slots__ = 'fund_id'
+
+    def __init__(self, url: str):
+        url, _, fund_id = url.partition('#')
+        self.fund_id = fund_id or '1'
+        super().__init__(url)
 
     async def _json(self, path, **kwa) -> _Any:
         return await super()._json(f'{self._api_path}/{path}', **kwa)
 
     async def live_navps(self) -> LiveNAVPS:
-        d: dict = await self._json('FundLiveData')
-        d['creation'] = d.pop('PurchaseNAVPerShare')
-        d['redemption'] = d.pop('SellNAVPerShare')
-        d['date'] = _jdatetime.strptime(
-            f'{d.pop("JalaliDate")} {d.pop("Time")}', '%Y/%m/%d %H:%M'
-        ).togregorian()
-        return d  # type: ignore
-
-    _navps_history_path = 'NAVPerShare'
+        d: _RHNavLight = await self._json(f'NavLight/{self.fund_id}')
+        return {
+            'creation': d['PurchaseNav'],
+            'redemption': d['SaleNav'],
+            'date': _jdatetime.strptime(
+                f'{d["Date"]} {d["Time"]}', '%Y/%m/%d %H:%M:%S'
+            ).togregorian(),
+        }
 
     async def navps_history(self) -> _DataFrame:
-        df: _DataFrame = await self._json(self._navps_history_path, df=True)
+        df: _DataFrame = await self._json(
+            f'NavPerShare/{self.fund_id}', df=True
+        )
         df.columns = ['date', 'creation', 'redemption', 'statistical']
         df['date'] = df['date'].map(_j2g)
         df.set_index('date', inplace=True)
         return df
 
-    _nav_history_path = 'PureAsset'
+    _nav_history_path = 'DailyNAVChart/1'
 
     async def nav_history(self) -> _DataFrame:
         df: _DataFrame = await self._json(self._nav_history_path, df=True)
-        df.columns = ['nav', 'date', 'redemption_navps']
+        df.columns = ['nav', 'date', 'creation_navps']
         df['date'] = df['date'].map(_j2g)
         return df
 
-    _portfolio_industries_path = 'Industries'
+    _portfolio_industries_path = 'Industries/1'
 
     async def portfolio_industries(self) -> _DataFrame:
         return await self._json(self._portfolio_industries_path, df=True)
@@ -418,7 +435,7 @@ class RayanHamafza(BaseSite):
         'JalaliDate',
     }
 
-    _asset_allocation_path = 'MixAsset'
+    _asset_allocation_path = 'MixAsset/1'
 
     async def asset_allocation(self) -> dict:
         d: dict = await self._json(self._asset_allocation_path)
@@ -426,7 +443,7 @@ class RayanHamafza(BaseSite):
         return {k: v / 100 if type(v) is not str else v for k, v in d.items()}
 
     async def dividend_history(self) -> _DataFrame:
-        j: dict = await self._json('FundProfit')
+        j: dict = await self._json('Profit/1')
         df = _DataFrame(j['data'])
         df['ProfitDate'] = df['ProfitDate'].apply(
             lambda i: _jdatetime.strptime(i, format='%Y/%m/%d').togregorian()
@@ -442,24 +459,8 @@ class RayanHamafza(BaseSite):
         )
 
 
-class RayanHamafzaMultiNAV(RayanHamafza):
-    """Same as RayanHamafza, only send fundId as a cookie."""
-
-    __slots__ = 'cookies'
-
-    def __init__(self, url: str):
-        """Note: the url should end with #<fund_id> where fund_id is an int."""
-        url, _, fund_id = url.partition('#')
-        self.cookies = {'fundId': fund_id}
-        super().__init__(url)
-
-    async def _json(self, path, **kwa) -> _Any:
-        return await super()._json(path, cookies=self.cookies, **kwa)
-
-
 class RayanHamafzaHybrid(RayanHamafza):
-    # Similar to RayanHamafzaMultiNAV but sends fundid using URL params.
-    _api_path = 'api/data'
+    # Similar to RayanHamafza but sends fundid using URL params.
     _portfolio_industries_path = 'Industries/2'
     _asset_allocation_path = 'MixAsset/2'
 

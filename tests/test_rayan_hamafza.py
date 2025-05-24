@@ -7,7 +7,6 @@ from iranetf import (
     BaseSite,
     LiveNAVPS,
     RayanHamafza,
-    RayanHamafzaMultiNAV,
 )
 from tests import assert_navps_history
 
@@ -28,6 +27,8 @@ async def test_navps_history():
 async def test_fund_profit():
     df = await RayanHamafza('https://www.homayeagah.ir/').dividend_history()
     assert [*df.dtypes.items()] == [
+        ('FundId', dtype('int64')),
+        ('FundApId', dtype('int64')),
         ('ProfitDate', dtype('<M8[ns]')),
         ('FundUnit', dtype('int64')),
         ('ProfitGuaranteeUnit', dtype('int64')),
@@ -36,17 +37,17 @@ async def test_fund_profit():
         ('SumUnitProfit', dtype('int64')),
         ('SumExtraProfit', dtype('int64')),
         ('SumProfitGuarantee', dtype('int64')),
-        ('SUMAllProfit', dtype('int64')),
+        ('SumAllProfit', dtype('int64')),
     ]
 
 
-petro_agah: RayanHamafzaMultiNAV = BaseSite.from_l18('پتروآگاه')  # type: ignore
-auto_agah: RayanHamafzaMultiNAV = BaseSite.from_l18('اتوآگاه')  # type: ignore
+petro_agah: RayanHamafza = BaseSite.from_l18('پتروآگاه')  # type: ignore
+auto_agah: RayanHamafza = BaseSite.from_l18('اتوآگاه')  # type: ignore
 
 
 @files('petroagah.json', 'autoagah.json')
 async def test_multinav():
-    assert type(auto_agah) is RayanHamafzaMultiNAV
+    assert type(auto_agah) is RayanHamafza
     assert petro_agah.url == auto_agah.url
     petro_nav = await petro_agah.live_navps()
     auto_nav = await auto_agah.live_navps()
