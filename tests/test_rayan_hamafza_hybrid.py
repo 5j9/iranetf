@@ -5,7 +5,7 @@ from aiohutils.tests import assert_dict_type, file
 from iranetf import (
     BaseSite,
     LiveNAVPS,
-    RayanHamafzaHybrid,
+    RayanHamafza as RayanHamafzaHybrid,
 )
 from tests import assert_navps_history
 
@@ -20,8 +20,6 @@ async def test_rhh_from_url():
 @file('rhh_live.json')
 async def test_rhh_live_navps():
     d = await site.live_navps()
-    for k in ('FundId', 'FundNavId', 'NextTimeInterval'):
-        assert type(d.pop(k)) is int
     assert_dict_type(d, LiveNAVPS)
 
 

@@ -169,7 +169,6 @@ class BaseSite(_ABC):
     async def from_url(url: str) -> AnySite:
         content = await (await _get(url)).read()
         rfind = content.rfind
-        find = content.find
 
         if rfind(b'<div class="tadbirLogo"></div>') != -1:
             tp_site = TadbirPardaz(url)
@@ -181,10 +180,6 @@ class BaseSite(_ABC):
             return tp_site
 
         if rfind(b'Rayan Ham Afza') != -1:
-            if find(b'<body class="multi-fund">') != -1:
-                if find(b'hybridInformationBox') != -1:
-                    return RayanHamafzaHybrid(url)
-                return RayanHamafza(url + '#1')
             return RayanHamafza(url)
 
         if rfind(b'://mabnadp.com') != -1:
@@ -457,29 +452,6 @@ class RayanHamafza(BaseSite):
             + aa['CashTodayPercent']
             + aa['BondTodayPercent']
         )
-
-
-class RayanHamafzaHybrid(RayanHamafza):
-    # Similar to RayanHamafza but sends fundid using URL params.
-    _portfolio_industries_path = 'Industries/2'
-    _asset_allocation_path = 'MixAsset/2'
-
-    def __init__(self, url: str):
-        """Note: the url should end with #<fund_id> where fund_id is an int."""
-        url, _, fund_id = url.partition('#')
-        self.fund_id = fund_id
-        self._navps_history_path = f'NavPerShare/2?fundId={fund_id}'
-        self._nav_history_path = f'DailyNAVChart/2?fundId={fund_id}'
-        super().__init__(url)
-
-    async def live_navps(self) -> LiveNAVPS:
-        d: dict = await self._json(f'NavLight/{self.fund_id}')
-        d['creation'] = d.pop('PurchaseNav')
-        d['redemption'] = d.pop('SaleNav')
-        d['date'] = _jdatetime.strptime(
-            f'{d.pop("Date")} {d.pop("Time")}', '%Y/%m/%d %H:%M:%S'
-        ).togregorian()
-        return d  # type: ignore
 
 
 # noinspection PyAbstractClass
