@@ -19,6 +19,7 @@ dependencies = [
     "jdatetime >= 4.1.0",
     "pandas[pyarrow] >= 2.2.1",
     'tsetmc',
+    'fipiran',
 ]
 [dependency-groups]
 dev = [
