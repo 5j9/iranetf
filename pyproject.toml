@@ -19,8 +19,8 @@ dependencies = [
     "jdatetime >= 4.1.0",
     "pandas[pyarrow] >= 2.2.1",
 ]
-[project.optional-dependencies]
-test = [
+[dependency-groups]
+dev = [
     "aiohutils[test] >= 0.21.0",
 ]
 
