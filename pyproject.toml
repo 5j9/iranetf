@@ -18,6 +18,7 @@ dependencies = [
     "aiohutils >= 0.20.0",
     "jdatetime >= 4.1.0",
     "pandas[pyarrow] >= 2.2.1",
+    'tsetmc',
 ]
 [dependency-groups]
 dev = [
