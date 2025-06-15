@@ -53,3 +53,10 @@ async def test_cache():
 @files('ahrom_live.json', 'ahrom_aa.json')
 async def test_leverage():
     await assert_leveraged_leverage(ahrom)
+
+
+@file('duplicate_navps_hist.json')
+async def test_pishran_navps_hist():
+    site = BaseSite.from_l18('پیشران')
+    df = await site.navps_history()
+    assert df.index.is_unique

@@ -648,9 +648,10 @@ class LeveragedTadbirPardaz(BaseTadbirPardaz):
             ),
         ):
             df = _DataFrame(i['List']).drop(columns='name')
-            df['date'] = _to_datetime(df['x'])
+            df['date'] = _to_datetime(df['x'], format='%m/%d/%Y')
             df.drop(columns='x', inplace=True)
             df.rename(columns={'y': name}, inplace=True)
+            df.drop_duplicates('date', inplace=True)
             df.set_index('date', inplace=True)
             frames.append(df)
 
