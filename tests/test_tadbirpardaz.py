@@ -1,7 +1,7 @@
 from unittest.mock import patch
 
 from aiohutils.tests import assert_dict_type, file, files
-from numpy import dtype
+from polars import Datetime, Float64, Int64
 from pytest import raises
 
 from iranetf import (
@@ -78,13 +78,21 @@ async def test_dividend_history():
     assert type(site) is TadbirPardaz
     df = await site.dividend_history()
     assert len(df) >= 22
-    assert [*df.dtypes.items()] == [
-        ('row', dtype('int64')),
-        ('ProfitDate', dtype('<M8[ns]')),
-        ('FundUnit', dtype('int64')),
-        ('UnitProfit', dtype('int64')),
-        ('SUMAllProfit', dtype('int64')),
-        ('ProfitPercent', dtype('float64')),
+    assert df.columns == [
+        'row',
+        'ProfitDate',
+        'FundUnit',
+        'UnitProfit',
+        'SUMAllProfit',
+        'ProfitPercent',
+    ]
+    assert df.dtypes == [
+        Int64,
+        Datetime(time_unit='us', time_zone=None),
+        Int64,
+        Int64,
+        Int64,
+        Float64,
     ]
 
 

@@ -20,6 +20,7 @@ dependencies = [
     "pandas[pyarrow] >= 2.2.1",
     'tsetmc',
     'fipiran',
+    "polars>=1.30.0",
 ]
 [dependency-groups]
 dev = [

@@ -3,6 +3,7 @@ import logging as _logging
 from abc import ABC as _ABC, abstractmethod as _abstractmethod
 from asyncio import gather as _gather
 from datetime import datetime as _datetime
+from functools import reduce
 from json import JSONDecodeError as _JSONDecodeError, loads as _loads
 from logging import (
     debug as _debug,
@@ -19,7 +20,7 @@ from re import (
 )
 from typing import Any as _Any, TypedDict as _TypedDict
 
-import pandas as _pd
+import polars as _pl
 from aiohttp import (
     ClientConnectorError as _ClientConnectorError,
     ClientOSError as _ClientOSError,
@@ -31,21 +32,11 @@ from aiohttp import (
 )
 from aiohutils.session import SessionManager
 from jdatetime import datetime as _jdatetime
-from pandas import (
-    DataFrame as _DataFrame,
-    Series as _Series,
-    concat as _concat,
-    read_csv as _read_csv,
-    to_datetime as _to_datetime,
-)
+from pandas import DataFrame as _Df
 from tsetmc.instruments import (
     Instrument as _Instrument,
     search as _tsetmc_search,
 )
-
-_pd.options.mode.copy_on_write = True
-_pd.options.future.infer_string = True  # type: ignore
-_pd.options.future.no_silent_downcasting = True  # type: ignore
 
 session_manager = SessionManager()
 
@@ -66,6 +57,8 @@ async def _read(url: str) -> bytes:
 
 
 def _j2g(s: str) -> _datetime:
+    """Converts a Jalaali date string to a Gregorian datetime object."""
+    # Ensure all parts are integers before passing to _jdatetime
     return _jdatetime(*[int(i) for i in s.split('/')]).togregorian()
 
 
@@ -108,7 +101,7 @@ type AnySite = 'LeveragedTadbirPardaz | TadbirPardaz | RayanHamafza | MabnaDP | 
 class BaseSite(_ABC):
     __slots__ = 'last_response', 'url'
 
-    ds: _DataFrame
+    ds: _pl.DataFrame  # Changed type hint to Polars DataFrame
     _aa_keys: set
 
     def __init__(self, url: str):
@@ -133,32 +126,44 @@ class BaseSite(_ABC):
         cookies: dict | None = None,
         df: bool = False,
     ) -> _Any:
+        """
+        Fetches JSON data from the given path.
+        If df is True, returns a Polars DataFrame.
+        """
         r = await _get(self.url + path, params, cookies)
         self.last_response = r
         content = await r.read()
         j = _loads(content)
         if df is True:
-            return _DataFrame(j, copy=False)
+            return _pl.DataFrame(j)  # Changed to Polars DataFrame
         return j
 
     @_abstractmethod
     async def live_navps(self) -> LiveNAVPS: ...
 
     @_abstractmethod
-    async def navps_history(self) -> _DataFrame: ...
+    async def navps_history(self) -> _pl.DataFrame: ...  # Changed type hint
 
     @_abstractmethod
     async def cache(self) -> float: ...
 
     @classmethod
     def from_l18(cls, l18: str) -> AnySite:
+        """
+        Loads the dataset and filters for the specific 'l18' value to
+        retrieve the associated site object.
+        """
         try:
             ds = cls.ds
         except AttributeError:
-            ds = cls.ds = load_dataset(site=True).set_index('l18')
-        return ds.loc[l18, 'site']  # type: ignore
+            # load_dataset now returns a Polars DataFrame
+            ds = cls.ds = load_dataset(site=True)
+        # Polars doesn't use `.loc` for indexing; filter and select column
+        # .item() extracts the single scalar value from the resulting Series
+        return ds.filter(_pl.col('l18') == l18).select('site').item()
 
     def _check_aa_keys(self, d: dict):
+        """Checks for unknown asset allocation keys and logs a warning."""
         if d.keys() <= self._aa_keys:
             return
         _warning(
@@ -167,6 +172,7 @@ class BaseSite(_ABC):
 
     @staticmethod
     async def from_url(url: str) -> AnySite:
+        """Determines the site type based on the content of the URL."""
         content = await (await _get(url)).read()
         rfind = content.rfind
 
@@ -200,10 +206,12 @@ class BaseSite(_ABC):
 
 
 def _comma_int(s: str) -> int:
+    """Converts a comma-separated string to an integer."""
     return int(s.replace(',', ''))
 
 
 def _comma_float(s: str) -> float:
+    """Converts a comma-separated string to a float."""
     return float(s.replace(',', ''))
 
 
@@ -220,25 +228,34 @@ class MabnaDP(BaseSite):
         j['redemption'] = _comma_int(j.pop('redemption_price'))
         return j  # type: ignore
 
-    async def navps_history(self) -> _DataFrame:
+    async def navps_history(self) -> _pl.DataFrame:  # Changed type hint
+        """
+        Fetches NAVPS history and returns it as a Polars DataFrame.
+        Converts Jalaali dates to Gregorian and renames columns.
+        """
         j: list[dict] = await self._json('navps.json')
-        df = _DataFrame(j[0]['values'])
-        df['date'] = (
-            df['date']
-            .astype(str)
-            .apply(
-                lambda i: _jdatetime.strptime(
-                    i, format='%Y%m%d000000'
-                ).togregorian()
+        df = _pl.DataFrame(j[0]['values'])
+        df = df.with_columns(
+            _pl.col('date').map_elements(
+                lambda x: _jdatetime.strptime(
+                    x, format='%Y%m%d000000'
+                ).togregorian(),
+                return_dtype=_pl.Datetime,
             )
         )
-        df['creation'] = df.pop('purchase_price')
-        df['redemption'] = df.pop('redeption_price')
-        df['statistical'] = df.pop('statistical_value')
-        df.set_index('date', inplace=True)
+        # Polars chain operations, no inplace
+        df = df.rename(
+            {
+                'purchase_price': 'creation',
+                'redeption_price': 'redemption',
+                'statistical_value': 'statistical',
+            }
+        )
+        # Polars doesn't use set_index; 'date' remains a regular column
         return df
 
     async def version(self) -> str:
+        """Extracts version number from the site's HTML content."""
         content = await _read(self.url)
         start = content.find('نگارش '.encode())
         if start == -1:
@@ -274,12 +291,14 @@ class LeveragedMabnaDP(BaseSite):
         if params is None:
             kwa['params'] = {'portfolio_id': '1'}
         else:
-            params.setdefalt('portfolio_id', '1')
+            # Using .setdefault instead of .setdefalt (typo in original)
+            params.setdefault('portfolio_id', '1')
 
         return await super()._json(f'api/v2/public/fund/{path}', **kwa)
 
     async def live_navps(self) -> LiveNAVPS:
         data = (await self._json('etf/navps/latest'))['data']
+        # Converting ISO format string to datetime and removing timezone
         data['date'] = _datetime.fromisoformat(data.pop('date_time')).replace(
             tzinfo=None
         )
@@ -287,22 +306,30 @@ class LeveragedMabnaDP(BaseSite):
         data['redemption'] = data.pop('redemption_price')
         return data
 
-    async def navps_history(self) -> _DataFrame:
+    async def navps_history(self) -> _pl.DataFrame:  # Changed type hint
+        """
+        Fetches NAVPS history for leveraged funds and returns it as a Polars DataFrame.
+        Handles datetime conversion and column renaming.
+        """
         data: list[dict] = (await self._json('chart'))['data']
-        df = _DataFrame(data)
-        df.rename(
-            columns={
+        df = _pl.DataFrame(data)  # Create Polars DataFrame
+        df = df.rename(
+            {  # Rename columns
                 'redemption_price': 'redemption',
                 'statistical_value': 'statistical',
                 'purchase_price': 'creation',
-            },
-            inplace=True,
+            }
         )
-        df['date_time'] = df['date_time'].astype('datetime64[ns, UTC+03:30]')  # type: ignore
-        df.set_index(
-            df['date_time'].dt.normalize().dt.tz_localize(None), inplace=True
-        )
-        df.index.name = 'date'
+        # Convert date_time to datetime and normalize
+        df = df.with_columns(
+            _pl.col('date_time')
+            .str.to_datetime(time_unit='ns')
+            .dt.convert_time_zone('Asia/Tehran')
+            .dt.replace_time_zone(None)
+            .dt.date()  # Get only the date part
+            .cast(_pl.Datetime)  # Cast back to Datetime type
+            .alias('date')
+        ).drop('date_time')  # Drop the original date_time column
         return df
 
     _aa_keys = {
@@ -332,6 +359,7 @@ class LeveragedMabnaDP(BaseSite):
 
     async def home_data(self) -> dict:
         html = await (await _get(self.url)).text()
+        # Extracting JSON blobs from HTML using partition and loads
         return {
             '__REACT_QUERY_STATE__': _loads(
                 _loads(
@@ -398,26 +426,45 @@ class RayanHamafza(BaseSite):
             ).togregorian(),
         }
 
-    async def navps_history(self) -> _DataFrame:
-        df: _DataFrame = await self._json(
+    _col_rename = {
+        'JalaliDate': 'date',
+        'PurchaseNAVPerShare': 'creation',
+        'SellNAVPerShare': 'redemption',
+        'StatisticalNAVPerShare': 'statistical',
+    }
+
+    async def navps_history(self) -> _pl.DataFrame:  # Changed type hint
+        """
+        Fetches NAVPS history from Rayan Hamafza and returns it as a Polars DataFrame.
+        Converts Jalaali dates to Gregorian.
+        """
+        df: _pl.DataFrame = await self._json(  # Create Polars DataFrame
             f'NavPerShare/{self.fund_id}', df=True
         )
-        df.columns = ['date', 'creation', 'redemption', 'statistical']
-        df['date'] = df['date'].map(_j2g)
-        df.set_index('date', inplace=True)
+        df = df.rename(self._col_rename)
+        df = df.with_columns(
+            _pl.col('date').map_elements(  # Apply _j2g using map_elements
+                _j2g, return_dtype=_pl.Datetime
+            )
+        )
+        # Polars doesn't use set_index
         return df
 
     _nav_history_path = 'DailyNAVChart/1'
 
-    async def nav_history(self) -> _DataFrame:
-        df: _DataFrame = await self._json(self._nav_history_path, df=True)
-        df.columns = ['nav', 'date', 'creation_navps']
-        df['date'] = df['date'].map(_j2g)
+    async def nav_history(self) -> _pl.DataFrame:  # Changed type hint
+        df: _pl.DataFrame = await self._json(self._nav_history_path, df=True)
+        df = df.rename(self._col_rename)
+        df = df.with_columns(
+            _pl.col('date').map_elements(  # Apply _j2g using map_elements
+                _j2g, return_dtype=_pl.Datetime
+            )
+        )
         return df
 
     _portfolio_industries_path = 'Industries/1'
 
-    async def portfolio_industries(self) -> _DataFrame:
+    async def portfolio_industries(self) -> _pl.DataFrame:  # Changed type hint
         return await self._json(self._portfolio_industries_path, df=True)
 
     _aa_keys = {
@@ -435,13 +482,27 @@ class RayanHamafza(BaseSite):
     async def asset_allocation(self) -> dict:
         d: dict = await self._json(self._asset_allocation_path)
         self._check_aa_keys(d)
-        return {k: v / 100 if type(v) is not str else v for k, v in d.items()}
+        return {
+            k: v / 100 if isinstance(v, int | float) else v
+            for k, v in d.items()
+        }
 
-    async def dividend_history(self) -> _DataFrame:
+    async def dividend_history(self) -> _pl.DataFrame:  # Changed type hint
+        """
+        Fetches dividend history from Rayan Hamafza and returns it as a Polars DataFrame.
+        Converts Jalaali dates to Gregorian.
+        """
         j: dict = await self._json('Profit/1')
-        df = _DataFrame(j['data'])
-        df['ProfitDate'] = df['ProfitDate'].apply(
-            lambda i: _jdatetime.strptime(i, format='%Y/%m/%d').togregorian()
+        df = _pl.DataFrame(j['data'])  # Create Polars DataFrame
+        df = df.with_columns(
+            _pl.col(
+                'ProfitDate'
+            ).map_elements(  # Apply UDF for date conversion
+                lambda i: _jdatetime.strptime(
+                    i, format='%Y/%m/%d'
+                ).togregorian(),
+                return_dtype=_pl.Datetime,
+            )
         )
         return df
 
@@ -517,6 +578,22 @@ class BaseTadbirPardaz(BaseSite):
         )
 
 
+def _fanum2en(expr: _pl.Expr) -> _pl.Expr:
+    return (
+        expr.str.replace_all('۰', '0')
+        .str.replace_all('۱', '1')
+        .str.replace_all('۲', '2')
+        .str.replace_all('۳', '3')
+        .str.replace_all('۴', '4')
+        .str.replace_all('۵', '5')
+        .str.replace_all('۶', '6')
+        .str.replace_all('۷', '7')
+        .str.replace_all('۸', '8')
+        .str.replace_all('۹', '9')
+        .str.replace_all(' ', '')
+    )
+
+
 class TadbirPardaz(BaseTadbirPardaz):
     async def live_navps(self) -> TPLiveNAVPS:
         d: str = await self._json('Fund/GetETFNAV')  # type: ignore
@@ -530,6 +607,7 @@ class TadbirPardaz(BaseTadbirPardaz):
         for k, t in TPLiveNAVPS.__annotations__.items():
             if t is int:
                 try:
+                    # Apply _comma_int for integer conversion
                     d[k] = _comma_int(d[k])
                 except KeyError:
                     _warning(f'key {k!r} not found')
@@ -543,7 +621,11 @@ class TadbirPardaz(BaseTadbirPardaz):
 
         return d  # type: ignore
 
-    async def navps_history(self) -> _DataFrame:
+    async def navps_history(self) -> _pl.DataFrame:  # Changed type hint
+        """
+        Fetches NAVPS history and returns it as a Polars DataFrame.
+        Converts dates to datetime objects.
+        """
         j: list = await self._json(
             'Chart/TotalNAV', params={'type': 'getnavtotal'}
         )
@@ -551,7 +633,7 @@ class TadbirPardaz(BaseTadbirPardaz):
             [d['y'] for d in i['List']] for i in j
         ]
         date = [d['x'] for d in j[0]['List']]
-        df = _DataFrame(
+        df = _pl.DataFrame(  # Create Polars DataFrame
             {
                 'date': date,
                 'creation': creation,
@@ -559,11 +641,18 @@ class TadbirPardaz(BaseTadbirPardaz):
                 'statistical': statistical,
             }
         )
-        df['date'] = _to_datetime(df.date)
-        df.set_index('date', inplace=True)
+        # Convert date column to datetime
+        df = df.with_columns(
+            _pl.col('date').str.to_datetime(format='%m/%d/%Y')
+        )
+        # Polars doesn't use set_index
         return df
 
-    async def dividend_history(self) -> _DataFrame:
+    async def dividend_history(self) -> _pl.DataFrame:  # Changed type hint
+        """
+        Fetches dividend history and returns it as a Polars DataFrame.
+        Handles parsing HTML tables, date conversion, and type casting.
+        """
         path = 'Reports/FundDividendProfitReport'
         all_rows = []
         while path:
@@ -578,26 +667,47 @@ class TadbirPardaz(BaseTadbirPardaz):
             path = after_table.rpartition('" title="Next page">')[
                 0
             ].rpartition('<a href="/')[2]
-        # try to use the same column names as RayanHamafza.dividend_history
-        df = _DataFrame(
-            all_rows,
-            columns=[
-                'row',
-                'ProfitDate',
-                'FundUnit',
-                'UnitProfit',
-                'SUMAllProfit',
-                'ProfitPercent',
-            ],
-        )
-        df['ProfitDate'] = df['ProfitDate'].apply(
-            lambda i: _jdatetime.strptime(i, format='%Y/%m/%d').togregorian()
+
+        # Define schema for Polars DataFrame explicitly
+        schema = {
+            'row': _pl.String,
+            'ProfitDate': _pl.String,
+            'FundUnit': _pl.String,
+            'UnitProfit': _pl.String,
+            'SUMAllProfit': _pl.String,
+            'ProfitPercent': _pl.String,
+        }
+        df = _pl.DataFrame(all_rows, schema=schema, orient='row')
+
+        # Convert ProfitDate using map_elements
+        df = df.with_columns(
+            _pl.col('ProfitDate').map_elements(
+                lambda i: _jdatetime.strptime(
+                    i, format='%Y/%m/%d'
+                ).togregorian(),
+                return_dtype=_pl.Datetime,
+            )
         )
         comma_cols = ['FundUnit', 'SUMAllProfit']
-        df[comma_cols] = df[comma_cols].map(_comma_int)
+        # Apply _comma_int to multiple columns using Polars expressions
+        df = df.with_columns(
+            [
+                _pl.col(c).map_elements(_comma_int, return_dtype=_pl.Int64)
+                for c in comma_cols
+            ]
+        )
         int_cols = ['row', 'UnitProfit']
-        df[int_cols] = df[int_cols].map(_comma_int)
-        df['ProfitPercent'] = df['ProfitPercent'].astype(float)
+        df = df.with_columns(
+            [
+                _pl.col(c).map_elements(_comma_int, return_dtype=_pl.Int64)
+                for c in int_cols
+            ]
+        )
+
+        # Cast ProfitPercent to Float64
+        df = df.with_columns(
+            _pl.col('ProfitPercent').pipe(_fanum2en).cast(_pl.Float64)
+        )
         return df
 
 
@@ -630,13 +740,16 @@ class LeveragedTadbirPardazLiveNAVPS(LiveNAVPS):
 
 
 class LeveragedTadbirPardaz(BaseTadbirPardaz):
-    async def navps_history(self) -> _DataFrame:
+    async def navps_history(self) -> _pl.DataFrame:  # Changed type hint
+        """
+        Fetches NAVPS history for leveraged Tadbir Pardaz funds and returns it as a Polars DataFrame.
+        Handles merging multiple data series by date.
+        """
         j: list = await self._json(
             'Chart/TotalNAV', params={'type': 'getnavtotal'}
         )
 
-        append = (frames := []).append
-
+        frames: list[_pl.DataFrame] = []
         for i, name in zip(
             j,
             (
@@ -648,15 +761,21 @@ class LeveragedTadbirPardaz(BaseTadbirPardaz):
                 'normal',
             ),
         ):
-            df = _DataFrame.from_records(i['List'], exclude=['name'])
-            df['date'] = _to_datetime(df['x'], format='%m/%d/%Y')
-            df.drop(columns='x', inplace=True)
-            df.rename(columns={'y': name}, inplace=True)
-            df.drop_duplicates('date', inplace=True)
-            df.set_index('date', inplace=True)
-            append(df)
+            df = _pl.DataFrame(i['List'])
+            df = df.drop('name')
+            df = df.with_columns(
+                _pl.col('x').str.to_datetime('%m/%d/%Y').alias('date')
+            ).drop('x')  # Drop original 'x' column
+            df = df.rename({'y': name})  # Rename 'y' to the specific name
+            df = df.unique('date')  # Drop duplicates based on 'date' column
+            frames.append(df)
 
-        df = _concat(frames, axis=1)
+        # Use reduce with join to combine all DataFrames by 'date' column
+        df = frames.pop()
+        df = reduce(
+            lambda left, right: left.join(right, on='date', how='left'),
+            frames,
+        )
         return df
 
     async def live_navps(self) -> LeveragedTadbirPardazLiveNAVPS:
@@ -702,45 +821,70 @@ class LeveragedTadbirPardaz(BaseTadbirPardaz):
 _DATASET_PATH = _Path(__file__).parent / 'dataset.csv'
 
 
-def _make_site(row) -> BaseSite:
+def _make_site_polars_udf(row: dict) -> BaseSite:
+    """UDF for creating a BaseSite object from a Polars row (dict)."""
     type_str = row['siteType']
     site_class = globals()[type_str]
     return site_class(row['url'])
 
 
-def load_dataset(*, site=True, inst=False) -> _DataFrame:
-    """Load dataset.csv as a DataFrame.
-
+def load_dataset(
+    *, site=True, inst=False
+) -> _pl.DataFrame:  # Changed return type hint
+    """
+    Load dataset.csv as a Polars DataFrame.
     If site is True, convert url and siteType columns to site object.
     """
-    df = _read_csv(
+    df = _pl.read_csv(  # Changed to Polars read_csv
         _DATASET_PATH,
         encoding='utf-8-sig',
-        low_memory=False,
-        lineterminator='\n',
-        dtype={
-            'l18': 'string',
-            'name': 'string',
-            'type': _pd.CategoricalDtype([*_ETF_TYPES.values()]),
-            'insCode': 'string',
-            'regNo': 'string',
-            'url': 'string',
-            'siteType': 'category',
+        # low_memory, lineterminator not directly applicable to Polars read_csv
+        # Polars handles string inference by default
+        # No need for pandas CategoricalDtype, use pl.Categorical
+        schema={
+            'l18': _pl.String,
+            'name': _pl.String,
+            'type': _pl.Categorical,
+            'insCode': _pl.String,
+            'regNo': _pl.String,
+            'url': _pl.String,
+            'siteType': _pl.Categorical,
         },
     )
 
     if site:
-        df['site'] = df[df['siteType'].notna()].apply(_make_site, axis=1)  # type: ignore
+        # Create a struct column with 'url' and 'siteType'
+        # Then map_elements with the UDF to create 'site' objects
+        df = df.with_columns(
+            _pl.when(_pl.col('siteType').is_not_null())
+            .then(
+                _pl.struct(['url', 'siteType']).map_elements(
+                    _make_site_polars_udf, return_dtype=_pl.Object
+                )
+            )
+            .otherwise(
+                _pl.lit(None, dtype=_pl.Object)
+            )  # Handle nulls for siteType
+            .alias('site')
+        )
 
     if inst:
-        df['inst'] = df['insCode'].apply(_Instrument)  # type: ignore
+        # Apply _Instrument to insCode using map_elements
+        df = df.with_columns(
+            _pl.col('insCode')
+            .map_elements(_Instrument, return_dtype=_pl.Object)
+            .alias('inst')
+        )
 
     return df
 
 
-def save_dataset(ds: _DataFrame):
-    ds[
-        [  # sort columns
+def save_dataset(ds: _pl.DataFrame):  # Changed type hint
+    """
+    Saves the Polars DataFrame to dataset.csv.
+    """
+    ds.select(  # Use select to reorder columns
+        [
             'l18',
             'name',
             'type',
@@ -749,12 +893,15 @@ def save_dataset(ds: _DataFrame):
             'url',
             'siteType',
         ]
-    ].sort_values('l18').to_csv(
-        _DATASET_PATH, lineterminator='\n', encoding='utf-8-sig', index=False
+    ).sort('l18').write_csv(  # Use Polars sort and write_csv
+        _DATASET_PATH,
+        include_bom=True,
+        include_header=True,  # Explicitly include header
     )
 
 
 async def _check_validity(site: BaseSite, retry=0) -> tuple[str, str] | None:
+    """Checks the validity of a site by trying to fetch its live NAVPS."""
     try:
         await site.live_navps()
     except (
@@ -779,6 +926,7 @@ SITE_TYPES = (RayanHamafza, TadbirPardaz, LeveragedTadbirPardaz, MabnaDP)
 
 
 async def _url_type(domain: str) -> tuple:
+    """Determines the site type for a given domain."""
     coros = [
         _check_validity(SiteType(f'http://{domain}/'), 2)
         for SiteType in SITE_TYPES
@@ -794,64 +942,132 @@ async def _url_type(domain: str) -> tuple:
 
 
 async def _add_url_and_type(
-    fipiran_df: _DataFrame, known_domains: _Series | None
+    fipiran_df: _pl.DataFrame,
+    known_domains: _pl.Series | None,  # Changed type hints
 ):
-    domains_to_be_checked = fipiran_df['domain'][~fipiran_df['domain'].isna()]
+    """
+    Adds URL and site type information to the fipiran DataFrame
+    by checking unknown domains.
+    """
+    domains_to_be_checked = fipiran_df.filter(
+        _pl.col('domain').is_not_null()
+    ).select('domain')
     if known_domains is not None:
-        domains_to_be_checked = domains_to_be_checked[
-            ~domains_to_be_checked.isin(known_domains)
-        ]
+        domains_to_be_checked = domains_to_be_checked.filter(
+            ~_pl.col('domain').is_in(known_domains)
+        ).select('domain')
 
-    _info(f'checking site types of {len(domains_to_be_checked)} domains')
-    if domains_to_be_checked.empty:
-        return
+    _info(f'checking site types of {domains_to_be_checked.height} domains')
+    if domains_to_be_checked.is_empty():
+        return fipiran_df
 
     # there will be a lot of redirection warnings, let's silent them
     _logging.disable()  # to disable redirection warnings
     list_of_tuples = await _gather(
-        *[_url_type(d) for d in domains_to_be_checked]
+        *[
+            _url_type(d)
+            for d in domains_to_be_checked.get_column('domain').to_list()
+        ]  # Convert to Python list
     )
     _logging.disable(_logging.NOTSET)
 
-    url, site_type = zip(*list_of_tuples)
-    fipiran_df.loc[:, ['url', 'siteType']] = _DataFrame(
-        {'url': url, 'siteType': site_type}, index=domains_to_be_checked.index
+    # Correct way to apply results back based on domains_to_be_checked
+    # Create a temporary DataFrame with domains and their new url/siteType
+    temp_df = _pl.DataFrame(
+        {
+            'domain': domains_to_be_checked.get_column('domain').to_list(),
+            'url_found': [tup[0] for tup in list_of_tuples],
+            'site_type_found': [tup[1] for tup in list_of_tuples],
+        }
     )
 
+    # Join fipiran_df with temp_df to get the new url and siteType
+    fipiran_df = fipiran_df.join(temp_df, on='domain', how='left')
 
-async def _add_ins_code(new_items: _DataFrame) -> None:
-    names_without_code = new_items[new_items['insCode'].isna()].name
-    if names_without_code.empty:
-        return
+    # Use coalesce to update 'url' and 'siteType' only where they are null in fipiran_df
+    # and new values were found
+    fipiran_df = fipiran_df.with_columns(
+        _pl.coalesce(_pl.col('url_found'), _pl.col('url')).alias('url'),
+        _pl.coalesce(_pl.col('site_type_found'), _pl.col('siteType')).alias(
+            'siteType'
+        ),
+    ).drop(['url_found', 'site_type_found'])  # Drop temporary columns
+
+    return fipiran_df  # Return the updated DataFrame
+
+
+async def _add_ins_code(
+    new_items: _pl.DataFrame,
+) -> _pl.DataFrame:  # Changed type hint
+    """
+    Adds 'insCode' to new items by searching on tsetmc for names without a code.
+    """
+    names_without_code = new_items.filter(_pl.col('insCode').is_null()).select(
+        'name'
+    )
+    if names_without_code.is_empty():
+        return new_items  # Return original if no updates needed
+
     _info('searching names on tsetmc to find their insCode')
     results = await _gather(
-        *[_tsetmc_search(name) for name in names_without_code]
+        *[
+            _tsetmc_search(name)
+            for name in names_without_code.get_column('name').to_list()
+        ]
     )
     ins_codes = [(None if len(r) != 1 else r[0]['insCode']) for r in results]
-    new_items.loc[names_without_code.index, 'insCode'] = ins_codes
+
+    # Create a DataFrame for the new insCodes to join back
+    ins_code_update_df = _pl.DataFrame(
+        {
+            'name': names_without_code.get_column('name').to_list(),
+            'insCode_new': ins_codes,
+        }
+    )
+
+    # Left join new_items with the ins_code_update_df
+    new_items = new_items.join(ins_code_update_df, on='name', how='left')
+
+    # Coalesce the original 'insCode' with the new 'insCode_new'
+    new_items = new_items.with_columns(
+        _pl.coalesce(_pl.col('insCode_new'), _pl.col('insCode')).alias(
+            'insCode'
+        )
+    ).drop('insCode_new')  # Drop the temporary column
+
+    return new_items
 
 
-async def _fipiran_data(ds) -> _DataFrame:
+async def _fipiran_data(
+    ds: _pl.DataFrame,
+) -> _pl.DataFrame:  # Changed type hint
+    """
+    Fetches fund data from Fipiran and processes it into a Polars DataFrame.
+    """
     import fipiran.funds
 
     _info('await fipiran.funds.funds()')
-    fipiran_df = await fipiran.funds.funds()
+    fipiran_pd_df: _Df = await fipiran.funds.funds()
 
-    reg_not_in_fipiran = ds[~ds['regNo'].isin(fipiran_df['regNo'])]
-    if not reg_not_in_fipiran.empty:
+    # Convert fipiran_df to Polars DataFrame immediately
+    fipiran_df = _pl.DataFrame(fipiran_pd_df)
+
+    reg_not_in_fipiran = ds.filter(
+        ~_pl.col('regNo').is_in(fipiran_df.get_column('regNo'))
+    )
+    if not reg_not_in_fipiran.is_empty():
+        # Polars has a nice __repr__ for DataFrames
         _warning(
             f'Some dataset rows were not found on fipiran:\n{reg_not_in_fipiran}'
         )
 
-    df = fipiran_df[
-        (fipiran_df['typeOfInvest'] == 'Negotiable')
-        # 11: 'Market Maker', 12: 'VC', 13: 'Project', 14: 'Land and building',
-        # 16: 'PE'
-        & ~(fipiran_df['fundType'].isin((11, 12, 13, 14, 16)))
-        & fipiran_df['isCompleted']
-    ]
+    df = fipiran_df.filter(
+        (_pl.col('typeOfInvest') == 'Negotiable')
+        & ~(_pl.col('fundType').is_in([11, 12, 13, 14, 16]))
+        & _pl.col('isCompleted')
+    )
 
-    df = df[
+    df = df.select(
         [
             'regNo',
             'smallSymbolName',
@@ -860,42 +1076,68 @@ async def _fipiran_data(ds) -> _DataFrame:
             'websiteAddress',
             'insCode',
         ]
-    ]
+    )
 
-    df.rename(
-        columns={
+    df = df.rename(
+        {  # Rename columns
             'fundType': 'type',
             'websiteAddress': 'domain',
             'smallSymbolName': 'l18',
-        },
-        copy=False,
-        inplace=True,
-        errors='raise',
+        }
     )
 
-    df['type'] = df['type'].replace(_ETF_TYPES)
+    # Replace fundType numbers with their string equivalents
+    df = df.with_columns(
+        _pl.col('type').replace_strict(_ETF_TYPES, return_dtype=_pl.String)
+    )
 
     return df
 
 
-async def _tsetmc_dataset() -> _DataFrame:
+async def _tsetmc_dataset() -> _pl.DataFrame:  # Changed type hint
+    """
+    Updates and loads the tsetmc dataset into a Polars DataFrame.
+    """
     from tsetmc.dataset import LazyDS, update
 
     _info('await tsetmc.dataset.update()')
     await update()
 
-    df = LazyDS.df
-    df.drop(columns=['l30', 'isin', 'cisin'], inplace=True)
+    df = LazyDS.df  # This will likely return a pandas DataFrame
+    df = _pl.DataFrame(df)  # Convert to Polars DataFrame
+
+    df = df.drop(['l30', 'isin', 'cisin'])  # Drop columns
     return df
 
 
-def _add_new_items_to_ds(new_items: _DataFrame, ds: _DataFrame) -> _DataFrame:
-    if new_items.empty:
+def _add_new_items_to_ds(
+    new_items: _pl.DataFrame, ds: _pl.DataFrame
+) -> _pl.DataFrame:  # Changed type hints
+    """
+    Adds newly found items to the main dataset.
+    """
+    if new_items.is_empty():
         return ds
-    new_with_code = new_items[new_items['insCode'].notna()]
-    if not new_with_code.empty:
-        ds = _concat(
-            [ds, new_with_code.set_index('insCode').drop(columns=['domain'])]
+    new_with_code = new_items.filter(_pl.col('insCode').is_not_null())
+    if not new_with_code.is_empty():
+        # Select relevant columns from new_with_code and then concatenate vertically
+        # Polars does not have set_index for concatenation; assumes schema compatibility
+        ds = _pl.concat(
+            [
+                ds,
+                new_with_code.select(
+                    [
+                        'l18',
+                        'name',
+                        'type',
+                        'insCode',
+                        'regNo',
+                        'url',
+                        'siteType',
+                    ]
+                ),
+            ],  # Explicitly select columns to match ds
+            how='vertical',
         )
     else:
         _info('new_with_code is empty!')
@@ -903,62 +1145,125 @@ def _add_new_items_to_ds(new_items: _DataFrame, ds: _DataFrame) -> _DataFrame:
 
 
 async def _update_existing_rows_using_fipiran(
-    ds: _DataFrame, fipiran_df: _DataFrame, check_existing_sites: bool
-) -> _DataFrame:
-    """Note: ds index will be set to insCode."""
-    await _add_url_and_type(
+    ds: _pl.DataFrame,
+    fipiran_df: _pl.DataFrame,
+    check_existing_sites: bool,  # Changed type hints
+) -> _pl.DataFrame:
+    """
+    Updates existing rows in the dataset using data from Fipiran DataFrame.
+    """
+    # _add_url_and_type now returns the updated fipiran_df
+    fipiran_df = await _add_url_and_type(
         fipiran_df,
         known_domains=None
         if check_existing_sites
-        else ds['url'].str.extract('//(.*)/')[0],
+        else ds.filter(_pl.col('url').is_not_null())
+        .select(
+            _pl.col('url').str.extract('//(.*)/').alias('domain_extracted')
+        )
+        .get_column('domain_extracted'),
     )
 
-    # to update existing urls and names
-    # NA values in regNo cause error later due to duplication
-    regno = ds[~ds['regNo'].isna()].set_index('regNo')
-    regno['domain'] = None
-    regno.update(fipiran_df.set_index('regNo'))
+    # Join ds with fipiran_df on 'regNo' to get updated values
+    # Use 'left' join to keep all rows from ds
+    ds = ds.join(
+        fipiran_df.select(
+            ['regNo', 'name', 'type', 'url', 'siteType', 'domain', 'l18']
+        ),
+        on='regNo',
+        how='left',
+        suffix='_fipiran',
+    )
 
-    ds.set_index('insCode', inplace=True)
-    # Do not overwrite MultiNAV type and URL.
-    regno.set_index('insCode', inplace=True)
-    ds.update(regno, overwrite=False)
-
-    # Update ds types using fipiran values
-    # ds['type'] = regno['type'] will create NA values in type column.
-    common_indices = regno.index.intersection(ds.index)
-    ds.loc[common_indices, 'type'] = regno.loc[common_indices, 'type']
+    # Coalesce (take first non-null) to update existing columns
+    ds = ds.with_columns(
+        _pl.coalesce(_pl.col('name_fipiran'), _pl.col('name')).alias('name'),
+        _pl.coalesce(_pl.col('type_fipiran'), _pl.col('type')).alias('type'),
+        # Do not overwrite MultiNAV type and URL - this is handled by coalesce
+        _pl.coalesce(_pl.col('url_fipiran'), _pl.col('url')).alias('url'),
+        _pl.coalesce(_pl.col('siteType_fipiran'), _pl.col('siteType')).alias(
+            'siteType'
+        ),
+        _pl.coalesce(_pl.col('l18_fipiran'), _pl.col('l18')).alias('l18'),
+    )
 
     # use domain as URL for those who do not have any URL
-    ds.loc[ds['url'].isna(), 'url'] = 'http://' + regno['domain'] + '/'
+    # Assuming 'domain' from fipiran_df is now available in ds due to the join
+    ds = ds.with_columns(
+        _pl.when(_pl.col('url').is_null())
+        .then(
+            _pl.lit('http://') + _pl.col('domain_fipiran') + _pl.lit('/')
+        )  # Use domain from fipiran join
+        .otherwise(_pl.col('url'))
+        .alias('url')
+    )
+
+    # Drop the temporary fipiran columns used for coalescing
+    ds = ds.drop([col for col in ds.columns if col.endswith('_fipiran')])
     return ds
 
 
-async def update_dataset(*, check_existing_sites=False) -> _DataFrame:
-    """Update dataset and return newly found that could not be added."""
+async def update_dataset(
+    *, check_existing_sites=False
+) -> _pl.DataFrame:  # Changed return type hint
+    """
+    Updates the main dataset by fetching data from Fipiran and Tsetmc.
+    Returns newly found items that could not be added due to missing insCode.
+    """
     ds = load_dataset(site=False)
-    fipiran_df = await _fipiran_data(ds)
+    fipiran_df = await _fipiran_data(
+        ds
+    )  # This function now returns a Polars DataFrame
     ds = await _update_existing_rows_using_fipiran(
         ds, fipiran_df, check_existing_sites
     )
 
-    new_items = fipiran_df[~fipiran_df['regNo'].isin(ds['regNo'])]
+    # Filter new items using Polars expressions
+    new_items = fipiran_df.filter(
+        ~_pl.col('regNo').is_in(ds.get_column('regNo'))
+    )
 
-    tsetmc_df = await _tsetmc_dataset()
-    await _add_ins_code(new_items)
-    ds = _add_new_items_to_ds(new_items, ds)
+    tsetmc_df = (
+        await _tsetmc_dataset()
+    )  # This function now returns a Polars DataFrame
+    new_items = await _add_ins_code(
+        new_items
+    )  # _add_ins_code now takes and returns Polars DataFrame
+    ds = _add_new_items_to_ds(
+        new_items, ds
+    )  # _add_new_items_to_ds now takes and returns Polars DataFrame
 
     # update all data, old or new, using tsetmc_df
-    ds.update(tsetmc_df)
+    # Join ds with tsetmc_df on 'insCode'
+    ds = ds.join(tsetmc_df, on='insCode', how='left', suffix='_tsetmc')
 
-    ds.reset_index(inplace=True)
+    # Coalesce relevant columns to update ds with tsetmc_df values
+    ds = ds.with_columns(
+        _pl.coalesce(_pl.col('name_tsetmc'), _pl.col('name')).alias('name'),
+        _pl.coalesce(_pl.col('type_tsetmc'), _pl.col('type')).alias('type'),
+        _pl.coalesce(_pl.col('l18_tsetmc'), _pl.col('l18')).alias('l18'),
+        _pl.coalesce(_pl.col('regNo_tsetmc'), _pl.col('regNo')).alias('regNo'),
+        _pl.coalesce(_pl.col('url_tsetmc'), _pl.col('url')).alias('url'),
+        _pl.coalesce(_pl.col('siteType_tsetmc'), _pl.col('siteType')).alias(
+            'siteType'
+        ),
+    ).drop(
+        [col for col in ds.columns if col.endswith('_tsetmc')]
+    )  # Drop temporary tsetmc columns
+
+    # No need for reset_index if we didn't explicitly set an index
     save_dataset(ds)
 
-    return new_items[new_items['insCode'].isna()]
+    return new_items.filter(
+        _pl.col('insCode').is_null()
+    )  # Filter for items with null insCode
 
 
-async def _check_site_type(site: BaseSite) -> None:
-    if site != site:  # na
+async def _check_site_type(site: BaseSite | None) -> None:
+    """Checks if the detected site type matches the dataset's recorded type."""
+    if (
+        site is None
+    ):  # Use `is None` for Polars Object column nulls, not `!= site`
         return
 
     try:
@@ -976,22 +1281,52 @@ async def _check_site_type(site: BaseSite) -> None:
 
 
 async def check_dataset(live=False):
+    """
+    Performs consistency checks on the dataset, optionally including live site checks.
+    """
     global ssl
     ds = load_dataset(site=False)
-    assert ds['l18'].is_unique
-    assert ds['name'].is_unique, ds['name'][ds['name'].duplicated()]
-    assert ds['type'].unique().isin(_ETF_TYPES.values()).all()  # type: ignore
-    assert ds['insCode'].is_unique
-    reg_numbers = ds['regNo']
-    known_reg_numbers = reg_numbers[reg_numbers.notna()]
-    assert known_reg_numbers.is_unique, ds[known_reg_numbers.duplicated()]
+
+    # Polars assertions for uniqueness
+    assert ds.get_column('l18').n_unique() == ds.height, (
+        'l18 column is not unique'
+    )
+    # To find duplicates in Polars: ds.group_by('name').len().filter(pl.col('len') > 1)
+    assert ds.get_column('name').n_unique() == ds.height, (
+        f'name column is not unique: {ds.filter(_pl.col("name").is_duplicated()).select("name")}'
+    )
+    assert (
+        ds.get_column('type').unique().is_in([*_ETF_TYPES.values()]).all()
+    ), 'Unknown ETF types found'  # Use .item() to get scalar boolean
+    assert ds.get_column('insCode').n_unique() == ds.height, (
+        'insCode column is not unique'
+    )
+    reg_numbers = ds.get_column('regNo')
+    known_reg_numbers = reg_numbers.filter(reg_numbers.is_not_null())
+    assert known_reg_numbers.n_unique() == len(known_reg_numbers)(  # type: ignore
+        f'regNo column has duplicates: {ds.filter(_pl.col("regNo").is_duplicated()).select("regNo")}'
+    )
 
     if not live:
         return
 
-    ds['site'] = ds[ds['siteType'].notna()].apply(_make_site, axis=1)  # type: ignore
+    # Create 'site' column for live check
+    ds = ds.with_columns(
+        _pl.when(_pl.col('siteType').is_not_null())
+        .then(
+            _pl.struct(['url', 'siteType']).map_elements(
+                _make_site_polars_udf, return_dtype=_pl.Object
+            )
+        )
+        .otherwise(_pl.lit(None, dtype=_pl.Object))
+        .alias('site')
+    )
 
-    coros = ds['site'].apply(_check_site_type)  # type: ignore
+    # Collect site objects to iterate and gather coroutines
+    sites_to_check = (
+        ds.filter(_pl.col('site').is_not_null()).get_column('site').to_list()
+    )
+    coros = [_check_site_type(site) for site in sites_to_check]
 
     local_ssl = ssl
     ssl = False  # many sites fail ssl verification
@@ -1000,7 +1335,7 @@ async def check_dataset(live=False):
     finally:
         ssl = local_ssl
 
-    if not (no_site := ds[ds['site'].isna()]).empty:
+    if not (no_site := ds.filter(_pl.col('site').is_null())).is_empty():
         _warning(
-            f'some dataset entries have no associated site:\n{no_site["l18"]}'
+            f'some dataset entries have no associated site:\n{no_site.select("l18")}'
         )

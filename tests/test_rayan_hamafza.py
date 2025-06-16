@@ -1,7 +1,7 @@
 from math import isclose
 
 from aiohutils.tests import assert_dict_type, file, files
-from numpy import dtype
+from polars import Datetime, Int64
 
 from iranetf import (
     BaseSite,
@@ -26,18 +26,31 @@ async def test_navps_history():
 @file('homay_profit.json')
 async def test_fund_profit():
     df = await RayanHamafza('https://www.homayeagah.ir/').dividend_history()
-    assert [*df.dtypes.items()] == [
-        ('FundId', dtype('int64')),
-        ('FundApId', dtype('int64')),
-        ('ProfitDate', dtype('<M8[ns]')),
-        ('FundUnit', dtype('int64')),
-        ('ProfitGuaranteeUnit', dtype('int64')),
-        ('UnitProfit', dtype('int64')),
-        ('ExtraProfit', dtype('int64')),
-        ('SumUnitProfit', dtype('int64')),
-        ('SumExtraProfit', dtype('int64')),
-        ('SumProfitGuarantee', dtype('int64')),
-        ('SumAllProfit', dtype('int64')),
+    assert df.dtypes == [
+        Int64,
+        Int64,
+        Datetime(time_unit='us', time_zone=None),
+        Int64,
+        Int64,
+        Int64,
+        Int64,
+        Int64,
+        Int64,
+        Int64,
+        Int64,
+    ]
+    assert df.columns == [
+        'FundId',
+        'FundApId',
+        'ProfitDate',
+        'FundUnit',
+        'ProfitGuaranteeUnit',
+        'UnitProfit',
+        'ExtraProfit',
+        'SumUnitProfit',
+        'SumExtraProfit',
+        'SumProfitGuarantee',
+        'SumAllProfit',
     ]
 
 
