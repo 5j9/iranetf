@@ -635,7 +635,8 @@ class LeveragedTadbirPardaz(BaseTadbirPardaz):
             'Chart/TotalNAV', params={'type': 'getnavtotal'}
         )
 
-        frames = []
+        append = (frames := []).append
+
         for i, name in zip(
             j,
             (
@@ -647,7 +648,7 @@ class LeveragedTadbirPardaz(BaseTadbirPardaz):
                 'normal',
             ),
         ):
-            df = _DataFrame(i['List']).drop(columns='name')
+            df = _DataFrame.from_records(i['List'], exclude=['name'])
             df['date'] = _to_datetime(df['x'], format='%m/%d/%Y')
             df.drop(columns='x', inplace=True)
             df.rename(columns={'y': name}, inplace=True)
@@ -655,7 +656,7 @@ class LeveragedTadbirPardaz(BaseTadbirPardaz):
             if not df.index.is_unique:
                 _warning('droppng duplicate dates from navps history')
                 df = df[~df.index.duplicated()]
-            frames.append(df)
+            append(df)
 
         df = _concat(frames, axis=1)
         return df
