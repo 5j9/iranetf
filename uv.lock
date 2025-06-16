@@ -83,16 +83,16 @@ speedups = [
 
 [[package]]
 name = "aiohutils"
-version = "0.22.0"
+version = "0.22.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "aiohttp", extra = ["speedups"] },
     { name = "html5lib" },
     { name = "pandas", extra = ["pyarrow"] },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/fd/9d/899819ce1bfe8108990f7532a7e06b2a34d423258256d7ef71cb08ad62fd/aiohutils-0.22.0.tar.gz", hash = "sha256:02bacf5b0aaae40b80e6f090358df371bd83d073883becc3d59a590655ce06c8", size = 4106, upload-time = "2025-05-15T10:17:47.878Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/f7/e2/7aacd98a4c7c2414387e36cc6bca51da06f745fcf259df25c0862481d75a/aiohutils-0.22.1.tar.gz", hash = "sha256:dc850c7bea3ba2a23c8c02163c47f77ba292fc198d59936d4faab707ca95bf91", size = 4116, upload-time = "2025-06-16T03:10:54.661Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/7f/c6/6c0a9cb7494e0a41a5b7c9a57bc63548b5446f0994a0891526af703866fa/aiohutils-0.22.0-py3-none-any.whl", hash = "sha256:30e8018675b6322329a59204b0d70057a950ba1187649bf7f64a743a8ad50a35", size = 4575, upload-time = "2025-05-15T10:17:41.573Z" },
+    { url = "https://files.pythonhosted.org/packages/ab/a0/24c5764e4680aab3fb9d156e9ab91da8c80b55059fe34b79e1eb7f1b593a/aiohutils-0.22.1-py3-none-any.whl", hash = "sha256:821b225199a821f425537e9922756472dca5ed6429c38fb33f58371063fe74a5", size = 4560, upload-time = "2025-06-16T03:10:53.232Z" },
 ]
 
 [package.optional-dependencies]
