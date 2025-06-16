@@ -59,4 +59,5 @@ async def test_leverage():
 async def test_pishran_navps_hist():
     site = BaseSite.from_l18('پیشران')
     df = await site.navps_history()
+    assert len(df) > 5000
     assert df.index.is_unique

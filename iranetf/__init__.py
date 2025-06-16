@@ -651,8 +651,10 @@ class LeveragedTadbirPardaz(BaseTadbirPardaz):
             df['date'] = _to_datetime(df['x'], format='%m/%d/%Y')
             df.drop(columns='x', inplace=True)
             df.rename(columns={'y': name}, inplace=True)
-            df.drop_duplicates('date', inplace=True)
             df.set_index('date', inplace=True)
+            if not df.index.is_unique:
+                _warning('droppng duplicate dates from navps history')
+                df = df[~df.index.duplicated()]
             frames.append(df)
 
         df = _concat(frames, axis=1)
