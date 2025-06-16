@@ -222,7 +222,7 @@ wheels = [
 
 [[package]]
 name = "fipiran"
-version = "0.23.0"
+version = "0.23.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "aiohutils" },
@@ -230,9 +230,9 @@ dependencies = [
     { name = "lxml" },
     { name = "pandas", extra = ["pyarrow"] },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/7e/95/ef3eb26debbb8f6871cc8cd29327d0d15cad38e5361f2b32b5f3e5629f1a/fipiran-0.23.0.tar.gz", hash = "sha256:6ea9cf1c2472572a150c8e20732df61e80096a0e99c827995ef9528864878a78", size = 20849, upload-time = "2025-01-28T06:21:08.43Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/2d/33/32c33ef05634700190c3bfd645a8fdad1753b7d59509477158825c70c06a/fipiran-0.23.1.tar.gz", hash = "sha256:8d382482f772d86b414607908f962e8ecc164b9ce2fac9fddb0eb060c5ed7fbc", size = 20863, upload-time = "2025-06-16T10:46:50.964Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/a2/ed/b7628ea9196ea09e680d3022b35e49dabf0297fbcfba7bc4fc10145d8926/fipiran-0.23.0-py3-none-any.whl", hash = "sha256:cbc394b9e83522c4edd2c9eff5662b1f6ca9ce6005061d53d9e58047152a7a3b", size = 20554, upload-time = "2025-01-28T06:21:00.189Z" },
+    { url = "https://files.pythonhosted.org/packages/f5/1a/d6ecaf5bcf3b396923fa0cefe39e21e3a78d9d3e87ea682918f1e64b1c0c/fipiran-0.23.1-py3-none-any.whl", hash = "sha256:6843cd280b091a33b98cbb4f8d1fdacfe6491b2873dea45082280be1a62a3b7d", size = 20585, upload-time = "2025-06-16T10:45:23.757Z" },
 ]
 
 [[package]]
