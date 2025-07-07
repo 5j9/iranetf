@@ -2,7 +2,8 @@ __version__ = '0.26.3.dev0'
 import logging as _logging
 from abc import ABC as _ABC, abstractmethod as _abstractmethod
 from asyncio import gather as _gather
-from datetime import datetime as _datetime
+from datetime import date as _date, datetime as _datetime
+from io import BytesIO as _BytesIO
 from json import JSONDecodeError as _JSONDecodeError, loads as _loads
 from logging import (
     debug as _debug,
@@ -454,6 +455,13 @@ class RayanHamafza(BaseSite):
         )
 
 
+_jp = _jdatetime.strptime
+
+
+def _jymd_to_greg(date_string, /):
+    return _jp(date_string, format='%Y/%m/%d').togregorian()
+
+
 # noinspection PyAbstractClass
 class BaseTadbirPardaz(BaseSite):
     async def version(self) -> str:
@@ -516,6 +524,58 @@ class BaseTadbirPardaz(BaseSite):
             + g('نقد و بانک (جاری)', 0.0)
             + g('اوراق مشارکت', 0.0)
         )
+
+    async def nav_history(
+        self, *, from_: _date = _date(1970, 1, 1), to: _date, basket_id=0
+    ) -> _DataFrame:
+        """
+        This function uses excel export function available at
+        /Reports/FundNAVList.
+
+        Tip: the from_ date can be arbitrary old, e.g. 1900-01-01.
+        """
+        r = await _get(
+            self.url + 'Download/DownloadNavChartList',
+            {
+                'exportType': 'Excel',
+                'fromDate': f'{from_.month}/{from_.day}/{from_.year}',
+                'toDate': f'{to.month}/{to.day}/{to.year}',
+                'basketId': basket_id,
+            },
+        )
+        excel = _BytesIO(await r.read())
+        df = _pd.read_excel(excel, engine='openpyxl', header=3)
+        df.rename(
+            columns={
+                'تعداد سرمایه\u200cگذاران\nواحدهای عادی': 'Number of Investors in Common Units',
+                'نسبت اهرمی': 'Leverage Ratio',
+                'Unnamed: 2': 'Unnamed: 2',
+                'ارزش کل واحدها (ریال)': 'Total Value of Units (RIAL)',
+                'مانده گواهی عادی': 'Outstanding Common Certificates',
+                'مانده گواهی ممتاز': 'Outstanding Preferred Certificates',
+                'تعداد واحد\nعادی باطل شده': 'Number of Canceled Common Units',
+                'تعداد واحد\nعادی صادر شده': 'Number of Issued Common Units',
+                'تعداد واحد\nممتاز باطل شده': 'Number of Canceled Preferred Units',
+                'تعداد واحد\nممتاز صادر شده': 'Number of Issued Preferred Units',
+                'خالص ارزش واحدهای عادی': 'NAV of Common Units',
+                'خالص ارزش واحدهای ممتاز': 'NAV of Preferred Units',
+                'خالص ارزش صندوق': 'NAV of Fund',
+                'بازده سالانه\nشده واحدهای عادی': 'Annualized Return of Common Units',
+                'بازده سالانه\nشده واحدهای ممتاز': 'Annualized Return of Preferred Units',
+                'بازده سالانه شده صندوق': 'Annualized Return of Fund',
+                'قیمت واحد های عادی': 'Price of Common Units',
+                'قیمت ابطال\nواحد های ممتاز': 'Cancellation Price of Preferred Units',
+                'قیمت صدور\nواحد های ممتاز': 'Issuance Price of Preferred Units',
+                'Unnamed: 19': 'Unnamed: 19',
+                'تاریخ': 'Date',
+                'Unnamed: 21': 'Unnamed: 21',
+                'ردیف': 'Row',
+            },
+            inplace=True,
+        )
+        df['Date'] = df['Date'].map(_jymd_to_greg)
+        df.set_index('Date', inplace=True)
+        return df
 
 
 class TadbirPardaz(BaseTadbirPardaz):
@@ -591,9 +651,7 @@ class TadbirPardaz(BaseTadbirPardaz):
                 'ProfitPercent',
             ],
         )
-        df['ProfitDate'] = df['ProfitDate'].apply(
-            lambda i: _jdatetime.strptime(i, format='%Y/%m/%d').togregorian()
-        )
+        df['ProfitDate'] = df['ProfitDate'].apply(_jymd_to_greg)
         comma_cols = ['FundUnit', 'SUMAllProfit']
         df[comma_cols] = df[comma_cols].map(_comma_int)
         int_cols = ['row', 'UnitProfit']

@@ -1,6 +1,8 @@
+from datetime import date
 from math import isclose
 
 from aiohutils.tests import assert_dict_type, file, files
+from numpy import dtype
 
 from iranetf import (
     BaseSite,
@@ -61,3 +63,36 @@ async def test_pishran_navps_hist():
     df = await site.navps_history()
     assert len(df) > 5000
     assert df.index.is_unique
+
+
+@file('nav_history.xlsx')
+async def test_nav_history():
+    site: LeveragedTadbirPardaz = BaseSite.from_l18('شتاب')  # type: ignore
+    df = await site.nav_history(from_=date(2025, 7, 1), to=date(2025, 7, 4))
+    assert df.index.name == 'Date'
+    assert df.index.dtype == 'datetime64[ns]'
+    assert [*df.dtypes.items()] == [
+        ('Number of Investors in Common Units', dtype('int64')),
+        ('Leverage Ratio', dtype('float64')),
+        ('Unnamed: 2', dtype('float64')),
+        ('Total Value of Units (RIAL)', dtype('int64')),
+        ('Outstanding Common Certificates', dtype('int64')),
+        ('Outstanding Preferred Certificates', dtype('int64')),
+        ('Number of Canceled Common Units', dtype('int64')),
+        ('Number of Issued Common Units', dtype('int64')),
+        ('Number of Canceled Preferred Units', dtype('int64')),
+        ('Number of Issued Preferred Units', dtype('int64')),
+        ('NAV of Common Units', dtype('float64')),
+        ('NAV of Preferred Units', dtype('float64')),
+        ('NAV of Fund', dtype('int64')),
+        ('Annualized Return of Common Units', dtype('float64')),
+        ('Annualized Return of Preferred Units', dtype('float64')),
+        ('Annualized Return of Fund', dtype('float64')),
+        ('Price of Common Units', dtype('float64')),
+        ('Cancellation Price of Preferred Units', dtype('int64')),
+        ('Issuance Price of Preferred Units', dtype('int64')),
+        ('Unnamed: 19', dtype('float64')),
+        ('Unnamed: 21', dtype('float64')),
+        ('Row', dtype('int64')),
+    ]
+    assert len(df) == 4
