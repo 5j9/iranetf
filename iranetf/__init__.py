@@ -1089,12 +1089,12 @@ async def check_dataset(live=False):
 
     ds['site'] = ds[ds['siteType'].notna()].apply(_make_site, axis=1)  # type: ignore
 
-    coros = ds['site'].apply(_check_site_type)  # type: ignore
+    check_site_coros = [_check_site_type(s) for s in ds['site']]
 
     local_ssl = ssl
     ssl = False  # many sites fail ssl verification
     try:
-        await _gather(*coros)
+        await _gather(*check_site_coros)
     finally:
         ssl = local_ssl
 
