@@ -96,10 +96,12 @@ async def test_version():
     assert (await tadbir.version()) == EXPECTED_TP_VER
 
 
-@file('rouinfund.html')
+steel: TadbirPardaz = BaseSite.from_l18('استیل')  # type: ignore
+
+
+@file('mofidsectorfund.html')
 async def test_info():
-    steel: TadbirPardaz = BaseSite.from_l18('استیل')  # type: ignore
-    assert await steel.info() == {
+    assert await steel.home_info() == {
         'basketIDs': {
             '1': 'صندوق سرمایه\u200cگذاری بخشی صنایع مفید',
             '2': 'استیل',
@@ -112,4 +114,11 @@ async def test_info():
         'isETFMultiNavMode': True,
         'isEtfMode': False,
         'isLeveragedMode': False,
+        'seo_reg_no': 12150,
+        'version': '9.2.2',
     }
+
+
+@file('mofidsectorfund.html')
+async def test_reg_no():
+    assert await steel.reg_no() == 12150

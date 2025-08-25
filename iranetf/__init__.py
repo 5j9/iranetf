@@ -13,7 +13,6 @@ from logging import (
 )
 from pathlib import Path as _Path
 from re import (
-    ASCII as _ASCII,
     findall as _findall,
     search as _search,
     split as _split,
@@ -107,7 +106,7 @@ type AnySite = 'LeveragedTadbirPardaz | TadbirPardaz | RayanHamafza | MabnaDP | 
 
 
 class BaseSite(_ABC):
-    __slots__ = 'last_response', 'url'
+    __slots__ = '_home_info_cache', 'last_response', 'url'
 
     ds: _DataFrame
     _aa_keys: set
@@ -173,7 +172,7 @@ class BaseSite(_ABC):
 
         if rfind(b'<div class="tadbirLogo"></div>') != -1:
             tp_site = TadbirPardaz(url)
-            info = await tp_site.info()
+            info = await tp_site.home_info()
             if info['isLeveragedMode']:
                 return LeveragedTadbirPardaz(url)
             if info['isETFMultiNavMode']:
@@ -199,6 +198,22 @@ class BaseSite(_ABC):
     async def leverage(self) -> float:
         return 1.0 - await self.cache()
 
+    async def _home(self) -> str:
+        return (await _read(self.url)).decode()
+
+    @_abstractmethod
+    async def _home_info(self) -> dict[str, _Any]: ...
+
+    async def home_info(self) -> dict[str, _Any]:
+        try:
+            return self._home_info_cache
+        except AttributeError:
+            i = self._home_info_cache = await self._home_info()
+            return i
+
+    async def reg_no(self) -> int:
+        return (await self.home_info())['seo_reg_no']
+
 
 def _comma_int(s: str) -> int:
     return int(s.replace(',', ''))
@@ -208,7 +223,17 @@ def _comma_float(s: str) -> float:
     return float(s.replace(',', ''))
 
 
-class MabnaDP(BaseSite):
+class MabnaDPBase(BaseSite):
+    async def _home_info(self):
+        d = {}
+        html = await self._home()
+        m = _search(r'(\d+) نزد سازمان بورس', html)
+        if m:
+            d['seo_reg_no'] = int(m[1])
+        return d
+
+
+class MabnaDP(MabnaDPBase):
     async def _json(self, path, **kwa) -> _Any:
         return await super()._json(f'api/v1/overall/{path}', **kwa)
 
@@ -269,7 +294,7 @@ class MabnaDP(BaseSite):
         return g('وجه نقد', 0.0) + g('سپرده بانکی', 0.0)
 
 
-class LeveragedMabnaDP(BaseSite):
+class LeveragedMabnaDP(MabnaDPBase):
     async def _json(self, path, **kwa) -> _Any:
         params: dict | None = kwa.get('params')
         if params is None:
@@ -381,6 +406,14 @@ class RayanHamafza(BaseSite):
     _api_path = 'api/data'
     __slots__ = 'fund_id'
 
+    async def _home_info(self) -> dict[str, _Any]:
+        html = await self._home()
+        d = {}
+        reg_no_match = _search(r'ثبت شده به شماره (\d+) نزد سازمان بورس', html)
+        if reg_no_match:
+            d['seo_reg_no'] = int(reg_no_match[1])
+        return d
+
     def __init__(self, url: str):
         url, _, fund_id = url.partition('#')
         self.fund_id = fund_id or '1'
@@ -462,13 +495,9 @@ def _jymd_to_greg(date_string, /):
     return _jp(date_string, format='%Y/%m/%d').togregorian()
 
 
-# noinspection PyAbstractClass
 class BaseTadbirPardaz(BaseSite):
     async def version(self) -> str:
-        content = await _read(self.url)
-        start = content.find(b'version number:')
-        end = content.find(b'\n', start)
-        return content[start + 15 : end].strip().decode()
+        return (await self.home_info())['version']
 
     _aa_keys = {
         'اوراق گواهی سپرده',
@@ -492,28 +521,38 @@ class BaseTadbirPardaz(BaseSite):
         self._check_aa_keys(d)
         return d
 
-    async def info(self) -> dict[str, _Any]:
-        content = await (await _get(self.url)).read()
+    async def _home_info(self) -> dict[str, _Any]:
+        html = await self._home()
         d: dict[str, _Any] = {
             'isETFMultiNavMode': _search(
-                rb'isETFMultiNavMode\s*=\s*true;', content, _ASCII
+                r'isETFMultiNavMode\s*=\s*true;', html
             )
             is not None,
-            'isLeveragedMode': _search(
-                rb'isLeveragedMode\s*=\s*true;', content, _ASCII
-            )
+            'isLeveragedMode': _search(r'isLeveragedMode\s*=\s*true;', html)
             is not None,
-            'isEtfMode': _search(rb'isEtfMode\s*=\s*true;', content, _ASCII)
-            is not None,
+            'isEtfMode': _search(r'isEtfMode\s*=\s*true;', html) is not None,
         }
         if d['isETFMultiNavMode']:
             baskets = _findall(
                 r'<option [^>]*?value="(\d+)">([^<]*)</option>',
-                content.partition(b'<div class="drp-basket-header">')[2]
-                .partition(b'</select>')[0]
-                .decode(),
+                html.partition('<div class="drp-basket-header">')[2].partition(
+                    '</select>'
+                )[0],
             )
             d['basketIDs'] = dict(baskets)
+
+        start = html.find('version number:')
+        end = html.find('\n', start)
+        d['version'] = html[start + 15 : end].strip()
+
+        reg_no_match = _search(
+            r'<td>شماره ثبت نزد سازمان بورس و اوراق بهادار</td>\s*'
+            '<td style="text-align:left">(.*?)</td>',
+            html,
+        )
+        if reg_no_match:
+            d['seo_reg_no'] = int(reg_no_match[1])
+
         return d
 
     async def cache(self) -> float:

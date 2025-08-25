@@ -10,17 +10,22 @@ from iranetf import (
 )
 from tests import assert_navps_history
 
-rayan = RayanHamafza('https://yaghootfund.ir/')
+yaqut = RayanHamafza('https://yaghootfund.ir/')
 
 
 @file('almas_live.json')
 async def test_live_navps():
-    assert_dict_type(await rayan.live_navps(), LiveNAVPS)
+    assert_dict_type(await yaqut.live_navps(), LiveNAVPS)
 
 
 @file('almas_navps_history.json')
 async def test_navps_history():
-    await assert_navps_history(rayan)
+    await assert_navps_history(yaqut)
+
+
+@file('yaqut.html')
+async def test_reg_no():
+    assert await yaqut.reg_no() == 11698
 
 
 @file('homay_profit.json')
