@@ -227,7 +227,7 @@ class MabnaDPBase(BaseSite):
     async def _home_info(self):
         d = {}
         html = await self._home()
-        m = _search(r'(\d+) نزد سازمان بورس', html)
+        m = _search(r'(\d+)\s*نزد سازمان بورس', html)
         if m:
             d['seo_reg_no'] = m[1]
         return d
