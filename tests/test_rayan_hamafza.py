@@ -25,7 +25,7 @@ async def test_navps_history():
 
 @file('yaqut.html')
 async def test_reg_no():
-    assert await yaqut.reg_no() == 11698
+    assert await yaqut.reg_no() == '11698'
 
 
 @file('homay_profit.json')

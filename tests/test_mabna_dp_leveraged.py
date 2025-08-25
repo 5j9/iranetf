@@ -12,7 +12,7 @@ site = LeveragedMabnaDP('https://kianfunds10.ir/')
 async def test_from_url():
     s = await BaseSite.from_url(site.url)
     assert s == site
-    assert await site.reg_no() == 12433
+    assert await site.reg_no() == '12433'
 
 
 @file('lmdp_live.json')

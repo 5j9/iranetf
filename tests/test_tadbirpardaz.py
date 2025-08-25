@@ -114,11 +114,11 @@ async def test_info():
         'isETFMultiNavMode': True,
         'isEtfMode': False,
         'isLeveragedMode': False,
-        'seo_reg_no': 12150,
+        'seo_reg_no': '12150',
         'version': '9.2.2',
     }
 
 
 @file('mofidsectorfund.html')
 async def test_reg_no():
-    assert await steel.reg_no() == 12150
+    assert await steel.reg_no() == '12150'

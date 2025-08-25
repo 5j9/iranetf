@@ -25,7 +25,7 @@ async def test_navps_history_mabna():
 @file('mabna_version.html')
 async def test_mabna_version():
     assert (await hamvazn.version()) == '2.15'
-    assert await hamvazn.reg_no() == 11924
+    assert await hamvazn.reg_no() == '11924'
 
 
 @file('old_mabna_version.html')

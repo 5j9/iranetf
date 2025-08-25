@@ -167,7 +167,7 @@ class BaseSite(_ABC):
 
     @staticmethod
     async def from_url(url: str) -> AnySite:
-        content = await _read()
+        content = await _read(url)
         rfind = content.rfind
 
         if rfind(b'<div class="tadbirLogo"></div>') != -1:
@@ -211,7 +211,7 @@ class BaseSite(_ABC):
             i = self._home_info_cache = await self._home_info()
             return i
 
-    async def reg_no(self) -> int:
+    async def reg_no(self) -> str:
         return (await self.home_info())['seo_reg_no']
 
 
@@ -229,7 +229,7 @@ class MabnaDPBase(BaseSite):
         html = await self._home()
         m = _search(r'(\d+) نزد سازمان بورس', html)
         if m:
-            d['seo_reg_no'] = int(m[1])
+            d['seo_reg_no'] = m[1]
         return d
 
 
@@ -411,7 +411,7 @@ class RayanHamafza(BaseSite):
         d = {}
         reg_no_match = _search(r'ثبت شده به شماره (\d+) نزد سازمان بورس', html)
         if reg_no_match:
-            d['seo_reg_no'] = int(reg_no_match[1])
+            d['seo_reg_no'] = reg_no_match[1]
         return d
 
     def __init__(self, url: str):
@@ -551,7 +551,7 @@ class BaseTadbirPardaz(BaseSite):
             html,
         )
         if reg_no_match:
-            d['seo_reg_no'] = int(reg_no_match[1])
+            d['seo_reg_no'] = str(int(reg_no_match[1]))
 
         return d
 
