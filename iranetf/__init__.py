@@ -167,7 +167,7 @@ class BaseSite(_ABC):
 
     @staticmethod
     async def from_url(url: str) -> AnySite:
-        content = await (await _get(url)).read()
+        content = await _read()
         rfind = content.rfind
 
         if rfind(b'<div class="tadbirLogo"></div>') != -1:
