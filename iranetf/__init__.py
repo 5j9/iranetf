@@ -1055,9 +1055,12 @@ async def update_dataset(*, check_existing_sites=False) -> _DataFrame:
     return new_items[new_items['insCode'].isna()]
 
 
-async def _check_site_type(row: dict) -> None:
-    site: BaseSite = row['site']
-    if site != site:  # na
+_NA = _pd.NA
+
+
+async def _check_site_type(row) -> None:
+    site: BaseSite = row.site
+    if site is _NA:  # na
         return
 
     try:
@@ -1074,11 +1077,11 @@ async def _check_site_type(row: dict) -> None:
     )
 
 
-async def _check_reg_no(row: dict):
-    ds_reg_no = row['regNo']
-    if ds_reg_no is None:  # todo: remove this after adding regNo for all
+async def _check_reg_no(row):
+    ds_reg_no = row.regNo
+    if ds_reg_no is _NA:  # todo: remove this after adding regNo for all
         return
-    site: BaseSite = row['site']
+    site: BaseSite = row.site
     try:
         actual_reg_no = await site.reg_no()
     except Exception as e:
@@ -1105,9 +1108,9 @@ async def check_dataset(live=False):
 
     ds['site'] = ds[ds['siteType'].notna()].apply(_make_site, axis=1)  # type: ignore
 
-    records = ds.to_dict(orient='records')
-    check_site_coros = [_check_site_type(r) for r in records]
-    check_reg_no_coros = [_check_reg_no(r) for r in records]
+    rows = [*ds.itertuples()]
+    check_site_coros = [_check_site_type(r) for r in rows]
+    check_reg_no_coros = [_check_reg_no(r) for r in rows]
 
     local_ssl = ssl
     ssl = False  # many sites fail ssl verification
