@@ -14,13 +14,11 @@ import pandas as _pd
 from aiohttp import (
     ClientConnectorError as _ClientConnectorError,
     ClientOSError as _ClientOSError,
-    ClientResponse as _ClientResponse,
     ClientResponseError as _ClientResponseError,
     ServerDisconnectedError as _ServerDisconnectedError,
     ServerTimeoutError as _ServerTimeoutError,
     TooManyRedirects as _TooManyRedirects,
 )
-from aiohutils.session import SessionManager
 from pandas import (
     NA as _NA,
     DataFrame as _DataFrame,
@@ -40,24 +38,6 @@ from iranetf.sites import (
     RayanHamafza as _RayanHamafza,
     TadbirPardaz as _TadbirPardaz,
 )
-
-_pd.options.mode.copy_on_write = True
-_pd.options.future.infer_string = True  # type: ignore
-_pd.options.future.no_silent_downcasting = True  # type: ignore
-
-session_manager = SessionManager()
-
-
-ssl: bool = False  # as horrible as this is, many sites fail ssl verification
-
-
-async def _get(
-    url: str, params: dict | None = None, cookies: dict | None = None
-) -> _ClientResponse:
-    return await session_manager.get(
-        url, ssl=ssl, cookies=cookies, params=params
-    )
-
 
 _ETF_TYPES = {  # numbers are according to fipiran
     6: 'Stock',
