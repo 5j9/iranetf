@@ -1,4 +1,4 @@
-__version__ = '0.28.1.dev1'
+__version__ = '0.29.0'
 import logging as _logging
 from abc import ABC as _ABC, abstractmethod as _abstractmethod
 from asyncio import gather as _gather
