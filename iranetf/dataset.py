@@ -31,6 +31,7 @@ from tsetmc.instruments import (
     search as _tsetmc_search,
 )
 
+import iranetf
 from iranetf.sites import (
     BaseSite as _BaseSite,
     LeveragedTadbirPardaz as _LeveragedTadbirPardaz,
@@ -365,13 +366,13 @@ async def check_dataset(live=False):
     check_site_coros = [_check_site_type(r) for r in rows]
     check_reg_no_coros = [_check_reg_no(r) for r in rows]
 
-    local_ssl = ssl
-    ssl = False  # many sites fail ssl verification
+    orig_ssl = iranetf.ssl
+    iranetf.ssl = False  # many sites fail ssl verification
     try:
         await _gather(*check_site_coros)
         await _gather(*check_reg_no_coros)
     finally:
-        ssl = local_ssl
+        iranetf.ssl = orig_ssl
 
     if not (no_site := ds[ds['site'].isna()]).empty:
         _warning(
