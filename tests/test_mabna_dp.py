@@ -3,7 +3,7 @@ from math import isclose
 from aiohutils.tests import assert_dict_type, file
 from pytest import mark
 
-from iranetf import LiveNAVPS, MabnaDP
+from iranetf.sites import LiveNAVPS, MabnaDP
 from tests import assert_navps_history
 
 hamvazn = MabnaDP('https://kianfunds6.ir/')

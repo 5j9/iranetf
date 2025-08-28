@@ -4,7 +4,7 @@ from aiohutils.tests import assert_dict_type, file, files
 from numpy import dtype
 from pytest import raises
 
-from iranetf import (
+from iranetf.sites import (
     BaseSite,
     TadbirPardaz,
     TadbirPardazMultiNAV,
@@ -46,7 +46,9 @@ async def test_multinav():
 
 async def test_multinav_hist_path():
     khodran = BaseSite.from_l18('خودران')
-    with patch('iranetf._get', side_effect=NotImplementedError) as get_mock:
+    with patch(
+        'iranetf.sites._get', side_effect=NotImplementedError
+    ) as get_mock:
         with raises(NotImplementedError):
             await khodran.navps_history()
     get_mock.assert_called_once_with(
@@ -58,7 +60,9 @@ async def test_multinav_hist_path():
 
 async def test_multinav_live_navps_path():
     khodran = BaseSite.from_l18('خودران')
-    with patch('iranetf._get', side_effect=NotImplementedError) as get_mock:
+    with patch(
+        'iranetf.sites._get', side_effect=NotImplementedError
+    ) as get_mock:
         with raises(NotImplementedError):
             await khodran.live_navps()
     get_mock.assert_called_once_with(

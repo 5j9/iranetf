@@ -3,7 +3,7 @@ from logging import getLogger
 
 from aiohttp import ClientConnectorDNSError, ClientResponseError
 
-from iranetf import load_dataset
+from iranetf.dataset import load_dataset
 
 ds = load_dataset()
 logger = getLogger(__name__)

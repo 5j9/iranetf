@@ -2,7 +2,7 @@ from aiohutils.tests import init_tests
 from numpy import dtype
 from pandas import DatetimeIndex
 
-from iranetf import BaseSite
+from iranetf.sites import BaseSite
 
 init_tests()
 

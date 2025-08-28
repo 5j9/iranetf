@@ -1,6 +1,6 @@
 from asyncio import run
 
-from iranetf import load_dataset
+from iranetf.dataset import load_dataset
 from iranetf.rahavard365 import etfs
 
 ds = load_dataset(site=False)

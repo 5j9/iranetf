@@ -1,6 +1,6 @@
 from asyncio import run
 
-from iranetf import check_dataset
+from iranetf.dataset import check_dataset
 
 
 async def main():

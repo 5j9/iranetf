@@ -3,7 +3,7 @@ from collections import defaultdict
 
 from aiohttp import ClientConnectorCertificateError
 
-from iranetf import RayanHamafza, load_dataset
+from iranetf.sites import RayanHamafza, load_dataset
 
 ds = load_dataset()
 

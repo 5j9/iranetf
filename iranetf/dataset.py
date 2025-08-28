@@ -32,6 +32,7 @@ from tsetmc.instruments import (
 )
 
 import iranetf
+from iranetf import sites as _sites
 from iranetf.sites import (
     BaseSite as _BaseSite,
     LeveragedTadbirPardaz as _LeveragedTadbirPardaz,
@@ -59,7 +60,7 @@ _DATASET_PATH = _Path(__file__).parent / 'dataset.csv'
 
 def _make_site(row) -> _BaseSite:
     type_str = row['siteType']
-    site_class = globals()[type_str]
+    site_class = getattr(_sites, type_str)
     return site_class(row['url'])
 
 

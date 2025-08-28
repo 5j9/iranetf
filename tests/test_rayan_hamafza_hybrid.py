@@ -2,7 +2,7 @@ from math import isclose
 
 from aiohutils.tests import assert_dict_type, file
 
-from iranetf import (
+from iranetf.sites import (
     BaseSite,
     LiveNAVPS,
     RayanHamafza as RayanHamafzaHybrid,

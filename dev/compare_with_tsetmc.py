@@ -4,7 +4,7 @@ from pandas import concat
 from tsetmc.funds import commodity_etfs, etfs
 from tsetmc.instruments import Instrument
 
-from iranetf import load_dataset
+from iranetf.dataset import load_dataset
 
 ignore_desc = {
     'نوع صندوق : خصوصی',

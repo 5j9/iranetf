@@ -4,7 +4,7 @@ from math import isclose
 from aiohutils.tests import assert_dict_type, file, files
 from numpy import dtype
 
-from iranetf import (
+from iranetf.sites import (
     BaseSite,
     LeveragedTadbirPardaz,
     LeveragedTadbirPardazLiveNAVPS,

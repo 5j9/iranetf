@@ -2,7 +2,7 @@ from math import isclose
 
 from aiohutils.tests import assert_dict_type, file, files
 
-from iranetf import BaseSite, LeveragedMabnaDP, LiveNAVPS
+from iranetf.sites import BaseSite, LeveragedMabnaDP, LiveNAVPS
 from tests import assert_leveraged_leverage, assert_navps_history
 
 site = LeveragedMabnaDP('https://kianfunds10.ir/')

@@ -1,6 +1,6 @@
 from asyncio import gather, run
 
-from iranetf import load_dataset
+from iranetf.dataset import load_dataset
 
 ds = load_dataset()
 
