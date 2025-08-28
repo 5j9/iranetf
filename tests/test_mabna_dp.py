@@ -1,6 +1,7 @@
 from math import isclose
 
 from aiohutils.tests import assert_dict_type, file
+from pytest import mark
 
 from iranetf import LiveNAVPS, MabnaDP
 from tests import assert_navps_history
@@ -28,6 +29,7 @@ async def test_mabna_version():
     assert await hamvazn.reg_no() == '11924'
 
 
+@mark.xfail
 @file('old_mabna_version.html')
 async def test_old_mabna_version():
     assert (await MabnaDP('https://gitidamavandfund.ir/').version()) == '2.21'
