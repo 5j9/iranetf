@@ -539,6 +539,7 @@ class BaseTadbirPardaz(BaseSite):
         'نقد و بانک (جاری)',
         'نقد و بانک (سپرده)',
         'گواهی سپرده کالایی',
+        'اختیار معامله',
     }
 
     async def asset_allocation(self) -> dict:

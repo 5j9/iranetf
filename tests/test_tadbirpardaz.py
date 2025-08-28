@@ -122,3 +122,10 @@ async def test_info():
 @file('mofidsectorfund.html')
 async def test_reg_no():
     assert await steel.reg_no() == '12150'
+
+
+@file('derakhshan_aa.json')
+async def test_option_in_asset_allocation(caplog):
+    site = TadbirPardaz('https://dafund.ir/')
+    await site.asset_allocation()
+    assert not caplog.records
