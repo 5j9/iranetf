@@ -1,0 +1,934 @@
+<!DOCTYPE html>
+<html>
+<head>
+    
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <meta name="keywords" content= صندوق سرمایه‌گذاری مشترک />
+    <meta name="Description" content= />
+    <title>لیست NAV</title>
+    <link href="/Content/Style/Fa/bootstrap-rtl.css" rel="stylesheet" />
+    <link href="/Content/Style/Fa/main.min.css" rel="stylesheet" />
+    <link href="/Content/Style/keyboard.css" rel="stylesheet" />
+    <link href="/Content/Style/font-awesome.min.css" rel="stylesheet" />
+    <link href="/Content/Style/jquery.mCustomScrollbar.min.css" rel="stylesheet" />
+    <link href="/Content/Style/persian-datepicker.css" rel="stylesheet" />
+    <link href="/Content/Style/jquery-ui.min.css" rel="stylesheet" />
+    <link href="/Content/Style/CustomStyles.css" rel="stylesheet" />
+    <link rel="icon" href="/ImageHandler.ashx?ImageId=259" />
+    <script src="/Scripts/jquery-3.6.1.min.js" type="text/javascript"></script>
+    <script src="/Scripts/jquery-ui.min.js" type="text/javascript"></script>
+    <script src="/Scripts/jquery-migrate-3.4.1.min.js" type="text/javascript"></script>
+
+
+
+</head>
+<body class="rtl " style="min-height: 100vh; background-color: #efefef">
+    
+    <div class="container-fluid d-flex flex-column" style="min-height: inherit;">
+        <div class="master-header">
+            <div class="row menu-row">
+                <div class="container-fluid">
+                    <nav class="navbar navbar-expand-xl navbar-light col-lg-12 px-0" style="min-height: 56px">
+                        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent">
+                            <span class="navbar-toggler-icon"></span>
+                        </button>
+                        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                            <ul class="navbar-nav">
+ 
+
+    <li class="nav-item ">
+<a class="nav-link" href="/">صفحه اول</a>        
+    </li>
+    <li class="nav-item dropdown">
+                <a class='nav-link  haschild' href='javascript:void(0)'> درباره صندوق</a>
+                    <div class="dropdown-menu">
+                <ul class="nav flex-column">
+                                <li class="nav-item"><a class='dropdown-item ' href="/AboutFund/FundCost">هزینه‌های صندوق</a></li>
+                                <li class="nav-item"><a class='dropdown-item ' href="/AboutFund/FundGoals">اهداف صندوق</a></li>
+                                <li class="nav-item"><a class='dropdown-item ' href="/AboutFund/FundStatute">اساسنامه صندوق</a></li>
+                                <li class="nav-item"><a class='dropdown-item ' href="/AboutFund/FundProspectus">امیدنامه صندوق</a></li>
+                                        <li class="nav-item"><a class="dropdown-item " href="/AboutFund/FundBankAccounts">حساب‌های بانکی صندوق</a></li>
+                                        <li class="nav-item"><a class="dropdown-item " href="/AboutFund/FundInvestmentHelp">راهنمای سرمایه‌گذاری</a></li>
+                                <li class="nav-item"><a class='dropdown-item ' href="/AboutFund/FundBranchs">شعبه‌های صندوق</a></li>
+                                <li class="nav-item"><a class='dropdown-item ' href="/AboutFund/FundGeneralInfo">اطلاعات کلی صندوق</a></li>
+                                <li class="nav-item"><a class='dropdown-item ' href="/AboutFund/FundComplaint">ثبت شکایت</a></li>
+                </ul>
+            </div>
+
+    </li>
+    <li class="nav-item dropdown">
+                <a class='nav-link  haschild' href='javascript:void(0)'> ارکان صندوق</a>
+                    <div class="dropdown-menu">
+                <ul class="nav flex-column">
+                                <li class="nav-item"><a class='dropdown-item ' href="/Pillar/Auditor">حسابرس صندوق</a></li>
+                                <li class="nav-item"><a class='dropdown-item ' href="/Pillar/InvestmentManager">مدیر سرمایه‌گذاری</a></li>
+                                <li class="nav-item"><a class='dropdown-item ' href="/Pillar/Manager">مدیر صندوق</a></li>
+                                <li class="nav-item"><a class='dropdown-item ' href="/Pillar/OperationManager">مدیر بهره برداری</a></li>
+                                <li class="nav-item"><a class='dropdown-item ' href="/Pillar/Trustee">متولی صندوق</a></li>
+                                <li class="nav-item"><a class='dropdown-item ' href="/Pillar/FundBroker">کارگزار صندوق</a></li>
+                </ul>
+            </div>
+
+    </li>
+    <li class="nav-item dropdown">
+                <a class='nav-link  haschild' href='javascript:void(0)'> گزارش‌های صندوق</a>
+                    <div class="dropdown-menu">
+                <ul class="nav flex-column">
+                                <li class="nav-item"><a class='dropdown-item ' href="/Reports/FundSuperUnits">دارندگان واحدهای ممتاز</a></li>
+                                <li class="nav-item"><a class='dropdown-item ' href="/Reports/FundFinancialStatements">صورت‌های مالی صندوق</a></li>
+                                <li class="nav-item"><a class='dropdown-item ' href="/Reports/FundMeeting">مجامع صندوق</a></li>
+                                <li class="nav-item"><a class='dropdown-item ' href="/Reports/ManagerReports">گزارشات مدیر</a></li>
+                                        <li class="nav-item"><a class="dropdown-item " href="/Reports/FundEfficiencyForDifferentPeriods">بازده دوره‌ای صندوق</a></li>
+                                        <li class="nav-item"><a class="dropdown-item " href="/Reports/FundDailyEfficiency">بازدهی روزانه صندوق</a></li>
+                                <li class="nav-item"><a class='dropdown-item ' href="/Reports/FundAssetDistributionForDifferentPeriods">ترکیب دارایی‌های دوره‌ای</a></li>
+                                <li class="nav-item"><a class='dropdown-item ' href="/Reports/FundDailyAssetDistribution">ترکیب دارایی‌های روزانه</a></li>
+                                <li class="nav-item"><a class='dropdown-item ' href="/Reports/FundStorageValueDividendProfitReport">گزارش تقسیم ذخیره تغییر ارزش</a></li>
+                                <li class="nav-item"><a class='dropdown-item ' href="/Reports/FundRankingDetailsReport">گزارش تفضیلی رتبه بندی عملکرد صندوق</a></li>
+                </ul>
+            </div>
+
+    </li>
+    <li class="nav-item ">
+                <a class='nav-link ' href="/Reports/FundRankingFinalResultReport" >نتیجه نهایی رتبه بندی عملکرد صندوق</a>
+        
+    </li>
+    <li class="nav-item dropdown">
+                <a class='nav-link  haschild' href='javascript:void(0)'> خبرهای صندوق</a>
+                    <div class="dropdown-menu">
+                <ul class="nav flex-column">
+                                <li class="nav-item"><a class='dropdown-item ' href="/News/NewsList">لیست خبرها</a></li>
+                </ul>
+            </div>
+
+    </li>
+    <li class="nav-item ">
+                <a class='nav-link ' href="/Reports/FundManagerReports" >بیانیه سیاست‌های سرمایه‌گذاری</a>
+        
+    </li>
+    <li class="nav-item ">
+                <a class='nav-link ' href="/User/Help" >راهنمای صدور و ابطال اینترنتی</a>
+        
+    </li>
+    <li class="nav-item ">
+                <a class='nav-link ' href="/Fund/Rules" >قوانین و مقررات</a>
+        
+    </li>
+    <li class="nav-item ">
+                <a class='nav-link ' href="/AboutFund/FundContactUs" >ارتباط با صندوق</a>
+        
+    </li>
+
+
+                            </ul>
+                        </div>
+
+                        <div class="login-actions d-flex align-items-center">
+
+                            <div class="login">
+                                <ul class="navbar-nav flex-row">
+                                        <li class="nav-item mr-auto" >
+                                            <a href="/User/Login" class="btn btn-success text-white px-3 py-1  h6 mb-0 d-flex align-items-center">
+                                                <i class="fa fa-user ml-1" aria-hidden="true"></i>
+                                                ورود به پرتال
+                                            </a>
+                                        </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </nav>
+                </div>
+            </div>
+            <div class="row header" style="padding-top: 58px;">
+                <div class="fund-title-box col-12">
+                    <div class="row m-0">
+                        <div class="d-flex mx-auto" style="align-content: center; justify-content: center; flex-direction: row">
+                            <div style="margin: 10px;border-radius: 5px; overflow: hidden;">
+                                <img style="height: 75px;" src="/ImageHandler.ashx?ImageId=259" alt="" />
+                            </div>
+ 
+
+<div class="fund-base-title d-flex flex-column flex-md-row align-items-center justify-content-center" style="margin:10px 0;">
+    <div class="title mx-3">صندوق اهرمی شتاب آگاه</div>
+    <div class="header-RegisterNo">
+        <table style="width: 100%;">
+            <tr>
+                <td>شماره ثبت نزد سازمان بورس و اوراق بهادار</td>
+                <td style="text-align:left">۱۲۱۲۷</td>
+            </tr>
+            <tr>
+                <td>شماره ثبت نزد مرجع ثبت شرکت‌ها و موسسات غیرتجاری</td>
+                <td style="text-align:left">۵۵۶۱۰</td>
+            </tr>
+
+        </table>
+    </div>
+</div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+
+
+<div class="row top-menu" style="position: sticky; top: 52px; z-index: 7; background-color: #fff; box-shadow: 0 0 15px #aaa;">
+    <div class="container-fluid">
+        <div class="col-12 m-0">
+            <h6 class="m-0 px-3 py-2 page-title">لیست NAV</h6>
+        </div>
+    </div>
+</div>
+<div class="row flex-fill" style="min-height: calc(100vh - 438px); overflow: auto">
+    <div class="container-fluid p-0 p-sm-4">
+                
+         
+
+<div class="card p-4" style="direction: rtl">
+    <div class="content">
+        <br />
+        <div class="PortalTitle">لیست NAV</div>
+        <br />
+        <div style="white-space: normal">
+<form action="/Reports/FundNAVList" method="post">                <div class="form-row" style="flex-wrap: wrap;">
+                    <div class="input-group col-lg-3 m-2" style="min-width: 150px">
+                        <div class="input-group-prepend">
+                            <label class="input-group-text" for="fromDate">انتخاب نماد بازارگردانی</label>
+                        </div>
+                        <select class="form-control" id="basketId" name="basketId"><option value="1">صندوق اهرمی شتاب آگاه</option>
+</select>
+                    </div>
+                    <div class="input-group col-lg-3 m-2" style="min-width: 150px">
+                        <div class="input-group-prepend">
+                            <label class="input-group-text" for="fromDate">از تاریخ</label>
+                        </div>
+                        <input class="form-control ltr" id="fromDate" name="fromDate" placeholder="مثال: ۱۳۹۴/۰۱/۰۱" type="text" value="1404/04/17" />
+                    </div>
+                    <div class="input-group col-lg-3 m-2" style="min-width: 150px">
+                        <div class="input-group-prepend">
+                            <label class="input-group-text" for="toDate">تا تاریخ</label>
+                        </div>
+                        <input class="form-control ltr" id="toDate" name="toDate" placeholder="مثال: ۱۳۹۴/۰۱/۰۱" type="text" value="1404/06/06" />
+                    </div>
+                    <input class="btn btn-main btn-sm m-2" type="submit" value="جستجو" />
+                    <input type="hidden" name="DotNetExport2" id="DotNetExport" />
+                    <a id="btnExportToExcel" class="align-items-center btn btn-success btn-sm d-flex m-2 text-white" export="Excel" href="/Download/DownloadNavChartList?exportType=Excel&amp;fromDate=7%2F8%2F2025&amp;toDate=8%2F28%2F2025&amp;basketId=0"
+                       title="خروجی اکسل"><i class="fa fa-file-excel-o ml-1"></i>خروجی اکسل</a>
+                </div>
+</form>
+            <div class="table-responsive table-wrapper mt-3">
+                <table class="table  m-0">
+                    <thead>
+                        <tr>
+                                <th scope="col">ردیف</th>
+                                <th scope="col">تاریخ</th>
+                                <th>قیمت صدور</th>
+                                <th>قیمت ابطال</th>
+                                <th>قیمت آماری</th>
+                                <th scope="col">NAV صدور واحدهای ممتاز</th>
+                                <th scope="col">NAV ابطال واحدهای ممتاز</th>
+                                <th scope="col">NAV آماری ممتاز</th>
+                                <th scope="col">NAV واحدهای عادی</th>
+                                <th scope="col">خالص ارزش صندوق</th>
+                                <th scope="col">خالص ارزش واحدهای ممتاز</th>
+                                <th scope="col">خالص ارزش واحدهای عادی</th>
+                                <th scope="col">تعداد واحد ممتاز صادر شده</th>
+                                <th scope="col">تعداد واحد ممتاز باطل شده</th>
+                                <th scope="col">تعداد واحد عادی صادر شده</th>
+                                <th scope="col">تعداد واحد عادی باطل شده</th>
+                                <th scope="col">مانده گواهی ممتاز</th>
+                                <th scope="col">مانده گواهی عادی</th>
+                                <th scope="col">کل واحدهای صندوق</th>
+                                <th scope="col">نسبت اهرمی</th>
+                                <th scope="col">تعداد سرمایه‌گذاران واحدهای عادی</th>
+                                <th scope="col"></th>
+
+                        </tr>
+                    </thead>
+                    <tbody>
+                                    <tr>
+                                        <td>۱</td>
+                                        <td>۱۴۰۴/۰۶/۰۴</td>
+                                        <td>14,769</td>
+                                        <td>14,680</td>
+                                        <td>14,680</td>
+                                        <td>۱۰,۱۵۱</td>
+                                        <td>۹,۹۴۴</td>
+                                        <td>9,944</td>
+                                        <td>۱۸,۳۰۴</td>
+                                        <td>۳۹,۶۵۹,۷۲۵,۰۲۳,۲۰۵</td>
+                                        <td>۱۱,۶۴۷,۰۲۰,۴۷۱,۲۶۴</td>
+                                        <td>۲۸,۰۱۲,۷۰۴,۵۵۱,۹۴۱</td>
+                                        <td>۰</td>
+                                        <td>۰</td>
+                                        <td>۱,۶۷۳,۶۴۱</td>
+                                        <td>۵,۴۴۳,۹۲۱</td>
+                                        <td>۱,۱۷۱,۲۱۳,۶۵۳</td>
+                                        <td>۱,۵۳۰,۳۹۹,۳۱۶</td>
+                                        <td>۲,۷۰۱,۶۱۲,۹۶۹</td>
+                                        <td dir="rtl">۲.۴۱</td>
+                                        <td>5,068</td>
+                                    </tr>
+                                    <tr>
+                                        <td>۲</td>
+                                        <td>۱۴۰۴/۰۶/۰۳</td>
+                                        <td>14,772</td>
+                                        <td>14,682</td>
+                                        <td>14,682</td>
+                                        <td>۱۰,۱۶۴</td>
+                                        <td>۹,۹۵۸</td>
+                                        <td>9,958</td>
+                                        <td>۱۸,۲۸۹</td>
+                                        <td>۳۹,۷۲۱,۳۰۵,۰۰۲,۶۴۱</td>
+                                        <td>۱۱,۶۶۲,۶۴۷,۱۳۵,۹۵۸</td>
+                                        <td>۲۸,۰۵۸,۶۵۷,۸۶۶,۶۸۳</td>
+                                        <td>۰</td>
+                                        <td>۰</td>
+                                        <td>۰</td>
+                                        <td>۰</td>
+                                        <td>۱,۱۷۱,۲۱۳,۶۵۳</td>
+                                        <td>۱,۵۳۴,۱۶۹,۵۹۶</td>
+                                        <td>۲,۷۰۵,۳۸۳,۲۴۹</td>
+                                        <td dir="rtl">۲.۴۱</td>
+                                        <td>5,060</td>
+                                    </tr>
+                                    <tr>
+                                        <td>۳</td>
+                                        <td>۱۴۰۴/۰۶/۰۲</td>
+                                        <td>14,994</td>
+                                        <td>14,903</td>
+                                        <td>14,904</td>
+                                        <td>۱۰,۶۹۷</td>
+                                        <td>۱۰,۴۸۷</td>
+                                        <td>10,489</td>
+                                        <td>۱۸,۲۷۴</td>
+                                        <td>۴۰,۳۱۸,۰۶۷,۹۱۴,۶۴۹</td>
+                                        <td>۱۲,۲۸۲,۴۵۳,۲۷۵,۲۹۸</td>
+                                        <td>۲۸,۰۳۵,۶۱۴,۶۳۹,۳۵۲</td>
+                                        <td>۰</td>
+                                        <td>۰</td>
+                                        <td>۳,۵۶۸,۰۸۳</td>
+                                        <td>۱,۹۴۳,۹۴۲</td>
+                                        <td>۱,۱۷۱,۲۱۳,۶۵۳</td>
+                                        <td>۱,۵۳۴,۱۶۹,۵۹۶</td>
+                                        <td>۲,۷۰۵,۳۸۳,۲۴۹</td>
+                                        <td dir="rtl">۲.۲۸</td>
+                                        <td>5,060</td>
+                                    </tr>
+                                    <tr>
+                                        <td>۴</td>
+                                        <td>۱۴۰۴/۰۶/۰۱</td>
+                                        <td>14,992</td>
+                                        <td>14,901</td>
+                                        <td>14,901</td>
+                                        <td>۱۰,۷۱۷</td>
+                                        <td>۱۰,۵۰۷</td>
+                                        <td>10,509</td>
+                                        <td>۱۸,۲۵۹</td>
+                                        <td>۴۰,۲۸۸,۱۰۴,۶۸۷,۲۵۱</td>
+                                        <td>۱۲,۳۰۵,۹۳۹,۵۹۱,۶۷۹</td>
+                                        <td>۲۷,۹۸۲,۱۶۵,۰۹۵,۵۷۲</td>
+                                        <td>۰</td>
+                                        <td>۰</td>
+                                        <td>۰</td>
+                                        <td>۰</td>
+                                        <td>۱,۱۷۱,۲۱۳,۶۵۳</td>
+                                        <td>۱,۵۳۲,۵۴۵,۴۵۵</td>
+                                        <td>۲,۷۰۳,۷۵۹,۱۰۸</td>
+                                        <td dir="rtl">۲.۲۷</td>
+                                        <td>5,064</td>
+                                    </tr>
+                                    <tr>
+                                        <td>۵</td>
+                                        <td>۱۴۰۴/۰۵/۳۱</td>
+                                        <td>14,878</td>
+                                        <td>14,788</td>
+                                        <td>14,789</td>
+                                        <td>۱۰,۴۷۵</td>
+                                        <td>۱۰,۲۶۶</td>
+                                        <td>10,268</td>
+                                        <td>۱۸,۲۴۴</td>
+                                        <td>۳۹,۹۸۲,۹۰۶,۲۶۱,۵۷۵</td>
+                                        <td>۱۲,۰۲۳,۷۱۴,۰۲۲,۳۷۳</td>
+                                        <td>۲۷,۹۵۹,۱۹۲,۲۳۹,۲۰۲</td>
+                                        <td>۰</td>
+                                        <td>۰</td>
+                                        <td>۰</td>
+                                        <td>۰</td>
+                                        <td>۱,۱۷۱,۲۱۳,۶۵۳</td>
+                                        <td>۱,۵۳۲,۵۴۵,۴۵۵</td>
+                                        <td>۲,۷۰۳,۷۵۹,۱۰۸</td>
+                                        <td dir="rtl">۲.۳۳</td>
+                                        <td>5,064</td>
+                                    </tr>
+                                    <tr>
+                                        <td>۶</td>
+                                        <td>۱۴۰۴/۰۵/۳۰</td>
+                                        <td>14,878</td>
+                                        <td>14,788</td>
+                                        <td>14,788</td>
+                                        <td>۱۰,۴۹۴</td>
+                                        <td>۱۰,۲۸۵</td>
+                                        <td>10,287</td>
+                                        <td>۱۸,۲۲۹</td>
+                                        <td>۳۹,۹۸۲,۵۸۰,۵۴۹,۹۵۳</td>
+                                        <td>۱۲,۰۴۶,۳۴۵,۸۴۱,۶۶۷</td>
+                                        <td>۲۷,۹۳۶,۲۳۴,۷۰۸,۲۸۶</td>
+                                        <td>۰</td>
+                                        <td>۰</td>
+                                        <td>۱,۸۷۷,۶۳۷</td>
+                                        <td>۶۴۷,۳۸۸</td>
+                                        <td>۱,۱۷۱,۲۱۳,۶۵۳</td>
+                                        <td>۱,۵۳۲,۵۴۵,۴۵۵</td>
+                                        <td>۲,۷۰۳,۷۵۹,۱۰۸</td>
+                                        <td dir="rtl">۲.۳۲</td>
+                                        <td>5,064</td>
+                                    </tr>
+                                    <tr>
+                                        <td>۷</td>
+                                        <td>۱۴۰۴/۰۵/۲۹</td>
+                                        <td>14,877</td>
+                                        <td>14,786</td>
+                                        <td>14,787</td>
+                                        <td>۱۰,۵۱۴</td>
+                                        <td>۱۰,۳۰۵</td>
+                                        <td>10,307</td>
+                                        <td>۱۸,۲۱۳</td>
+                                        <td>۳۹,۹۵۹,۸۵۲,۸۷۱,۵۴۱</td>
+                                        <td>۱۲,۰۶۹,۷۳۳,۳۸۷,۹۲۶</td>
+                                        <td>۲۷,۸۹۰,۱۱۹,۴۸۳,۶۱۵</td>
+                                        <td>۰</td>
+                                        <td>۰</td>
+                                        <td>۱,۵۰۰,۲۳۵</td>
+                                        <td>۱,۵۹۱,۰۶۰</td>
+                                        <td>۱,۱۷۱,۲۱۳,۶۵۳</td>
+                                        <td>۱,۵۳۱,۳۱۵,۲۰۶</td>
+                                        <td>۲,۷۰۲,۵۲۸,۸۵۹</td>
+                                        <td dir="rtl">۲.۳۱</td>
+                                        <td>5,049</td>
+                                    </tr>
+                                    <tr>
+                                        <td>۸</td>
+                                        <td>۱۴۰۴/۰۵/۲۸</td>
+                                        <td>14,854</td>
+                                        <td>14,763</td>
+                                        <td>14,764</td>
+                                        <td>۱۰,۴۸۲</td>
+                                        <td>۱۰,۲۷۲</td>
+                                        <td>10,274</td>
+                                        <td>۱۸,۱۹۸</td>
+                                        <td>۳۹,۹۰۰,۱۰۹,۴۳۱,۶۹۹</td>
+                                        <td>۱۲,۰۳۱,۲۴۵,۵۷۰,۲۳۴</td>
+                                        <td>۲۷,۸۶۸,۸۶۳,۸۶۱,۴۶۵</td>
+                                        <td>۰</td>
+                                        <td>۰</td>
+                                        <td>۳,۰۲۵,۴۲۳</td>
+                                        <td>۲۰,۷۷۹,۹۶۶</td>
+                                        <td>۱,۱۷۱,۲۱۳,۶۵۳</td>
+                                        <td>۱,۵۳۱,۴۰۶,۰۳۱</td>
+                                        <td>۲,۷۰۲,۶۱۹,۶۸۴</td>
+                                        <td dir="rtl">۲.۳۲</td>
+                                        <td>5,036</td>
+                                    </tr>
+                                    <tr>
+                                        <td>۹</td>
+                                        <td>۱۴۰۴/۰۵/۲۷</td>
+                                        <td>14,860</td>
+                                        <td>14,769</td>
+                                        <td>14,770</td>
+                                        <td>۱۰,۴۶۳</td>
+                                        <td>۱۰,۲۵۴</td>
+                                        <td>10,255</td>
+                                        <td>۱۸,۱۸۳</td>
+                                        <td>۴۰,۱۷۸,۱۷۷,۳۷۷,۶۷۶</td>
+                                        <td>۱۲,۰۰۹,۳۷۲,۳۸۷,۲۷۹</td>
+                                        <td>۲۸,۱۶۸,۸۰۴,۹۹۰,۳۹۷</td>
+                                        <td>۰</td>
+                                        <td>۰</td>
+                                        <td>۳,۰۰۷,۳۹۵</td>
+                                        <td>۲۹,۰۷۸,۰۱۷</td>
+                                        <td>۱,۱۷۱,۲۱۳,۶۵۳</td>
+                                        <td>۱,۵۴۹,۱۶۰,۵۷۴</td>
+                                        <td>۲,۷۲۰,۳۷۴,۲۲۷</td>
+                                        <td dir="rtl">۲.۳۵</td>
+                                        <td>5,030</td>
+                                    </tr>
+                                    <tr>
+                                        <td>۱۰</td>
+                                        <td>۱۴۰۴/۰۵/۲۶</td>
+                                        <td>14,858</td>
+                                        <td>14,769</td>
+                                        <td>14,769</td>
+                                        <td>۱۰,۴۰۷</td>
+                                        <td>۱۰,۱۹۷</td>
+                                        <td>10,199</td>
+                                        <td>۱۸,۱۶۸</td>
+                                        <td>۴۰,۵۶۱,۶۴۳,۵۱۷,۱۱۰</td>
+                                        <td>۱۱,۹۴۳,۰۹۵,۱۸۵,۱۷۳</td>
+                                        <td>۲۸,۶۱۸,۵۴۸,۳۳۱,۹۳۷</td>
+                                        <td>۰</td>
+                                        <td>۰</td>
+                                        <td>۱۸,۹۵۶,۲۷۷</td>
+                                        <td>۲۷,۶۱۹,۱۲۳</td>
+                                        <td>۱,۱۷۱,۲۱۳,۶۵۳</td>
+                                        <td>۱,۵۷۵,۲۳۱,۱۹۶</td>
+                                        <td>۲,۷۴۶,۴۴۴,۸۴۹</td>
+                                        <td dir="rtl">۲.۴</td>
+                                        <td>5,032</td>
+                                    </tr>
+                                    <tr>
+                                        <td>۱۱</td>
+                                        <td>۱۴۰۴/۰۵/۲۵</td>
+                                        <td>14,726</td>
+                                        <td>14,637</td>
+                                        <td>14,638</td>
+                                        <td>۱۰,۰۹۱</td>
+                                        <td>۹,۸۸۳</td>
+                                        <td>9,885</td>
+                                        <td>۱۸,۱۵۲</td>
+                                        <td>۴۰,۳۲۷,۰۴۳,۲۰۳,۵۹۱</td>
+                                        <td>۱۱,۵۷۵,۵۳۳,۳۱۷,۷۰۹</td>
+                                        <td>۲۸,۷۵۱,۵۰۹,۸۸۵,۸۸۲</td>
+                                        <td>۰</td>
+                                        <td>۰</td>
+                                        <td>۰</td>
+                                        <td>۰</td>
+                                        <td>۱,۱۷۱,۲۱۳,۶۵۳</td>
+                                        <td>۱,۵۸۳,۸۹۴,۰۴۲</td>
+                                        <td>۲,۷۵۵,۱۰۷,۶۹۵</td>
+                                        <td dir="rtl">۲.۴۸</td>
+                                        <td>5,038</td>
+                                    </tr>
+                                    <tr>
+                                        <td>۱۲</td>
+                                        <td>۱۴۰۴/۰۵/۲۴</td>
+                                        <td>14,513</td>
+                                        <td>14,426</td>
+                                        <td>14,426</td>
+                                        <td>۹,۶۱۰</td>
+                                        <td>۹,۴۰۶</td>
+                                        <td>9,407</td>
+                                        <td>۱۸,۱۳۸</td>
+                                        <td>۳۹,۷۴۳,۸۶۸,۹۹۱,۱۷۸</td>
+                                        <td>۱۱,۰۱۵,۹۷۴,۹۶۵,۴۶۳</td>
+                                        <td>۲۸,۷۲۷,۸۹۴,۰۲۵,۷۱۵</td>
+                                        <td>۰</td>
+                                        <td>۰</td>
+                                        <td>۰</td>
+                                        <td>۰</td>
+                                        <td>۱,۱۷۱,۲۱۳,۶۵۳</td>
+                                        <td>۱,۵۸۳,۸۹۴,۰۴۲</td>
+                                        <td>۲,۷۵۵,۱۰۷,۶۹۵</td>
+                                        <td dir="rtl">۲.۶۱</td>
+                                        <td>5,038</td>
+                                    </tr>
+                                    <tr>
+                                        <td>۱۳</td>
+                                        <td>۱۴۰۴/۰۵/۲۳</td>
+                                        <td>14,512</td>
+                                        <td>14,425</td>
+                                        <td>14,426</td>
+                                        <td>۹,۶۳۰</td>
+                                        <td>۹,۴۲۵</td>
+                                        <td>9,427</td>
+                                        <td>۱۸,۱۲۳</td>
+                                        <td>۳۹,۷۴۳,۴۶۶,۳۹۷,۵۴۵</td>
+                                        <td>۱۱,۰۳۹,۱۷۲,۳۹۳,۰۵۵</td>
+                                        <td>۲۸,۷۰۴,۲۹۴,۰۰۴,۴۹۰</td>
+                                        <td>۰</td>
+                                        <td>۰</td>
+                                        <td>۲,۶۰۲,۶۷۲</td>
+                                        <td>۶۱۷,۷۲۸</td>
+                                        <td>۱,۱۷۱,۲۱۳,۶۵۳</td>
+                                        <td>۱,۵۸۳,۸۹۴,۰۴۲</td>
+                                        <td>۲,۷۵۵,۱۰۷,۶۹۵</td>
+                                        <td dir="rtl">۲.۶</td>
+                                        <td>5,038</td>
+                                    </tr>
+                                    <tr>
+                                        <td>۱۴</td>
+                                        <td>۱۴۰۴/۰۵/۲۲</td>
+                                        <td>14,510</td>
+                                        <td>14,423</td>
+                                        <td>14,423</td>
+                                        <td>۹,۶۵۰</td>
+                                        <td>۹,۴۴۵</td>
+                                        <td>9,447</td>
+                                        <td>۱۸,۱۰۸</td>
+                                        <td>۳۹,۷۰۷,۱۲۴,۹۶۷,۲۷۱</td>
+                                        <td>۱۱,۰۶۲,۳۴۲,۱۳۶,۱۴۴</td>
+                                        <td>۲۸,۶۴۴,۷۸۲,۸۳۱,۱۲۸</td>
+                                        <td>۰</td>
+                                        <td>۰</td>
+                                        <td>۳,۱۳۱,۱۹۸</td>
+                                        <td>۱۸,۰۸۸,۱۸۹</td>
+                                        <td>۱,۱۷۱,۲۱۳,۶۵۳</td>
+                                        <td>۱,۵۸۱,۹۰۹,۰۹۸</td>
+                                        <td>۲,۷۵۳,۱۲۲,۷۵۱</td>
+                                        <td dir="rtl">۲.۵۹</td>
+                                        <td>5,033</td>
+                                    </tr>
+                                    <tr>
+                                        <td>۱۵</td>
+                                        <td>۱۴۰۴/۰۵/۲۱</td>
+                                        <td>14,731</td>
+                                        <td>14,642</td>
+                                        <td>14,643</td>
+                                        <td>۱۰,۱۴۶</td>
+                                        <td>۹,۹۳۸</td>
+                                        <td>9,940</td>
+                                        <td>۱۸,۰۹۳</td>
+                                        <td>۴۰,۵۳۱,۵۶۶,۲۴۲,۸۴۳</td>
+                                        <td>۱۱,۶۳۹,۶۹۱,۶۵۵,۸۱۹</td>
+                                        <td>۲۸,۸۹۱,۸۷۴,۵۸۷,۰۲۵</td>
+                                        <td>۰</td>
+                                        <td>۰</td>
+                                        <td>۲,۲۸۲,۹۵۵</td>
+                                        <td>۴,۱۵۷,۲۵۰</td>
+                                        <td>۱,۱۷۱,۲۱۳,۶۵۳</td>
+                                        <td>۱,۵۹۶,۸۶۶,۰۸۹</td>
+                                        <td>۲,۷۶۸,۰۷۹,۷۴۲</td>
+                                        <td dir="rtl">۲.۴۸</td>
+                                        <td>5,037</td>
+                                    </tr>
+                                    <tr>
+                                        <td>۱۶</td>
+                                        <td>۱۴۰۴/۰۵/۲۰</td>
+                                        <td>14,884</td>
+                                        <td>14,795</td>
+                                        <td>14,796</td>
+                                        <td>۱۰,۵۲۵</td>
+                                        <td>۱۰,۳۱۴</td>
+                                        <td>10,315</td>
+                                        <td>۱۸,۰۷۸</td>
+                                        <td>۴۰,۹۸۱,۶۴۸,۹۶۲,۱۵۵</td>
+                                        <td>۱۲,۰۷۹,۶۲۰,۳۰۰,۲۰۳</td>
+                                        <td>۲۸,۹۰۲,۰۲۸,۶۶۱,۹۵۲</td>
+                                        <td>۰</td>
+                                        <td>۴,۰۰۰,۰۰۰</td>
+                                        <td>۲,۱۷۳,۱۲۴</td>
+                                        <td>۱,۴۴۵,۲۸۲</td>
+                                        <td>۱,۱۷۱,۲۱۳,۶۵۳</td>
+                                        <td>۱,۵۹۸,۷۴۰,۳۸۴</td>
+                                        <td>۲,۷۶۹,۹۵۴,۰۳۷</td>
+                                        <td dir="rtl">۲.۳۹</td>
+                                        <td>5,032</td>
+                                    </tr>
+                                    <tr>
+                                        <td>۱۷</td>
+                                        <td>۱۴۰۴/۰۵/۱۹</td>
+                                        <td>15,007</td>
+                                        <td>14,917</td>
+                                        <td>14,920</td>
+                                        <td>۱۰,۸۵۱</td>
+                                        <td>۱۰,۶۳۸</td>
+                                        <td>10,645</td>
+                                        <td>۱۸,۰۶۳</td>
+                                        <td>۴۱,۳۶۶,۹۶۴,۴۶۳,۷۱۰</td>
+                                        <td>۱۲,۵۰۱,۸۲۴,۲۱۵,۶۸۳</td>
+                                        <td>۲۸,۸۶۵,۱۴۰,۲۴۸,۰۲۷</td>
+                                        <td>۰</td>
+                                        <td>۰</td>
+                                        <td>۱۹,۴۸۱,۲۲۳</td>
+                                        <td>۱۲۰,۸۹۵,۴۴۸</td>
+                                        <td>۱,۱۷۵,۲۱۳,۶۵۳</td>
+                                        <td>۱,۵۹۸,۰۱۲,۵۴۲</td>
+                                        <td>۲,۷۷۳,۲۲۶,۱۹۵</td>
+                                        <td dir="rtl">۲.۳۱</td>
+                                        <td>5,032</td>
+                                    </tr>
+                                    <tr>
+                                        <td>۱۸</td>
+                                        <td>۱۴۰۴/۰۵/۱۸</td>
+                                        <td>15,122</td>
+                                        <td>15,034</td>
+                                        <td>15,037</td>
+                                        <td>۱۰,۸۹۱</td>
+                                        <td>۱۰,۶۷۷</td>
+                                        <td>10,684</td>
+                                        <td>۱۸,۰۴۸</td>
+                                        <td>۴۳,۲۱۸,۲۳۴,۴۲۳,۲۲۹</td>
+                                        <td>۱۲,۵۴۷,۲۸۶,۰۲۹,۲۳۱</td>
+                                        <td>۳۰,۶۷۰,۹۴۸,۳۹۳,۹۹۸</td>
+                                        <td>۰</td>
+                                        <td>۰</td>
+                                        <td>۰</td>
+                                        <td>۰</td>
+                                        <td>۱,۱۷۵,۲۱۳,۶۵۳</td>
+                                        <td>۱,۶۹۹,۴۲۶,۷۶۷</td>
+                                        <td>۲,۸۷۴,۶۴۰,۴۲۰</td>
+                                        <td dir="rtl">۲.۴۴</td>
+                                        <td>5,029</td>
+                                    </tr>
+                                    <tr>
+                                        <td>۱۹</td>
+                                        <td>۱۴۰۴/۰۵/۱۷</td>
+                                        <td>15,021</td>
+                                        <td>14,934</td>
+                                        <td>14,937</td>
+                                        <td>۱۰,۶۶۵</td>
+                                        <td>۱۰,۴۵۲</td>
+                                        <td>10,459</td>
+                                        <td>۱۸,۰۳۳</td>
+                                        <td>۴۲,۹۲۸,۹۸۳,۶۴۸,۳۹۱</td>
+                                        <td>۱۲,۲۸۳,۲۲۰,۷۵۹,۰۸۰</td>
+                                        <td>۳۰,۶۴۵,۷۶۲,۸۸۹,۳۱۱</td>
+                                        <td>۰</td>
+                                        <td>۰</td>
+                                        <td>۰</td>
+                                        <td>۰</td>
+                                        <td>۱,۱۷۵,۲۱۳,۶۵۳</td>
+                                        <td>۱,۶۹۹,۴۲۶,۷۶۷</td>
+                                        <td>۲,۸۷۴,۶۴۰,۴۲۰</td>
+                                        <td dir="rtl">۲.۴۹</td>
+                                        <td>5,029</td>
+                                    </tr>
+                                    <tr>
+                                        <td>۲۰</td>
+                                        <td>۱۴۰۴/۰۵/۱۶</td>
+                                        <td>15,021</td>
+                                        <td>14,934</td>
+                                        <td>14,937</td>
+                                        <td>۱۰,۶۸۶</td>
+                                        <td>۱۰,۴۷۳</td>
+                                        <td>10,480</td>
+                                        <td>۱۸,۰۱۸</td>
+                                        <td>۴۲,۹۲۸,۴۴۳,۹۱۹,۱۱۸</td>
+                                        <td>۱۲,۳۰۷,۸۴۹,۵۴۰,۲۲۶</td>
+                                        <td>۳۰,۶۲۰,۵۹۴,۳۷۸,۸۹۲</td>
+                                        <td>۰</td>
+                                        <td>۰</td>
+                                        <td>۳,۴۵۸,۰۶۷</td>
+                                        <td>۸۷۸,۹۵۶</td>
+                                        <td>۱,۱۷۵,۲۱۳,۶۵۳</td>
+                                        <td>۱,۶۹۹,۴۲۶,۷۶۷</td>
+                                        <td>۲,۸۷۴,۶۴۰,۴۲۰</td>
+                                        <td dir="rtl">۲.۴۹</td>
+                                        <td>5,029</td>
+                                    </tr>
+
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                                    <td colspan="22">
+                                        <div class="pager">
+                                            <span class="disabled">«</span><span class="current">1</span><a href="/Reports/FundNAVList?FromDate=1404%2F04%2F17&ToDate=1404%2F06%2F06&BasketId=0&page=2" title="">2</a><a href="/Reports/FundNAVList?FromDate=1404%2F04%2F17&ToDate=1404%2F06%2F06&BasketId=0&page=3" title="">3</a><a href="/Reports/FundNAVList?FromDate=1404%2F04%2F17&ToDate=1404%2F06%2F06&BasketId=0&page=2" title="Next page">»</a>
+                                        </div>
+                                    </td>
+
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+    </div>
+</div>
+<div class="row footer">
+    <div class="container-fluid">
+        <div class="row footer-box">
+ 
+
+<div class="col-lg-2 footer-group">
+    <span class="footer-group-title">سایت‌های مرتبط</span>
+    <ul>
+        <li> 
+            <a href='http://www.seo.ir/' target="_blank">سازمان بورس اوراق بهادار</a>
+        </li>
+        <li>
+            <a href='http://www.fipiran.com/' target="_blank">مرکز پردازش اطلاعات مالی</a>
+        </li>
+        <li>
+            <a href='http://www.tsetmc.com/' target="_blank">مدیریت فن آوری بورس تهران</a>
+        </li>
+        <li>
+            <a href='http://www.sena.ir/' target="_blank">پایگاه اطلاع رسانی بازار سرمایه</a>
+        </li>
+    </ul>
+</div>
+<div class="col-lg-2 footer-group">
+    <span class="footer-group-title">ارتباط با صندوق</span>
+    <ul>
+        <li>
+            <a href="/AboutFund/FundContactUs" target="_blank">ارتباط با صندوق</a>
+        </li>
+        <li>
+            <a href="/AboutFund/FundBranchs" target="_blank">شعبه‌های صندوق</a>
+        </li>
+    </ul>
+</div>
+<div class="col-lg-2 footer-group">
+    <span class="footer-group-title">اخبار</span>
+    <ul>
+        <li>
+            <a href="/News/NewsList" target="_blank">لیست خبرها</a>
+        </li>
+        <li>
+            <a href="/Reports/FundMeeting" target="_blank">مجامع صندوق</a>
+        </li>
+    </ul>
+</div>
+<div class="col-lg-2 footer-group">
+    <span class="footer-group-title">گزارش‌ها</span>
+    <ul>
+        <li>
+            <a href="/Reports/FundFinancialStatements" target="_blank">صورت‌های مالی صندوق</a>
+        </li>
+                <li>
+                    <a href="/Reports/FundAssetDistributionForDifferentPeriods" target="_blank">ترکیب دارایی‌های دوره‌ای</a>
+                </li>
+
+     </ul>
+</div>
+<div class="col-lg-2 footer-group">
+    <span class="footer-group-title">درباره صندوق</span>
+    <ul>
+        <li>
+            <a href="/AboutFund/FundInvestmentHelp" target="_blank">راهنمای سرمایه‌گذاری</a>
+        </li>
+        <li>
+            <a href="/AboutFund/FundStatute" target="_blank">اساسنامه صندوق</a>
+        </li>
+        <li>
+            <a href="/AboutFund/FundProspectus" target="_blank">امیدنامه صندوق</a>
+        </li>
+    </ul>
+</div>
+
+<div class="col-lg-2 copyright">
+    <div class="tadbirLogo"></div>
+    <div class="text farsi">
+        کلیه حقوق این سایت متعلق به
+		<a href='Pillar/Manager'>شرکت سبدگردان آگاه(سهامی خاص) </a> می‌باشد.
+    </div>
+    <div class="text ltr">
+        Copyright © 2020 <a href='http://shetabfund.ir'> </a>. All rights reserved.
+    </div>
+    <div class="text ltr">
+        version number:  9.2.5
+    </div>
+    <div class="mt-2 mx-auto"><a referrerpolicy="origin" target="_blank" href="https://trustseal.enamad.ir/?id=348909&Code=W2sBlRzg1jSMFwbKQTro">
+	<img referrerpolicy="origin" src="https://Trustseal.eNamad.ir/logo.aspx?id=348909&Code=W2sBlRzg1jSMFwbKQTro" alt="" style="cursor:pointer" id="W2sBlRzg1jSMFwbKQTro" />
+</a></div>
+</div>
+
+
+        </div>
+    </div>
+</div>
+
+    </div>
+
+    <script src="/Scripts/jquery.mCustomScrollbar.concat.min.js" type="text/javascript"></script>
+    <script src="/Scripts/highstock.js" type="text/javascript"></script>
+    <script src="/Scripts/plugins.js" type="text/javascript"></script>
+    <script src="/Scripts/common.js" type="text/javascript"></script>
+    <script src="/Scripts/highcharts-localization.js" type="text/javascript"></script>
+    <script src="/Scripts/jalali.js" type="text/javascript"></script>
+    <script src="/Scripts/bootstrap.min.js" type="text/javascript"></script>
+    <script src="/Scripts/inputmask.min.js" type="text/javascript"></script>
+    <script src="/Scripts/jquery.inputmask.min.js" type="text/javascript"></script>
+    <script src="/Scripts/virtualKeyboard.js" type="text/javascript"></script>
+    <script src="/Scripts/persian-date.js" type="text/javascript"></script>
+    <script src="/Scripts/persian-datePicker.js" type="text/javascript"></script>
+    <script>
+        $(document).ready(function () {
+            $(".myScroll").mCustomScrollbar({
+                theme: "minimal"
+            });
+            $(".nav-item.dropdown").click(function () {
+                $(this).toggleClass('open');
+            });
+        });
+
+    </script>
+    
+    
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $("#fromDate").attr("value",'2025-07-08');
+            $("#toDate").attr("value", '2025-08-28');
+            $('#basketId').on('change',
+                function () {
+                    $(this).parents("form").submit();
+                });
+            $("#fromDate").pDatepicker({
+                "format": "l",
+                "autoClose": true,
+                "calendarType": "persian",
+                "inputDelay": "100",
+                "observer": true,
+                "calendar": {
+                    "persian": {
+                        "showHint": true,
+                        "leapYearMode": "astronomical"
+                    },
+                    "gregorian": {
+                        "showHint": true
+                    }
+                },
+                "navigator": {
+                    "enabled": true,
+                    "scroll": {
+                        "enabled": true
+                    },
+                    "text": {
+                        "btnNextText": "«",
+                        "btnPrevText": "»"
+                    }
+                },
+                "toolbox": {
+                    "enabled": true,
+                    "calendarSwitch": {
+                        "enabled": true,
+                        "format": "L"
+                    }
+                },
+                "responsive": true
+            });
+            $("#toDate").pDatepicker({
+                "format": "l",
+                "autoClose": true,
+                "calendarType": "persian",
+                "inputDelay": "100",
+                "observer": true,
+                "calendar": {
+                    "persian": {
+                        "showHint": true,
+                        "leapYearMode": "astronomical"
+                    },
+                    "gregorian": {
+                        "showHint": true
+                    }
+                },
+                "navigator": {
+                    "enabled": true,
+                    "scroll": {
+                        "enabled": true
+                    },
+                    "text": {
+                        "btnNextText": "«",
+                        "btnPrevText": "»"
+                    }
+                },
+                "toolbox": {
+                    "enabled": true,
+                    "calendarSwitch": {
+                        "enabled": true,
+                        "format": "L"
+                    }
+                },
+                "responsive": true
+            });
+        });
+    </script>
+
+
+    <script src="/Scripts/script.js" type="text/javascript"></script>
+</body>
+</html>

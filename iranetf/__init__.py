@@ -3,7 +3,7 @@ import logging as _logging
 from abc import ABC as _ABC, abstractmethod as _abstractmethod
 from asyncio import gather as _gather
 from datetime import date as _date, datetime as _datetime
-from io import BytesIO as _BytesIO
+from io import StringIO as _StringIO
 from json import JSONDecodeError as _JSONDecodeError, loads as _loads
 from logging import (
     debug as _debug,
@@ -37,6 +37,7 @@ from pandas import (
     concat as _concat,
     read_csv as _read_csv,
     to_datetime as _to_datetime,
+    to_numeric as _to_numeric,
 )
 from tsetmc.instruments import (
     Instrument as _Instrument,
@@ -67,6 +68,31 @@ async def _read(url: str) -> bytes:
 
 def _j2g(s: str) -> _datetime:
     return _jdatetime(*[int(i) for i in s.split('/')]).togregorian()
+
+
+_fa_to_en_tt = str.maketrans(
+    {
+        '۰': '0',
+        '۱': '1',
+        '۲': '2',
+        '۳': '3',
+        '۴': '4',
+        '۵': '5',
+        '۶': '6',
+        '۷': '7',
+        '۸': '8',
+        '۹': '9',
+        ',': '',
+    }
+)
+
+
+def _fanum_to_num(series: _Series):
+    """
+    Converts a pandas Series from strings containing Persian digits and commas
+    to a numeric data type.
+    """
+    return _to_numeric(series.str.translate(_fa_to_en_tt))  # type: ignore
 
 
 _ETF_TYPES = {  # numbers are according to fipiran
@@ -568,50 +594,83 @@ class BaseTadbirPardaz(BaseSite):
         self, *, from_: _date = _date(1970, 1, 1), to: _date, basket_id=0
     ) -> _DataFrame:
         """
-        This function uses excel export function available at
-        /Reports/FundNAVList.
+        This function uses the HTML output available at /Reports/FundNAVList.
+        This is better than the excel output because it includes statistical
+        nav column which excel does not have.
 
-        Tip: the from_ date can be arbitrary old, e.g. 1900-01-01.
+        If the output is in multiple pages, this function will fetch them
+        all and return the result in a single dataframe.
+
+        Tip: the from_ date can be arbitrary old, e.g. 1900-01-01 but
+            there is a 50 year limit on how far in the future the
+            `to` can be.
         """
-        r = await _get(
-            self.url + 'Download/DownloadNavChartList',
-            {
-                'exportType': 'Excel',
-                'fromDate': f'{from_.month}/{from_.day}/{from_.year}',
-                'toDate': f'{to.month}/{to.day}/{to.year}',
-                'basketId': basket_id,
-            },
-        )
-        excel = _BytesIO(await r.read())
-        df = _pd.read_excel(excel, engine='openpyxl', header=3)
+        path = f'Reports/FundNAVList?FromDate={_jdatetime.fromgregorian(date=from_):%Y/%m/%d}&ToDate={_jdatetime.fromgregorian(date=to):%Y/%m/%d}&BasketId={basket_id}&page=1'
+        dfs = []
+        while True:
+            r = await _get(self.url + path)
+            html = (await r.read()).decode()
+            # the first table contains regNo which can be ignored
+            table = _pd.read_html(_StringIO(html))[1]
+            # the last row is <tfoot> containing next/previous links
+            table.drop(table.index[-1], inplace=True)
+            dfs.append(table)
+            m = _search('<a href="([^"]*)" title="Next page">»</a>', html)
+            if m is None:
+                break
+            path = m[1]
+
+        df = _concat(dfs, ignore_index=True)
         df.rename(
             columns={
-                'تعداد سرمایه\u200cگذاران\nواحدهای عادی': 'Number of Investors in Common Units',
-                'نسبت اهرمی': 'Leverage Ratio',
-                'Unnamed: 2': 'Unnamed: 2',
-                'ارزش کل واحدها (ریال)': 'Total Value of Units (RIAL)',
-                'مانده گواهی عادی': 'Outstanding Common Certificates',
-                'مانده گواهی ممتاز': 'Outstanding Preferred Certificates',
-                'تعداد واحد\nعادی باطل شده': 'Number of Canceled Common Units',
-                'تعداد واحد\nعادی صادر شده': 'Number of Issued Common Units',
-                'تعداد واحد\nممتاز باطل شده': 'Number of Canceled Preferred Units',
-                'تعداد واحد\nممتاز صادر شده': 'Number of Issued Preferred Units',
-                'خالص ارزش واحدهای عادی': 'NAV of Common Units',
-                'خالص ارزش واحدهای ممتاز': 'NAV of Preferred Units',
-                'خالص ارزش صندوق': 'NAV of Fund',
-                'بازده سالانه\nشده واحدهای عادی': 'Annualized Return of Common Units',
-                'بازده سالانه\nشده واحدهای ممتاز': 'Annualized Return of Preferred Units',
-                'بازده سالانه شده صندوق': 'Annualized Return of Fund',
-                'قیمت واحد های عادی': 'Price of Common Units',
-                'قیمت ابطال\nواحد های ممتاز': 'Cancellation Price of Preferred Units',
-                'قیمت صدور\nواحد های ممتاز': 'Issuance Price of Preferred Units',
-                'Unnamed: 19': 'Unnamed: 19',
-                'تاریخ': 'Date',
-                'Unnamed: 21': 'Unnamed: 21',
                 'ردیف': 'Row',
+                'تاریخ': 'Date',
+                'قیمت صدور': 'Issue Price',
+                'قیمت ابطال': 'Redemption Price',
+                'قیمت آماری': 'Statistical Price',
+                'NAV صدور واحدهای ممتاز': 'NAV of Premium Units Issued',
+                'NAV ابطال واحدهای ممتاز': 'NAV of Premium Units Redeemed',
+                'NAV آماری ممتاز': 'Statistical NAV of Premium Units',
+                'NAV واحدهای عادی': 'NAV of Normal Units',
+                'خالص ارزش صندوق': 'Net Asset Value of Fund',
+                'خالص ارزش واحدهای ممتاز': 'Net Asset Value of Premium Units',
+                'خالص ارزش واحدهای عادی': 'Net Asset Value of Normal Units',
+                'تعداد واحد ممتاز صادر شده': 'Number of Premium Units Issued',
+                'تعداد واحد ممتاز باطل شده': 'Number of Premium Units Redeemed',
+                'تعداد واحد عادی صادر شده': 'Number of Normal Units Issued',
+                'تعداد واحد عادی باطل شده': 'Number of Normal Units Redeemed',
+                'مانده گواهی ممتاز': 'Remaining Premium Certificate',
+                'مانده گواهی عادی': 'Remaining Normal Certificate',
+                'کل واحدهای صندوق': 'Total Fund Units',
+                'نسبت اهرمی': 'Leverage Ratio',
+                'تعداد سرمایه‌گذاران واحدهای عادی': 'Number of Normal Unit Investors',
+                'Unnamed: 21': 'Unnamed_21',
             },
             inplace=True,
         )
+        numeric_cols = [
+            'Row',
+            'Issue Price',
+            'Redemption Price',
+            'Statistical Price',
+            'NAV of Premium Units Issued',
+            'NAV of Premium Units Redeemed',
+            'Statistical NAV of Premium Units',
+            'NAV of Normal Units',
+            'Net Asset Value of Fund',
+            'Net Asset Value of Premium Units',
+            'Net Asset Value of Normal Units',
+            'Number of Premium Units Issued',
+            'Number of Premium Units Redeemed',
+            'Number of Normal Units Issued',
+            'Number of Normal Units Redeemed',
+            'Remaining Premium Certificate',
+            'Remaining Normal Certificate',
+            'Total Fund Units',
+            'Leverage Ratio',
+            'Number of Normal Unit Investors',
+        ]
+        df[numeric_cols] = df[numeric_cols].apply(_fanum_to_num)
         df['Date'] = df['Date'].map(_jymd_to_greg)
         df.set_index('Date', inplace=True)
         return df
