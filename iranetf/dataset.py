@@ -22,6 +22,7 @@ from aiohttp import (
 )
 from aiohutils.session import SessionManager
 from pandas import (
+    NA as _NA,
     DataFrame as _DataFrame,
     Series as _Series,
     concat as _concat,
@@ -328,9 +329,6 @@ async def update_dataset(*, check_existing_sites=False) -> _DataFrame:
     save_dataset(ds)
 
     return new_items[new_items['insCode'].isna()]
-
-
-_NA = _pd.NA
 
 
 async def _check_site_type(row) -> None:
