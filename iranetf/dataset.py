@@ -340,7 +340,7 @@ async def _check_reg_no(row):
     try:
         actual_reg_no = await site.reg_no()
     except Exception as e:
-        _error(f'Exception during checking regNo on {site.url}: {e}')
+        _error(f'Exception during checking regNo on {site.url}: {e!r}')
         return
     if ds_reg_no == actual_reg_no:
         return
