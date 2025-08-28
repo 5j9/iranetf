@@ -354,6 +354,7 @@ async def check_dataset(live=False):
     assert ds['name'].is_unique, ds['name'][ds['name'].duplicated()]
     assert ds['type'].unique().isin(_ETF_TYPES.values()).all()  # type: ignore
     assert ds['insCode'].is_unique
+    assert ds['url'].is_unique
     reg_numbers = ds['regNo']
     known_reg_numbers = reg_numbers[reg_numbers.notna()]
     assert known_reg_numbers.is_unique, ds[known_reg_numbers.duplicated()]
