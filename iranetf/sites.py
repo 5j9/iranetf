@@ -380,6 +380,17 @@ class _RHNavLight(_TypedDict):
     Time: str
 
 
+class FundList(_TypedDict):
+    FundId: int
+    FundName: str
+    IsDefaultFund: bool
+
+
+class FundData(_TypedDict):
+    FundType: int
+    FundList: list[FundList]
+
+
 class RayanHamafza(BaseSite):
     _api_path = 'api/data'
     __slots__ = 'fund_id'
@@ -464,6 +475,9 @@ class RayanHamafza(BaseSite):
             + aa['CashTodayPercent']
             + aa['BondTodayPercent']
         )
+
+    async def fund_data(self) -> FundData:
+        return await self._json('Fund')
 
 
 _jp = _jdatetime.strptime

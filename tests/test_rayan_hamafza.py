@@ -1,10 +1,11 @@
 from math import isclose
 
-from aiohutils.tests import assert_dict_type, file, files
+from aiohutils.tests import file, files, validate_dict
 from numpy import dtype
 
 from iranetf.sites import (
     BaseSite,
+    FundData,
     LiveNAVPS,
     RayanHamafza,
 )
@@ -15,7 +16,7 @@ yaqut = RayanHamafza('https://yaghootfund.ir/')
 
 @file('almas_live.json')
 async def test_live_navps():
-    assert_dict_type(await yaqut.live_navps(), LiveNAVPS)
+    validate_dict(await yaqut.live_navps(), LiveNAVPS)
 
 
 @file('almas_navps_history.json')
@@ -77,3 +78,8 @@ async def test_cache():
 @files('petro_agah_aa.json')
 async def test_leverage():
     assert type(await petro_agah.leverage()) is float
+
+
+@file('petro_agah_fund_data.json')
+async def test_fund_data():
+    validate_dict(await petro_agah.fund_data(), FundData)

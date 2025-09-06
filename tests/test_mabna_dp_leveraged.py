@@ -1,6 +1,6 @@
 from math import isclose
 
-from aiohutils.tests import assert_dict_type, file, files
+from aiohutils.tests import file, files, validate_dict
 
 from iranetf.sites import BaseSite, LeveragedMabnaDP, LiveNAVPS
 from tests import assert_leveraged_leverage, assert_navps_history
@@ -18,7 +18,7 @@ async def test_from_url():
 @file('lmdp_live.json')
 async def test_live_navps():
     d = await site.live_navps()
-    assert_dict_type(d, LiveNAVPS)
+    validate_dict(d, LiveNAVPS)
 
 
 @file('lmdp_navps_history.json')

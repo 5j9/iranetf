@@ -1,6 +1,6 @@
 from math import isclose
 
-from aiohutils.tests import assert_dict_type, file
+from aiohutils.tests import file, validate_dict
 from pytest import mark
 
 from iranetf.sites import LiveNAVPS, MabnaDP
@@ -15,7 +15,7 @@ async def test_live_navps_mabna():
     assert type(d.pop('date_time')) is str
     assert type(d.pop('statistical_price')) is float
     assert type(d.pop('unit_count')) is int
-    assert_dict_type(d, LiveNAVPS)
+    validate_dict(d, LiveNAVPS)
 
 
 @file('hamvazn_navps_history.json')

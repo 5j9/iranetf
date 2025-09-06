@@ -1,6 +1,6 @@
 from math import isclose
 
-from aiohutils.tests import assert_dict_type, file
+from aiohutils.tests import file, validate_dict
 
 from iranetf.sites import (
     BaseSite,
@@ -20,7 +20,7 @@ async def test_rhh_from_url():
 @file('rhh_live.json')
 async def test_rhh_live_navps():
     d = await site.live_navps()
-    assert_dict_type(d, LiveNAVPS)
+    validate_dict(d, LiveNAVPS)
 
 
 @file('rhh_navps_history.json')

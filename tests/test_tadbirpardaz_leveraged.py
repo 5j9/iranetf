@@ -1,7 +1,7 @@
 from datetime import date
 from math import isclose
 
-from aiohutils.tests import assert_dict_type, file, files
+from aiohutils.tests import file, files, validate_dict
 from numpy import dtype
 
 from iranetf.sites import (
@@ -19,7 +19,7 @@ ahrom: LeveragedTadbirPardaz = BaseSite.from_l18('اهرم')  # type: ignore
 @file('ahrom_live.json')
 async def test_live_navps_leveraged():
     live = await ahrom.live_navps()
-    assert_dict_type(live, LeveragedTadbirPardazLiveNAVPS)
+    validate_dict(live, LeveragedTadbirPardazLiveNAVPS)
 
 
 @file('ahrom_navps_history.json')

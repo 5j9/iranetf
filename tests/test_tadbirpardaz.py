@@ -1,6 +1,6 @@
 from unittest.mock import patch
 
-from aiohutils.tests import assert_dict_type, file, files
+from aiohutils.tests import file, files, validate_dict
 from numpy import dtype
 from pytest import raises
 
@@ -18,7 +18,7 @@ tadbir = TadbirPardaz('https://modirfund.ir/')
 @file('modir_live.json')
 async def test_live_navps():
     d = await tadbir.live_navps()
-    assert_dict_type(d, TPLiveNAVPS)
+    validate_dict(d, TPLiveNAVPS)
 
 
 @file('modir_navps_history.json')
@@ -29,7 +29,7 @@ async def test_navps_history():
 @file('icpfvc_navps_date_space.json')
 async def test_navps_date_ends_with_space():
     d = await TadbirPardaz('https://icpfvc.ir/').live_navps()
-    assert_dict_type(d, TPLiveNAVPS)
+    validate_dict(d, TPLiveNAVPS)
 
 
 @files('still.json', 'khodran.json')
