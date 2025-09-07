@@ -1,6 +1,7 @@
 from abc import ABC as _ABC, abstractmethod as _abstractmethod
 from asyncio import gather as _gather
 from datetime import date as _date, datetime as _datetime
+from enum import IntEnum as _IntEnum
 from io import StringIO as _StringIO
 from json import loads as _loads
 from logging import (
@@ -386,8 +387,19 @@ class FundList(_TypedDict):
     IsDefaultFund: bool
 
 
+class FundType(_IntEnum):
+    # the values are defined in the first line of public.min.js e.g. in
+    # https://tazmin.charismafunds.ir/bundles/js/public.min.js?v=202508170532
+    # fundType={simple:1,simpleETF:2,hybrid:3,multiFund:4,multiETF:5};
+    SIMPLE = 1
+    SIMPLE_ETF = 2
+    HYBRID = 3
+    MULTI_FUND = 4
+    MULTI_ETF = 5
+
+
 class FundData(_TypedDict):
-    FundType: int
+    FundType: FundType
     FundList: list[FundList]
 
 
@@ -477,7 +489,9 @@ class RayanHamafza(BaseSite):
         )
 
     async def fund_data(self) -> FundData:
-        return await self._json('Fund')
+        fund_data = await self._json('Fund')
+        fund_data['FundType'] = FundType(fund_data['FundType'])
+        return fund_data
 
 
 _jp = _jdatetime.strptime

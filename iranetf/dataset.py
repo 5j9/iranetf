@@ -35,6 +35,8 @@ import iranetf
 from iranetf import sites as _sites
 from iranetf.sites import (
     BaseSite as _BaseSite,
+    BaseTadbirPardaz as _BaseTadbirPardaz,
+    FundType as _FundType,
     LeveragedTadbirPardaz as _LeveragedTadbirPardaz,
     MabnaDP as _MabnaDP,
     RayanHamafza as _RayanHamafza,
@@ -313,11 +315,7 @@ async def update_dataset(*, check_existing_sites=False) -> _DataFrame:
     return new_items[new_items['insCode'].isna()]
 
 
-async def _check_site_type(row) -> None:
-    site: _BaseSite = row.site
-    if site is _NA:  # na
-        return
-
+async def _check_site_type(site: _BaseSite) -> None:
     try:
         detected = await _BaseSite.from_url(site.url)
     except Exception as e:
@@ -347,6 +345,45 @@ async def _check_reg_no(row):
     _error(f'regNo mismatch:\n {site.url=}\n {ds_reg_no=}\n {actual_reg_no=}')
 
 
+_url_symbols: dict[str, dict[str, int]] = {}
+
+
+async def _collect_symbol_counts(site: _BaseSite):
+    if (url := site.url) in _url_symbols:
+        _url_symbols[url]['actual_count'] += 1
+        return
+
+    # set an initual value early to avoid race conditions
+    _url_symbols[url] = {
+        'expected_count': 1,
+        'actual_count': 1,
+    }
+
+    if isinstance(site, _RayanHamafza):
+        fund_data = await site.fund_data()
+        if fund_data['FundType'] is _FundType.HYBRID:
+            return  # expected_count == 1
+        _url_symbols[url]['expected_count'] = len(fund_data['FundList'])
+        return
+
+    if isinstance(site, _BaseTadbirPardaz):
+        home_info = await site.home_info()
+        if home_info['isETFMultiNavMode']:
+            home_info['basketIDs'].pop('1', None)  # ignore the overall basket
+            _url_symbols[url]['expected_count'] = len(home_info['basketIDs'])
+        return
+
+    # for all other site types, assume site is not multi-nav
+
+
+def _check_symbol_counts():
+    """this function should be called after _gather_site_symbol_counts has been run for all sites"""
+    for url, counts in _url_symbols.items():
+        if counts['expected_count'] == counts['actual_count']:
+            continue
+        _error(f'{url=} symbol counts do not match: {counts}')
+
+
 async def check_dataset(live=False):
     global ssl
     ds = load_dataset(site=False)
@@ -365,16 +402,21 @@ async def check_dataset(live=False):
     ds['site'] = ds[ds['siteType'].notna()].apply(_make_site, axis=1)  # type: ignore
 
     rows = [*ds.itertuples()]
-    check_site_coros = [_check_site_type(r) for r in rows]
+    sites: list[_BaseSite] = [row.site for row in rows]  # type: ignore
+    check_site_coros = [_check_site_type(s) for s in sites]
     check_reg_no_coros = [_check_reg_no(r) for r in rows]
+    collect_symbol_counts_coros = [_collect_symbol_counts(s) for s in sites]
 
     orig_ssl = iranetf.ssl
     iranetf.ssl = False  # many sites fail ssl verification
     try:
-        await _gather(*check_site_coros)
-        await _gather(*check_reg_no_coros)
+        # await _gather(*check_site_coros)
+        # await _gather(*check_reg_no_coros)
+        await _gather(*collect_symbol_counts_coros)
     finally:
         iranetf.ssl = orig_ssl
+
+    _check_symbol_counts()
 
     if not (no_site := ds[ds['site'].isna()]).empty:
         _warning(
