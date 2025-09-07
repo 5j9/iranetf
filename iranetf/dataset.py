@@ -410,8 +410,8 @@ async def check_dataset(live=False):
     orig_ssl = iranetf.ssl
     iranetf.ssl = False  # many sites fail ssl verification
     try:
-        # await _gather(*check_site_coros)
-        # await _gather(*check_reg_no_coros)
+        await _gather(*check_site_coros)
+        await _gather(*check_reg_no_coros)
         await _gather(*collect_symbol_counts_coros)
     finally:
         iranetf.ssl = orig_ssl
