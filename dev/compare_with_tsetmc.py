@@ -1,6 +1,7 @@
 from asyncio import run
 
 from pandas import concat
+from tsetmc import Flow
 from tsetmc.funds import commodity_etfs, etfs
 from tsetmc.instruments import Instrument
 
@@ -26,8 +27,9 @@ async def is_valid(l18: str) -> bool:
 async def main():
     ds = load_dataset(site=False)
 
-    df1 = await etfs(flow=1)
-    df2 = await etfs(flow=2)
+    # note: some etfs do not show up in any of the flows; reason: unknown
+    df1 = await etfs(flow=Flow.BOURSE)
+    df2 = await etfs(flow=Flow.OTC)
     df3 = await commodity_etfs()
     df = concat([df1, df2, df3], ignore_index=True)
 
