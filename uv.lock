@@ -367,7 +367,7 @@ wheels = [
 
 [[package]]
 name = "iranetf"
-version = "0.30.5"
+version = "0.30.6.dev1"
 source = { editable = "." }
 dependencies = [
     { name = "aiohttp", extra = ["speedups"] },
