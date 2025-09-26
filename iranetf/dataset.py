@@ -84,6 +84,7 @@ def load_dataset(*, site=True, inst=False) -> _DataFrame:
             'regNo': 'string',
             'url': 'string',
             'siteType': 'category',
+            'dps_interval': 'Int8',
         },
     )
 
@@ -106,6 +107,7 @@ def save_dataset(ds: _DataFrame):
             'regNo',
             'url',
             'siteType',
+            'dps_interval',
         ]
     ].sort_values('l18').to_csv(
         _DATASET_PATH, lineterminator='\n', encoding='utf-8-sig', index=False
