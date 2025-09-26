@@ -79,7 +79,7 @@ def _fanum_to_num(series: _Series):
     Converts a pandas Series from strings containing Persian digits and commas
     to a numeric data type.
     """
-    return _to_numeric(series.str.translate(_fa_to_en_tt))  # type: ignore
+    return _to_numeric(series.str.translate(_fa_to_en_tt))
 
 
 class BaseSite(_ABC):
