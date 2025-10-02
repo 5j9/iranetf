@@ -84,12 +84,13 @@ async def test_dividend_history():
     assert len(df) >= 22
     assert [*df.dtypes.items()] == [
         ('row', dtype('int64')),
-        ('ProfitDate', dtype('<M8[ns]')),
         ('FundUnit', dtype('int64')),
         ('UnitProfit', dtype('int64')),
         ('SUMAllProfit', dtype('int64')),
         ('ProfitPercent', dtype('float64')),
     ]
+    assert (index := df.index).dtype == 'datetime64[ns]'
+    assert index.name == 'ProfitDate'
 
 
 EXPECTED_TP_VER = '9.2.5'

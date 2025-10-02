@@ -35,7 +35,6 @@ async def test_fund_profit():
     assert [*df.dtypes.items()] == [
         ('FundId', dtype('int64')),
         ('FundApId', dtype('int64')),
-        ('ProfitDate', dtype('<M8[ns]')),
         ('FundUnit', dtype('int64')),
         ('ProfitGuaranteeUnit', dtype('int64')),
         ('UnitProfit', dtype('int64')),
@@ -45,6 +44,8 @@ async def test_fund_profit():
         ('SumProfitGuarantee', dtype('int64')),
         ('SumAllProfit', dtype('int64')),
     ]
+    assert (index := df.index).dtype == 'datetime64[ns]'
+    assert index.name == 'ProfitDate'
 
 
 petro_agah: RayanHamafza = BaseSite.from_l18('پتروآگاه')  # type: ignore

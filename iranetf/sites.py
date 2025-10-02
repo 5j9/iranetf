@@ -478,6 +478,7 @@ class RayanHamafza(BaseSite):
         df['ProfitDate'] = df['ProfitDate'].apply(
             lambda i: _jdatetime.strptime(i, format='%Y/%m/%d').togregorian()
         )
+        df.set_index('ProfitDate', inplace=True)
         return df
 
     async def cache(self) -> float:
@@ -736,6 +737,7 @@ class TadbirPardaz(BaseTadbirPardaz):
         int_cols = ['row', 'UnitProfit']
         df[int_cols] = df[int_cols].map(_comma_int)
         df['ProfitPercent'] = df['ProfitPercent'].astype(float)
+        df.set_index('ProfitDate', inplace=True)
         return df
 
 
