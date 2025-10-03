@@ -12,14 +12,14 @@ classifiers = [
     "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
     "Operating System :: OS Independent",
 ]
-requires-python = ">= 3.12"
+requires-python = ">= 3.13"
 dependencies = [
     "aiohttp[speedups]",
     "aiohutils >= 0.22.3",
     "jdatetime >= 4.1.0",
     "pandas[pyarrow] >= 2.2.1",
     'tsetmc',
-    'fipiran',
+    'fipiran >= 1.0.1',
 ]
 [dependency-groups]
 dev = ["aiohutils[test] >= 0.22.3"]
