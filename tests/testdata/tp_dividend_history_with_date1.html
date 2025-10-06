@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html>
+<head>
+    
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <meta name="keywords" content= صندوق سرمایه‌گذاری مشترک />
+    <meta name="Description" content= />
+    <title>گزارش تقسیم سود صندوق</title>
+    <link href="/Content/Style/Fa/bootstrap-rtl.css" rel="stylesheet" />
+    <link href="/Content/Style/Fa/main.min.css" rel="stylesheet" />
+    <link href="/Content/Style/keyboard.css" rel="stylesheet" />
+    <link href="/Content/Style/font-awesome.min.css" rel="stylesheet" />
+    <link href="/Content/Style/jquery.mCustomScrollbar.min.css" rel="stylesheet" />
+    <link href="/Content/Style/persian-datepicker.css" rel="stylesheet" />
+    <link href="/Content/Style/jquery-ui.min.css" rel="stylesheet" />
+    <link href="/Content/Style/CustomStyles.css" rel="stylesheet" />
+    <link rel="icon" href="/ImageHandler.ashx?ImageId=259" />
+    <script src="/Scripts/jquery-3.6.1.min.js" type="text/javascript"></script>
+    <script src="/Scripts/jquery-ui.min.js" type="text/javascript"></script>
+    <script src="/Scripts/jquery-migrate-3.4.1.min.js" type="text/javascript"></script>
+
+
+
+</head>
+<body class="rtl blue" style="min-height: 100vh; background-color: #efefef">
+    
+    <div class="container-fluid d-flex flex-column" style="min-height: inherit;">
+        <div class="master-header">
+            <div class="row menu-row">
+                <div class="container-fluid">
+                    <nav class="navbar navbar-expand-xl navbar-light col-lg-12 px-0" style="min-height: 56px">
+                        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent">
+                            <span class="navbar-toggler-icon"></span>
+                        </button>
+                        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                            <ul class="navbar-nav">
+ 
+
+    <li class="nav-item ">
+<a class="nav-link" href="/">صفحه اول</a>        
+    </li>
+    <li class="nav-item dropdown">
+                <a class='nav-link  haschild' href='javascript:void(0)'> درباره صندوق</a>
+                    <div class="dropdown-menu">
+                <ul class="nav flex-column">
+                                <li class="nav-item"><a class='dropdown-item ' href="/AboutFund/FundCost">هزینه‌های صندوق</a></li>
+                                <li class="nav-item"><a class='dropdown-item ' href="/AboutFund/FundGoals">اهداف صندوق</a></li>
+                                <li class="nav-item"><a class='dropdown-item ' href="/AboutFund/FundStatute">اساسنامه صندوق</a></li>
+                                <li class="nav-item"><a class='dropdown-item ' href="/AboutFund/FundProspectus">امیدنامه صندوق</a></li>
+                                        <li class="nav-item"><a class="dropdown-item " href="/AboutFund/FundBankAccounts">حساب‌های بانکی صندوق</a></li>
+                                        <li class="nav-item"><a class="dropdown-item " href="/AboutFund/FundInvestmentHelp">راهنمای سرمایه‌گذاری</a></li>
+                                <li class="nav-item"><a class='dropdown-item ' href="/AboutFund/FundBranchs">شعبه‌های صندوق</a></li>
+                                <li class="nav-item"><a class='dropdown-item ' href="/AboutFund/FundGeneralInfo">اطلاعات کلی صندوق</a></li>
+                                <li class="nav-item"><a class='dropdown-item ' href="/AboutFund/FundComplaint">ثبت شکایت</a></li>
+                </ul>
+            </div>
+
+    </li>
+    <li class="nav-item dropdown">
+                <a class='nav-link  haschild' href='javascript:void(0)'> ارکان صندوق</a>
+                    <div class="dropdown-menu">
+                <ul class="nav flex-column">
+                                <li class="nav-item"><a class='dropdown-item ' href="/Pillar/Auditor">حسابرس صندوق</a></li>
+                                <li class="nav-item"><a class='dropdown-item ' href="/Pillar/InvestmentManager">مدیر سرمایه‌گذاری</a></li>
+                                <li class="nav-item"><a class='dropdown-item ' href="/Pillar/Manager">مدیر صندوق</a></li>
+                                <li class="nav-item"><a class='dropdown-item ' href="/Pillar/OperationManager">مدیر بهره برداری</a></li>
+                                <li class="nav-item"><a class='dropdown-item ' href="/Pillar/Trustee">متولی صندوق</a></li>
+                                <li class="nav-item"><a class='dropdown-item ' href="/Pillar/FundBroker">کارگزار صندوق</a></li>
+                                <li class="nav-item"><a class='dropdown-item ' href="/Pillar/MarketMaker">بازارگردان</a></li>
+                </ul>
+            </div>
+
+    </li>
+    <li class="nav-item dropdown">
+                <a class='nav-link  haschild' href='javascript:void(0)'> گزارش‌های صندوق</a>
+                    <div class="dropdown-menu">
+                <ul class="nav flex-column">
+                                <li class="nav-item"><a class='dropdown-item ' href="/Reports/FundSuperUnits">دارندگان واحدهای ممتاز</a></li>
+                                <li class="nav-item"><a class='dropdown-item ' href="/Reports/FundFinancialStatements">صورت‌های مالی صندوق</a></li>
+                                <li class="nav-item"><a class='dropdown-item ' href="/Reports/FundMeeting">مجامع صندوق</a></li>
+                                <li class="nav-item"><a class='dropdown-item ' href="/Reports/ManagerReports">گزارشات مدیر</a></li>
+                                        <li class="nav-item"><a class="dropdown-item " href="/Reports/FundEfficiencyForDifferentPeriods">بازده دوره‌ای صندوق</a></li>
+                                        <li class="nav-item"><a class="dropdown-item " href="/Reports/FundDailyEfficiency">بازدهی روزانه صندوق</a></li>
+                                <li class="nav-item"><a class='dropdown-item ' href="/Reports/FundAssetDistributionForDifferentPeriods">ترکیب دارایی‌های دوره‌ای</a></li>
+                                <li class="nav-item"><a class='dropdown-item ' href="/Reports/FundDailyAssetDistribution">ترکیب دارایی‌های روزانه</a></li>
+                                <li class="nav-item"><a class='dropdown-item ' href="/Reports/FundDividendProfitReport">گزارش تقسیم سود صندوق</a></li>
+                                <li class="nav-item"><a class='dropdown-item ' href="/Reports/FundStorageValueDividendProfitReport">گزارش تقسیم ذخیره تغییر ارزش</a></li>
+                                <li class="nav-item"><a class='dropdown-item ' href="/Reports/FundRankingDetailsReport">گزارش تفضیلی رتبه بندی عملکرد صندوق</a></li>
+                </ul>
+            </div>
+
+    </li>
+    <li class="nav-item ">
+                <a class='nav-link ' href="/Reports/FundRankingFinalResultReport" target=_blank>نتیجه نهایی رتبه بندی عملکرد صندوق</a>
+        
+    </li>
+    <li class="nav-item dropdown">
+                <a class='nav-link  haschild' href='javascript:void(0)'> خبرهای صندوق</a>
+                    <div class="dropdown-menu">
+                <ul class="nav flex-column">
+                                <li class="nav-item"><a class='dropdown-item ' href="/News/NewsList">لیست خبرها</a></li>
+                </ul>
+            </div>
+
+    </li>
+    <li class="nav-item ">
+                <a class='nav-link ' href="/Reports/FundManagerReports" >بیانیه سیاست‌های سرمایه‌گذاری</a>
+        
+    </li>
+    <li class="nav-item ">
+                <a class='nav-link ' href="/User/Help" >راهنمای صدور و ابطال اینترنتی</a>
+        
+    </li>
+    <li class="nav-item ">
+                <a class='nav-link ' href="/Fund/Rules" >قوانین و مقررات</a>
+        
+    </li>
+    <li class="nav-item ">
+                <a class='nav-link ' href="/AboutFund/FundContactUs" >ارتباط با صندوق</a>
+        
+    </li>
+
+
+                            </ul>
+                        </div>
+
+                        <div class="login-actions d-flex align-items-center">
+
+                            <div class="login">
+                                <ul class="navbar-nav flex-row">
+                                        <li class="nav-item mr-auto" style=display:none!important;>
+                                            <a href="/User/Login" class="btn btn-success text-white px-3 py-1  h6 mb-0 d-flex align-items-center">
+                                                <i class="fa fa-user ml-1" aria-hidden="true"></i>
+                                                ورود به پرتال
+                                            </a>
+                                        </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </nav>
+                </div>
+            </div>
+            <div class="row header" style="padding-top: 58px;">
+                <div class="fund-title-box col-12">
+                    <div class="row m-0">
+                        <div class="d-flex mx-auto" style="align-content: center; justify-content: center; flex-direction: row">
+                            <div style="margin: 10px;border-radius: 5px; overflow: hidden;">
+                                <img style="height: 75px;" src="/ImageHandler.ashx?ImageId=259" alt="" />
+                            </div>
+ 
+
+<div class="fund-base-title d-flex flex-column flex-md-row align-items-center justify-content-center" style="margin:10px 0;">
+    <div class="title mx-3">صندوق سرمایه‌گذاری امین یکم فردا</div>
+    <div class="header-RegisterNo">
+        <table style="width: 100%;">
+            <tr>
+                <td>شماره ثبت نزد سازمان بورس و اوراق بهادار</td>
+                <td style="text-align:left">۱۱۴۶۰</td>
+            </tr>
+            <tr>
+                <td>شماره ثبت نزد مرجع ثبت شرکت‌ها و موسسات غیرتجاری</td>
+                <td style="text-align:left">۳۹۸۱۴</td>
+            </tr>
+
+        </table>
+    </div>
+</div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+
+
+<div class="row top-menu" style="position: sticky; top: 52px; z-index: 7; background-color: #fff; box-shadow: 0 0 15px #aaa;">
+    <div class="container-fluid">
+        <div class="col-12 m-0">
+            <h6 class="m-0 px-3 py-2 page-title">گزارش تقسیم سود صندوق</h6>
+        </div>
+    </div>
+</div>
+<div class="row flex-fill" style="min-height: calc(100vh - 438px); overflow: auto">
+    <div class="container-fluid p-0 p-sm-4">
+                
+         
+
+<div class="card p-4" style="direction: rtl">
+<form AutoComplete="off" action="/Reports/FundDividendProfitReport" method="get">        <div class="form-row" style="flex-wrap: wrap;">
+          
+            <div class="input-group col-lg-3 m-2" style="min-width: 150px">
+                <div class="input-group-prepend">
+                    <label class="input-group-text" for="fromDate">از تاریخ</label>
+                </div>
+                <input class="form-control ltr" id="fromDate" name="fromDate" placeholder="مثال: ۱۳۹۴/۰۱/۰۱" type="text" value="1403/8/30" />
+            </div>
+            <div class="input-group col-lg-3 m-2" style="min-width: 150px">
+                <div class="input-group-prepend">
+                    <label class="input-group-text" for="toDate">تا تاریخ</label>
+                </div>
+                <input class="form-control ltr" id="toDate" name="toDate" placeholder="مثال: ۱۳۹۴/۰۱/۰۱" type="text" value="1404/6/31" />
+            </div>
+            <input class="btn btn-main btn-sm m-2" type="submit" value="جستجو" />
+        </div>
+</form>
+   
+    <div class="table-responsive table-wrapper mt-3">
+        <table class="table  m-0">
+            <thead>
+                <tr>
+                    <th scope="col">ردیف</th>
+                    <th scope="col">تاریخ تقسیم سود</th>
+                    <th>تعداد واحدها </th>
+                    <th>سود تقسیمی هر واحد</th>
+                    <th>کل سود تقسیم شده</th>
+                    <th>بازدهی</th>
+                </tr>
+            </thead>
+            <tbody>
+                                <tr>
+                                    <td>۱</td>
+                                    <td>۱۴۰۴/۰۶/۳۱</td>
+                                    <td>۳,۴۲۸,۰۳۲,۴۰۷</td>
+                                    <td>۲۵۶</td>
+                                    <td>۸۷۷,۵۷۶,۲۹۶,۱۹۲</td>
+                                    <td> ۳۴.۶۷ </td>
+
+                                </tr>
+                                <tr>
+                                    <td>۲</td>
+                                    <td>۱۴۰۴/۰۵/۳۱</td>
+                                    <td>۳,۳۲۹,۷۳۳,۱۵۳</td>
+                                    <td>۲۵۶</td>
+                                    <td>۸۵۲,۴۱۱,۶۸۷,۱۶۸</td>
+                                    <td> ۳۴.۶۷ </td>
+
+                                </tr>
+                                <tr>
+                                    <td>۳</td>
+                                    <td>۱۴۰۴/۰۴/۳۱</td>
+                                    <td>۳,۰۲۳,۴۴۲,۲۹۵</td>
+                                    <td>۲۵۶</td>
+                                    <td>۷۷۴,۰۰۱,۲۲۷,۵۲۰</td>
+                                    <td> ۳۴.۶۷ </td>
+
+                                </tr>
+                                <tr>
+                                    <td>۴</td>
+                                    <td>۱۴۰۴/۰۳/۳۱</td>
+                                    <td>۲,۹۰۰,۲۱۰,۷۲۵</td>
+                                    <td>۲۵۶</td>
+                                    <td>۷۴۲,۴۵۳,۹۴۵,۶۰۰</td>
+                                    <td> ۳۴.۶۷ </td>
+
+                                </tr>
+                                <tr>
+                                    <td>۵</td>
+                                    <td>۱۴۰۴/۰۲/۳۱</td>
+                                    <td>۲,۷۸۱,۵۰۶,۲۲۴</td>
+                                    <td>۲۵۶</td>
+                                    <td>۷۱۲,۰۶۵,۵۹۳,۳۴۴</td>
+                                    <td> ۳۴.۶۷ </td>
+
+                                </tr>
+                                <tr>
+                                    <td>۶</td>
+                                    <td>۱۴۰۴/۰۱/۳۱</td>
+                                    <td>۲,۲۶۶,۱۱۰,۰۹۳</td>
+                                    <td>۳۰۲</td>
+                                    <td>۶۸۴,۳۶۵,۲۴۸,۰۸۶</td>
+                                    <td> ۳۴.۱۱ </td>
+
+                                </tr>
+                                <tr>
+                                    <td>۷</td>
+                                    <td>۱۴۰۳/۱۲/۲۴</td>
+                                    <td>۲,۲۶۵,۹۱۳,۲۰۴</td>
+                                    <td>۱۹۲</td>
+                                    <td>۴۳۵,۰۵۵,۳۳۵,۱۶۸</td>
+                                    <td> ۳۳.۵۴ </td>
+
+                                </tr>
+                                <tr>
+                                    <td>۸</td>
+                                    <td>۱۴۰۳/۱۱/۳۰</td>
+                                    <td>۲,۲۶۵,۹۱۳,۲۰۴</td>
+                                    <td>۲۱۴</td>
+                                    <td>۴۸۴,۹۰۵,۴۲۵,۶۵۶</td>
+                                    <td> ۲۹.۳۸ </td>
+
+                                </tr>
+                                <tr>
+                                    <td>۹</td>
+                                    <td>۱۴۰۳/۱۰/۳۰</td>
+                                    <td>۲,۲۶۵,۹۱۳,۲۰۴</td>
+                                    <td>۲۰۵</td>
+                                    <td>۴۶۴,۵۱۲,۲۰۶,۸۲۰</td>
+                                    <td> ۲۸ </td>
+
+                                </tr>
+                                <tr>
+                                    <td>۱۰</td>
+                                    <td>۱۴۰۳/۰۹/۳۰</td>
+                                    <td>۲,۲۶۵,۹۱۳,۲۰۴</td>
+                                    <td>۱۸۹</td>
+                                    <td>۴۲۸,۲۵۷,۵۹۵,۵۵۶</td>
+                                    <td> ۲۵.۵۸ </td>
+
+                                </tr>
+
+            </tbody>
+            <tfoot>
+                <tr>
+                    <td colspan="16">
+                        <div class="pager">
+                            <span class="disabled">«</span><span class="current">1</span><a href="/Reports/FundDividendProfitReport?FromDate=1403%2F08%2F30&ToDate=1404%2F06%2F31&page=2" title="">2</a><a href="/Reports/FundDividendProfitReport?FromDate=1403%2F08%2F30&ToDate=1404%2F06%2F31&page=2" title="Next page">»</a>
+                        </div>
+                    </td>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+</div>
+
+
+    </div>
+</div>
+<div class="row footer">
+    <div class="container-fluid">
+        <div class="row footer-box">
+ 
+
+<div class="col-lg-2 footer-group">
+    <span class="footer-group-title">سایت‌های مرتبط</span>
+    <ul>
+        <li> 
+            <a href='http://www.seo.ir/' target="_blank">سازمان بورس اوراق بهادار</a>
+        </li>
+        <li>
+            <a href='http://www.fipiran.com/' target="_blank">مرکز پردازش اطلاعات مالی</a>
+        </li>
+        <li>
+            <a href='http://www.tsetmc.com/' target="_blank">مدیریت فن آوری بورس تهران</a>
+        </li>
+        <li>
+            <a href='http://www.sena.ir/' target="_blank">پایگاه اطلاع رسانی بازار سرمایه</a>
+        </li>
+    </ul>
+</div>
+<div class="col-lg-2 footer-group">
+    <span class="footer-group-title">ارتباط با صندوق</span>
+    <ul>
+        <li>
+            <a href="/AboutFund/FundContactUs" target="_blank">ارتباط با صندوق</a>
+        </li>
+        <li>
+            <a href="/AboutFund/FundBranchs" target="_blank">شعبه‌های صندوق</a>
+        </li>
+    </ul>
+</div>
+<div class="col-lg-2 footer-group">
+    <span class="footer-group-title">اخبار</span>
+    <ul>
+        <li>
+            <a href="/News/NewsList" target="_blank">لیست خبرها</a>
+        </li>
+        <li>
+            <a href="/Reports/FundMeeting" target="_blank">مجامع صندوق</a>
+        </li>
+    </ul>
+</div>
+<div class="col-lg-2 footer-group">
+    <span class="footer-group-title">گزارش‌ها</span>
+    <ul>
+        <li>
+            <a href="/Reports/FundFinancialStatements" target="_blank">صورت‌های مالی صندوق</a>
+        </li>
+                <li>
+                    <a href="/Reports/FundAssetDistributionForDifferentPeriods" target="_blank">ترکیب دارایی‌های دوره‌ای</a>
+                </li>
+
+     </ul>
+</div>
+<div class="col-lg-2 footer-group">
+    <span class="footer-group-title">درباره صندوق</span>
+    <ul>
+        <li>
+            <a href="/AboutFund/FundInvestmentHelp" target="_blank">راهنمای سرمایه‌گذاری</a>
+        </li>
+        <li>
+            <a href="/AboutFund/FundStatute" target="_blank">اساسنامه صندوق</a>
+        </li>
+        <li>
+            <a href="/AboutFund/FundProspectus" target="_blank">امیدنامه صندوق</a>
+        </li>
+    </ul>
+</div>
+
+<div class="col-lg-2 copyright">
+    <div class="tadbirLogo"></div>
+    <div class="text farsi">
+        کلیه حقوق این سایت متعلق به
+		<a href='Pillar/Manager'>تأمین سرمایه امین </a> می‌باشد.
+    </div>
+    <div class="text ltr">
+        Copyright © 2020 <a href='http://aminfarda.ir'> </a>. All rights reserved.
+    </div>
+    <div class="text ltr">
+        version number:  9.2.5
+    </div>
+    <div class="mt-2 mx-auto"></div>
+</div>
+
+
+        </div>
+    </div>
+</div>
+
+    </div>
+
+    <script src="/Scripts/jquery.mCustomScrollbar.concat.min.js" type="text/javascript"></script>
+    <script src="/Scripts/highstock.js" type="text/javascript"></script>
+    <script src="/Scripts/plugins.js" type="text/javascript"></script>
+    <script src="/Scripts/common.js" type="text/javascript"></script>
+    <script src="/Scripts/highcharts-localization.js" type="text/javascript"></script>
+    <script src="/Scripts/jalali.js" type="text/javascript"></script>
+    <script src="/Scripts/bootstrap.min.js" type="text/javascript"></script>
+    <script src="/Scripts/inputmask.min.js" type="text/javascript"></script>
+    <script src="/Scripts/jquery.inputmask.min.js" type="text/javascript"></script>
+    <script src="/Scripts/virtualKeyboard.js" type="text/javascript"></script>
+    <script src="/Scripts/persian-date.js" type="text/javascript"></script>
+    <script src="/Scripts/persian-datePicker.js" type="text/javascript"></script>
+    <script>
+        $(document).ready(function () {
+            $(".myScroll").mCustomScrollbar({
+                theme: "minimal"
+            });
+            $(".nav-item.dropdown").click(function () {
+                $(this).toggleClass('open');
+            });
+        });
+
+    </script>
+    
+    
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $("#fromDate").attr("value",'11/20/2024 12:00:00 AM');
+            $("#toDate").attr("value",'9/22/2025 12:00:00 AM');
+            $("#fromDate").pDatepicker({
+                "format": "l",
+                "autoClose": true,
+                "calendarType": "persian",
+                "inputDelay": "100",
+                "observer": true,
+                "calendar": {
+                    "persian": {
+                        "showHint": true,
+                        "leapYearMode": "astronomical"
+                    },
+                    "gregorian": {
+                        "showHint": true
+                    }
+                },
+                "navigator": {
+                    "enabled": true,
+                    "scroll": {
+                        "enabled": true
+                    },
+                    "text": {
+                        "btnNextText": "«",
+                        "btnPrevText": "»"
+                    }
+                },
+                "toolbox": {
+                    "enabled": true,
+                    "calendarSwitch": {
+                        "enabled": true,
+                        "format": "L"
+                    }
+                },
+                "responsive": true
+            });
+            $("#toDate").pDatepicker({
+                "format": "l",
+                "autoClose": true,
+                "calendarType": "persian",
+                "inputDelay": "100",
+                "observer": true,
+                "calendar": {
+                    "persian": {
+                        "showHint": true,
+                        "leapYearMode": "astronomical"
+                    },
+                    "gregorian": {
+                        "showHint": true
+                    }
+                },
+                "navigator": {
+                    "enabled": true,
+                    "scroll": {
+                        "enabled": true
+                    },
+                    "text": {
+                        "btnNextText": "«",
+                        "btnPrevText": "»"
+                    }
+                },
+                "toolbox": {
+                    "enabled": true,
+                    "calendarSwitch": {
+                        "enabled": true,
+                        "format": "L"
+                    }
+                },
+                "responsive": true
+            });
+        });
+    </script>
+
+
+    <script src="/Scripts/script.js" type="text/javascript"></script>
+</body>
+</html>

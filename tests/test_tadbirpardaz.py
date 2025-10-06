@@ -1,3 +1,4 @@
+from datetime import date
 from unittest.mock import patch
 
 from aiohutils.tests import file, files, validate_dict
@@ -91,6 +92,19 @@ async def test_dividend_history():
     ]
     assert (index := df.index).dtype == 'datetime64[ns]'
     assert index.name == 'ProfitDate'
+
+
+@files(
+    'tp_dividend_history_with_date1.html',
+    'tp_dividend_history_with_date2.html',
+)
+async def test_dividend_history_with_dates():
+    site = BaseSite.from_l18('امین یکم')
+    assert type(site) is TadbirPardaz
+    df = await site.dividend_history(
+        from_date=date(2024, 11, 20), to_date=date(2025, 9, 22)
+    )
+    assert len(df) == 11
 
 
 EXPECTED_TP_VER = '9.2.5'

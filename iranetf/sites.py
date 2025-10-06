@@ -15,7 +15,7 @@ from re import (
 from typing import Any as _Any, TypedDict as _TypedDict
 
 import pandas as _pd
-from jdatetime import datetime as _jdatetime
+from jdatetime import date as _jdate, datetime as _jdatetime
 from pandas import (
     DataFrame as _DataFrame,
     Series as _Series,
@@ -704,11 +704,35 @@ class TadbirPardaz(BaseTadbirPardaz):
         df.set_index('date', inplace=True)
         return df
 
-    async def dividend_history(self) -> _DataFrame:
-        path = 'Reports/FundDividendProfitReport'
+    async def dividend_history(
+        self,
+        *,
+        from_date: _date | str | None = None,
+        to_date: _date | str | None = None,
+    ) -> _DataFrame:
+        params: dict = {'page': 1}
+        if from_date is not None or to_date is not None:
+            if from_date is not None:
+                if isinstance(from_date, _date):
+                    jd = _jdate.fromgregorian(date=from_date)
+                    from_date = f'{jd.year}/{jd.month}/{jd.day}'
+                params['fromDate'] = from_date
+            if to_date is not None:
+                if isinstance(to_date, _date):
+                    jd = _jdate.fromgregorian(date=to_date)
+                    to_date = f'{jd.year}/{jd.month}/{jd.day}'
+                params['toDate'] = to_date
+
         all_rows = []
-        while path:
-            html = (await _read(f'{self.url}{path}')).decode()
+        while True:
+            html = (
+                await (
+                    await _get(
+                        f'{self.url}Reports/FundDividendProfitReport',
+                        params=params,
+                    )
+                ).read()
+            ).decode()
             table, _, after_table = html.partition('<tbody>')[2].rpartition(
                 '</tbody>'
             )
@@ -716,9 +740,10 @@ class TadbirPardaz(BaseTadbirPardaz):
                 _findall(r'<td>([^<]*)</td>', r)
                 for r in _split(r'</tr>\s*<tr>', table)
             ]
-            path = after_table.rpartition('" title="Next page">')[
-                0
-            ].rpartition('<a href="/')[2]
+            if '" title="Next page">' not in after_table:
+                break
+            params['page'] += 1
+
         # try to use the same column names as RayanHamafza.dividend_history
         df = _DataFrame(
             all_rows,
