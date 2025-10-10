@@ -4,7 +4,7 @@ build-backend = 'uv_build'
 
 [project]
 name = "iranetf"
-version = "0.32.1"
+version = "0.32.2.dev1"
 authors = [{name = "5j9", email = "5j9@users.noreply.github.com"}]
 description = "a library to fetch data from ETF websites active TSE"
 classifiers = [
