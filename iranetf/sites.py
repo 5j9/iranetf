@@ -761,7 +761,7 @@ class TadbirPardaz(BaseTadbirPardaz):
         df[comma_cols] = df[comma_cols].map(_comma_int)
         int_cols = ['row', 'UnitProfit']
         df[int_cols] = df[int_cols].map(_comma_int)
-        df['ProfitPercent'] = df['ProfitPercent'].astype(float)
+        df['ProfitPercent'] = df['ProfitPercent'].map(_comma_float)
         df.set_index('ProfitDate', inplace=True)
         return df
 

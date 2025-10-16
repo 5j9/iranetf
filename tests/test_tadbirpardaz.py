@@ -1,9 +1,10 @@
 from datetime import date
 from unittest.mock import patch
 
+import aiohutils.tests as tests_config
 from aiohutils.tests import file, files, validate_dict
 from numpy import dtype
-from pytest import raises
+from pytest import mark, raises
 
 from iranetf.sites import (
     BaseSite,
@@ -105,6 +106,18 @@ async def test_dividend_history_with_dates():
         from_date=date(2024, 11, 20), to_date=date(2025, 9, 22)
     )
     assert len(df) == 11
+
+
+@mark.skipif(not tests_config.OFFLINE_MODE, reason='not offline')
+@file('tp_invalid_dividend_history.html')
+async def test_invalid_dividend_history_value():
+    site = BaseSite.from_l18('آسان')
+    assert type(site) is TadbirPardaz
+    df = await site.dividend_history(
+        from_date=date(2025, 1, 19), to_date=date(2025, 1, 19)
+    )
+    assert len(df) == 1
+    assert df.at['2025-01-19', 'ProfitPercent'] == 1.81671169356907e18
 
 
 EXPECTED_TP_VER = '9.2.5'
