@@ -744,6 +744,9 @@ class TadbirPardaz(BaseTadbirPardaz):
                 break
             params['page'] += 1
 
+        if not all_rows[0]:  # no data for selected range
+            return _DataFrame()
+
         # try to use the same column names as RayanHamafza.dividend_history
         df = _DataFrame(
             all_rows,

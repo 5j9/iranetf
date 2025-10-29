@@ -161,3 +161,11 @@ async def test_option_in_asset_allocation(caplog):
     site = TadbirPardaz('https://dafund.ir/')
     await site.asset_allocation()
     assert not caplog.records
+
+
+@file('empty_divident_hist.html')
+async def test_empty_divident_hist():
+    site = TadbirPardaz('https://maskanamfund.ir/')
+    dt = date(2025, 10, 29)
+    df = await site.dividend_history(from_date=dt, to_date=dt)
+    assert df.empty
