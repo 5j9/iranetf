@@ -109,7 +109,7 @@ async def test_dividend_history_with_dates():
 
 @file('tp_invalid_dividend_history.html')
 async def test_invalid_dividend_history_value(test_config):
-    if test_config['OFFLINE_MODE']:
+    if not test_config['OFFLINE_MODE']:
         raise skip('not offline')
     site = BaseSite.from_l18('آسان')
     assert type(site) is TadbirPardaz
