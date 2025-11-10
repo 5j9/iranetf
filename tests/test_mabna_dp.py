@@ -1,7 +1,7 @@
 from math import isclose
 
-from aiohutils.tests import file, validate_dict
 from pytest import mark
+from pytest_aiohutils import file, validate_dict
 
 from iranetf.sites import LiveNAVPS, MabnaDP
 from tests import assert_navps_history

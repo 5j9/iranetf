@@ -1,8 +1,8 @@
 from datetime import date
 from math import isclose
 
-from aiohutils.tests import file, files, validate_dict
 from numpy import dtype
+from pytest_aiohutils import file, files, validate_dict
 
 from iranetf.sites import (
     BaseSite,

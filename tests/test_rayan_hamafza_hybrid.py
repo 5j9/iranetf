@@ -1,6 +1,6 @@
 from math import isclose
 
-from aiohutils.tests import file, validate_dict
+from pytest_aiohutils import file, validate_dict
 
 from iranetf.sites import (
     BaseSite,

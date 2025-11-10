@@ -1,6 +1,6 @@
 from math import isclose
 
-from aiohutils.tests import file, files, validate_dict
+from pytest_aiohutils import file, files, validate_dict
 
 from iranetf.sites import BaseSite, LeveragedMabnaDP, LiveNAVPS
 from tests import assert_leveraged_leverage, assert_navps_history

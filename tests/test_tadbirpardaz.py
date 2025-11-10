@@ -1,10 +1,9 @@
 from datetime import date
 from unittest.mock import patch
 
-import aiohutils.tests as tests_config
-from aiohutils.tests import file, files, validate_dict
 from numpy import dtype
-from pytest import mark, raises
+from pytest import raises, skip
+from pytest_aiohutils import file, files, validate_dict
 
 from iranetf.sites import (
     BaseSite,
@@ -108,9 +107,10 @@ async def test_dividend_history_with_dates():
     assert len(df) == 11
 
 
-@mark.skipif(not tests_config.OFFLINE_MODE, reason='not offline')
 @file('tp_invalid_dividend_history.html')
-async def test_invalid_dividend_history_value():
+async def test_invalid_dividend_history_value(test_config):
+    if test_config['OFFLINE_MODE']:
+        raise skip('not offline')
     site = BaseSite.from_l18('آسان')
     assert type(site) is TadbirPardaz
     df = await site.dividend_history(

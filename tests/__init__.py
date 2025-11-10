@@ -1,10 +1,7 @@
-from aiohutils.tests import init_tests
 from numpy import dtype
 from pandas import DatetimeIndex
 
 from iranetf.sites import BaseSite
-
-init_tests()
 
 
 async def assert_navps_history(site: BaseSite, has_statistical=True):
