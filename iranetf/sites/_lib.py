@@ -109,15 +109,10 @@ class BaseSite(ABC):
             return sites.RayanHamafza(url)
 
         if rfind(b'://mabnadp.com') != -1:
-            if rfind(rb'\"fundType\":\"leverage\"') != -1:
-                assert (
-                    rfind(
-                        rb'\"isMultiNav\":false,\"isSingleNav\":true,\"isEtf\":true'
-                    )
-                    != -1
-                ), 'Uknown MabnaDP site type.'
-                return sites.MabnaDP2(url)
-            return sites.MabnaDP(url)
+            if rfind(rb'/api/v1/') != -1:
+                return sites.MabnaDP(url)
+            assert rfind(rb'/api/v2/') != -1, 'Uknown MabnaDP site type.'
+            return sites.MabnaDP2(url)
 
         raise ValueError(f'Could not determine site type for {url}.')
 
