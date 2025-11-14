@@ -87,7 +87,8 @@ class MabnaDP(MabnaDPBase):
         return g('وجه نقد', 0.0) + g('سپرده بانکی', 0.0)
 
 
-class LeveragedMabnaDP(MabnaDPBase):
+class MabnaDP2(MabnaDPBase):
+    # uses api/v2/ path instead of api/v1/
     async def _json(self, path, **kwa) -> Any:
         params: dict | None = kwa.get('params')
         if params is None:

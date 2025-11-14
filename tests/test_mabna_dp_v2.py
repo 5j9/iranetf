@@ -2,10 +2,10 @@ from math import isclose
 
 from pytest_aiohutils import file, files, validate_dict
 
-from iranetf.sites import BaseSite, LeveragedMabnaDP, LiveNAVPS
+from iranetf.sites import BaseSite, LiveNAVPS, MabnaDP2
 from tests import assert_leveraged_leverage, assert_navps_history
 
-site = LeveragedMabnaDP('https://kianfunds10.ir/')
+site = MabnaDP2('https://kianfunds10.ir/')
 
 
 @file('lmdp_home.html')

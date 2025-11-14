@@ -116,7 +116,7 @@ class BaseSite(ABC):
                     )
                     != -1
                 ), 'Uknown MabnaDP site type.'
-                return sites.LeveragedMabnaDP(url)
+                return sites.MabnaDP2(url)
             return sites.MabnaDP(url)
 
         raise ValueError(f'Could not determine site type for {url}.')
