@@ -1,9 +1,14 @@
 from math import isclose
 
+from numpy import dtype
 from pytest_aiohutils import file, files, validate_dict
 
 from iranetf.sites import BaseSite, LiveNAVPS, MabnaDP2
-from tests import assert_leveraged_leverage, assert_navps_history
+from tests import (
+    assert_date_index,
+    assert_leveraged_leverage,
+    assert_navps_history,
+)
 
 site = MabnaDP2('https://kianfunds10.ir/')
 
@@ -58,3 +63,20 @@ async def test_home_data():
 @files('home.html', 'lmdp_aa.json')
 async def test_leverage():
     await assert_leveraged_leverage(site)
+
+
+@file('md2_assets_history.json')
+async def test_assets_history():
+    site = MabnaDP2('https://gitidamavandfund.ir/')
+    df = await site.assets_history()
+    assert_date_index(df)
+    assert [*df.dtypes.items()] == [
+        (
+            'date_time',
+            'datetime64[ns, UTC+03:30]',
+        ),
+        (
+            'value',
+            dtype('int64'),
+        ),
+    ]

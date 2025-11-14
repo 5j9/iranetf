@@ -5,11 +5,11 @@ from re import search
 from typing import Any
 
 from jdatetime import datetime as jdatetime
+from pandas import DataFrame
 
 from iranetf.sites._lib import (
     BaseSite,
     LiveNAVPS,
-    _DataFrame,
     _get,
     _read,
     comma_int,
@@ -39,9 +39,9 @@ class MabnaDP(MabnaDPBase):
         j['redemption'] = comma_int(j.pop('redemption_price'))
         return j  # type: ignore
 
-    async def navps_history(self) -> _DataFrame:
+    async def navps_history(self) -> DataFrame:
         j: list[dict] = await self._json('navps.json')
-        df = _DataFrame(j[0]['values'])
+        df = DataFrame(j[0]['values'])
         df['date'] = (
             df['date']
             .astype(str)
@@ -107,9 +107,19 @@ class MabnaDP2(MabnaDPBase):
         data['redemption'] = data.pop('redemption_price')
         return data
 
-    async def navps_history(self) -> _DataFrame:
-        data: list[dict] = (await self._json('chart'))['data']
-        df = _DataFrame(data)
+    @staticmethod
+    def _chart_df(j) -> DataFrame:
+        df = DataFrame(j['data'])
+        df['date_time'] = df['date_time'].astype('datetime64[ns, UTC+03:30]')  # type: ignore
+        df.set_index(
+            df['date_time'].dt.normalize().dt.tz_localize(None), inplace=True
+        )
+        df.index.name = 'date'
+        return df
+
+    async def navps_history(self) -> DataFrame:
+        j = await self._json('chart')
+        df = self._chart_df(j)
         df.rename(
             columns={
                 'redemption_price': 'redemption',
@@ -118,12 +128,11 @@ class MabnaDP2(MabnaDPBase):
             },
             inplace=True,
         )
-        df['date_time'] = df['date_time'].astype('datetime64[ns, UTC+03:30]')  # type: ignore
-        df.set_index(
-            df['date_time'].dt.normalize().dt.tz_localize(None), inplace=True
-        )
-        df.index.name = 'date'
         return df
+
+    async def assets_history(self):
+        j = await self._json('navps/assets-chart')
+        return self._chart_df(j)
 
     _aa_keys = {
         'اوراق',
