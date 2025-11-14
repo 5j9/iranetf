@@ -48,7 +48,7 @@ async def test_multinav():
 async def test_multinav_hist_path():
     khodran = BaseSite.from_l18('خودران')
     with patch(
-        'iranetf.sites._get', side_effect=NotImplementedError
+        'iranetf.sites._lib._get', side_effect=NotImplementedError
     ) as get_mock:
         with raises(NotImplementedError):
             await khodran.navps_history()
@@ -62,7 +62,7 @@ async def test_multinav_hist_path():
 async def test_multinav_live_navps_path():
     khodran = BaseSite.from_l18('خودران')
     with patch(
-        'iranetf.sites._get', side_effect=NotImplementedError
+        'iranetf.sites._lib._get', side_effect=NotImplementedError
     ) as get_mock:
         with raises(NotImplementedError):
             await khodran.live_navps()
