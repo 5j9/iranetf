@@ -72,7 +72,7 @@ async def test_pishran_navps_hist():
 )
 async def test_nav_history():
     site: LeveragedTadbirPardaz = BaseSite.from_l18('شتاب')  # type: ignore
-    df = await site.nav_history(from_=date(2025, 7, 8), to=date(2025, 8, 28))
+    df = await site.nav_history(from_=date(2025, 7, 8), to=date(2025, 8, 26))
     assert df.index.name == 'Date'
     assert df.index.dtype == 'datetime64[ns]'
     assert [*df.dtypes.items()] == [
