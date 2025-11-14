@@ -94,7 +94,7 @@ class MabnaDP2(MabnaDPBase):
         if params is None:
             kwa['params'] = {'portfolio_id': '1'}
         else:
-            params.setdefalt('portfolio_id', '1')
+            params.setdefault('portfolio_id', '1')
 
         return await super()._json(f'api/v2/public/fund/{path}', **kwa)
 
