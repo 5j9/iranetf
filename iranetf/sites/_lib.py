@@ -1,22 +1,22 @@
-from __future__ import annotations as _annotations
+from __future__ import annotations as _
 
 from abc import ABC, abstractmethod
-from datetime import datetime as _datetime
-from json import loads as _loads
+from datetime import datetime
+from json import loads
 from logging import warning
-from typing import Any as _Any, TypedDict as _TypedDict
+from typing import Any, TypedDict
 
-from pandas import DataFrame as _DataFrame
+from pandas import DataFrame
 
 import iranetf
 import iranetf.sites
 from iranetf import _get
 
 
-class LiveNAVPS(_TypedDict):
+class LiveNAVPS(TypedDict):
     creation: int
     redemption: int
-    date: _datetime
+    date: datetime
 
 
 def comma_int(s: str) -> int:
@@ -30,7 +30,7 @@ async def _read(url: str) -> bytes:
 class BaseSite(ABC):
     __slots__ = '_home_info_cache', 'last_response', 'url'
 
-    ds: _DataFrame
+    ds: DataFrame
     _aa_keys: set
 
     def __init__(self, url: str):
@@ -54,20 +54,20 @@ class BaseSite(ABC):
         params: dict | None = None,
         cookies: dict | None = None,
         df: bool = False,
-    ) -> _Any:
+    ) -> Any:
         r = await _get(self.url + path, params, cookies)
         self.last_response = r
         content = await r.read()
-        j = _loads(content)
+        j = loads(content)
         if df is True:
-            return _DataFrame(j, copy=False)
+            return DataFrame(j, copy=False)
         return j
 
     @abstractmethod
     async def live_navps(self) -> LiveNAVPS: ...
 
     @abstractmethod
-    async def navps_history(self) -> _DataFrame: ...
+    async def navps_history(self) -> DataFrame: ...
 
     @abstractmethod
     async def cache(self) -> float: ...
@@ -123,9 +123,9 @@ class BaseSite(ABC):
         return (await _read(self.url)).decode()
 
     @abstractmethod
-    async def _home_info(self) -> dict[str, _Any]: ...
+    async def _home_info(self) -> dict[str, Any]: ...
 
-    async def home_info(self) -> dict[str, _Any]:
+    async def home_info(self) -> dict[str, Any]:
         try:
             return self._home_info_cache
         except AttributeError:
