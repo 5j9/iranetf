@@ -1,9 +1,8 @@
 import logging
 from asyncio import run
 
-import config
-
 import iranetf
+from dev import config
 from iranetf.dataset import update_dataset
 
 logging.basicConfig(
