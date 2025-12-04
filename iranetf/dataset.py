@@ -387,7 +387,6 @@ def _check_symbol_counts():
 
 
 async def check_dataset(live=False):
-    global ssl
     ds = load_dataset(site=False)
     assert ds['l18'].is_unique
     assert ds['name'].is_unique, ds['name'][ds['name'].duplicated()]
