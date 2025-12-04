@@ -4,7 +4,7 @@ from abc import ABC, abstractmethod
 from datetime import datetime
 from json import loads
 from logging import warning
-from typing import Any, TypedDict
+from typing import Any, Self, TypedDict
 
 from pandas import DataFrame
 
@@ -73,7 +73,7 @@ class BaseSite(ABC):
     async def cache(self) -> float: ...
 
     @classmethod
-    def from_l18(cls, l18: str) -> iranetf.sites.AnySite:
+    def from_l18(cls, l18: str) -> Self:
         try:
             ds = cls.ds
         except AttributeError:
