@@ -1,20 +1,21 @@
 from math import isclose
+from unittest.mock import patch
 
 from pytest_aiohutils import file, validate_dict
 
 from iranetf.sites import (
     BaseSite,
     LiveNAVPS,
-    RayanHamafza as RayanHamafzaHybrid,
+    RayanHamafza,
 )
 from tests import assert_navps_history
 
-site = RayanHamafzaHybrid('https://tazmin.charismafunds.ir/#1')
+site: RayanHamafza = RayanHamafza.from_l18('ضمان')
 
 
 @file('rhh_main.html')
 async def test_rhh_from_url():
-    assert type(await BaseSite.from_url(site.url) is RayanHamafzaHybrid)
+    assert type(await BaseSite.from_url(site.url) is RayanHamafza)
 
 
 @file('rhh_live.json')
@@ -38,5 +39,7 @@ async def test_asset_allocation():
 
 @file('rhh_asset_allocation.json')
 async def test_cache():
-    cache = await site.cache()
+    with patch.object(RayanHamafza, '_json', side_effect=site._json) as m:
+        cache = await site.cache()
+    m.assert_called_once_with('MixAsset/2')
     assert 0.0 <= cache <= 0.6

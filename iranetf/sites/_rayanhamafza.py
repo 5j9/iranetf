@@ -84,18 +84,16 @@ class RayanHamafza(BaseSite):
         df.set_index('date', inplace=True)
         return df
 
-    _nav_history_path = 'DailyNAVChart/1'
-
     async def nav_history(self) -> DataFrame:
-        df: DataFrame = await self._json(self._nav_history_path, df=True)
+        df: DataFrame = await self._json(
+            f'DailyNAVChart/{self.fund_id}', df=True
+        )
         df.columns = ['nav', 'date', 'creation_navps']
         df['date'] = df['date'].map(_j2g)
         return df
 
-    _portfolio_industries_path = 'Industries/1'
-
     async def portfolio_industries(self) -> DataFrame:
-        return await self._json(self._portfolio_industries_path, df=True)
+        return await self._json(f'Industries/{self.fund_id}', df=True)
 
     _aa_keys = {
         'DepositTodayPercent',
@@ -108,15 +106,13 @@ class RayanHamafza(BaseSite):
         'CcdTodayPercent',  # Commodity Certificates of Deposit
     }
 
-    _asset_allocation_path = 'MixAsset/1'
-
     async def asset_allocation(self) -> dict:
-        d: dict = await self._json(self._asset_allocation_path)
+        d: dict = await self._json(f'MixAsset/{self.fund_id}')
         self._check_aa_keys(d)
         return {k: v / 100 if type(v) is not str else v for k, v in d.items()}
 
     async def dividend_history(self) -> DataFrame:
-        j: dict = await self._json('Profit/1')
+        j: dict = await self._json(f'Profit/{self.fund_id}')
         df = DataFrame(j['data'])
         df['ProfitDate'] = df['ProfitDate'].apply(
             lambda i: jdatetime.strptime(i, format='%Y/%m/%d').togregorian()
