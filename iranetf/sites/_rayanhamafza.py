@@ -105,6 +105,7 @@ class RayanHamafza(BaseSite):
         'BondTodayPercent',
         'OtherStock',
         'JalaliDate',
+        'CcdTodayPercent',  # Commodity Certificates of Deposit
     }
 
     _asset_allocation_path = 'MixAsset/1'
