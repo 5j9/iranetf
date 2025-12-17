@@ -70,6 +70,8 @@ reportUnnecessaryCast = 'warning'
 reportUnnecessaryComparison = 'warning'
 reportUnnecessaryContains = 'warning'
 reportUnnecessaryIsInstance = 'warning'
+venvPath = "."
+venv = ".venv"
 
 [tool.uv.build-backend]
 module-name = "iranetf"
