@@ -34,7 +34,7 @@ class BaseSite(ABC):
     _aa_keys: set
 
     def __init__(self, url: str):
-        assert url[-1] == '/', 'the url must end with `/`'
+        assert url[-1] == '/', f'the url must end with `/` {url=}'
         self.url = url
 
     def __repr__(self):
