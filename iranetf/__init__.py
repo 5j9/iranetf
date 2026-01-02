@@ -1,4 +1,4 @@
-__version__ = '0.34.4.dev1'
+__version__ = '0.34.4'
 
 import pandas as _pd
 from aiohttp import (
