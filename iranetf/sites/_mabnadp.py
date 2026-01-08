@@ -112,7 +112,8 @@ class MabnaDP2(MabnaDPBase):
         df = DataFrame(j['data'])
         df['date_time'] = df['date_time'].astype('datetime64[ns, UTC+03:30]')  # type: ignore
         df.set_index(
-            df['date_time'].dt.normalize().dt.tz_localize(None), inplace=True
+            df['date_time'].dt.normalize().dt.tz_localize(None),  # pyright: ignore[reportAttributeAccessIssue]
+            inplace=True,
         )
         df.index.name = 'date'
         return df
