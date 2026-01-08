@@ -322,6 +322,8 @@ def _log_errors(func):
     async def wrapper(arg):
         try:
             return await func(arg)
+        except OSError as e:
+            _error(f'{e!r} on {arg}')
         except Exception as e:
             _excepton(f'Exception occurred during checking of {arg}: {e}')
             return None
@@ -331,11 +333,7 @@ def _log_errors(func):
 
 @_log_errors
 async def _check_site_type(site: _BaseSite) -> None:
-    try:
-        detected = await _BaseSite.from_url(site.url)
-    except Exception as e:
-        _error(f'Exception occured during checking of {site}: {e}')
-        return
+    detected = await _BaseSite.from_url(site.url)
     if type(detected) is not type(site):
         _error(
             f'Detected site type for {site.url} is {type(detected).__name__},'
