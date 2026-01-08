@@ -191,7 +191,7 @@ async def _add_ins_code(new_items: _DataFrame) -> None:
     new_items.loc[names_without_code.index, 'insCode'] = ins_codes
 
 
-async def _fipiran_data(ds) -> _DataFrame:
+async def _fipiran_data(ds: _DataFrame) -> _DataFrame:
     import fipiran.funds
 
     _info('await fipiran.funds.funds()')
