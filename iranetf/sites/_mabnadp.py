@@ -173,14 +173,14 @@ class MabnaDP2(MabnaDPBase):
                 loads(
                     html.rpartition('window.__REACT_QUERY_STATE__ = ')[
                         2
-                    ].partition(';')[0]
+                    ].partition(';\n')[0]
                 )
             ),
             '__REACT_REDUX_STATE__': loads(
                 loads(
                     html.rpartition('window.__REACT_REDUX_STATE__ = ')[
                         2
-                    ].partition(';')[0]
+                    ].partition(';\n')[0]
                 )
             ),
             '__ENV__': loads(
