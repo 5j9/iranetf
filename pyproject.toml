@@ -22,7 +22,7 @@ dependencies = [
     'fipiran >= 1.0.2',
 ]
 [dependency-groups]
-dev = ["pytest-aiohutils >= 0.22.5"]
+dev = ["pytest-aiohutils >= 0.22.5", 'rich']
 
 [project.readme]
 file = "README.rst"
