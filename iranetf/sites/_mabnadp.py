@@ -87,14 +87,19 @@ class MabnaDP(MabnaDPBase):
         return g('وجه نقد', 0.0) + g('سپرده بانکی', 0.0)
 
 
+# uses api/v2/ path instead of api/v1/
 class MabnaDP2(MabnaDPBase):
-    # uses api/v2/ path instead of api/v1/
+    def __init__(self, url: str):
+        url, _, portfolio_id = url.partition('#')
+        super().__init__(url)
+        self.portfolio_id = portfolio_id or '1'
+
     async def _json(self, path, **kwa) -> Any:
         params: dict | None = kwa.get('params')
         if params is None:
-            kwa['params'] = {'portfolio_id': '1'}
+            kwa['params'] = {'portfolio_id': self.portfolio_id}
         else:
-            params.setdefault('portfolio_id', '1')
+            params.setdefault('portfolio_id', self.portfolio_id)
 
         return await super()._json(f'api/v2/public/fund/{path}', **kwa)
 

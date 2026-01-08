@@ -3,7 +3,6 @@ import logging as _logging
 from asyncio import gather as _gather
 from json import JSONDecodeError as _JSONDecodeError
 from logging import (
-    debug as _debug,
     error as _error,
     info as _info,
     warning as _warning,
@@ -39,6 +38,7 @@ from iranetf.sites import (
     FundType as _FundType,
     LeveragedTadbirPardaz as _LeveragedTadbirPardaz,
     MabnaDP as _MabnaDP,
+    MabnaDP2 as _MabnaDP2,
     RayanHamafza as _RayanHamafza,
     TadbirPardaz as _TadbirPardaz,
 )
@@ -323,13 +323,18 @@ async def _check_site_type(site: _BaseSite) -> None:
     except Exception as e:
         _error(f'Exception occured during checking of {site}: {e}')
         return
-    if type(detected) is type(site):
-        _debug(f'checked {site.url}')
-        return
-    _error(
-        f'Detected site type for {site.url} is {type(detected).__name__},'
-        f' but dataset site type is {type(site).__name__}.'
-    )
+    if type(detected) is not type(site):
+        _error(
+            f'Detected site type for {site.url} is {type(detected).__name__},'
+            f' but dataset site type is {type(site).__name__}.'
+        )
+    if isinstance(site, _MabnaDP2):
+        data = await site.home_data()
+        portfolio_ids = data['__REACT_REDUX_STATE__']['general']['data'][
+            'portfolioIds'
+        ]
+        if site.portfolio_id not in portfolio_ids:
+            _error(f'site.portfolio_id not in portfolio_ids for {site}')
 
 
 async def _check_reg_no(row):
