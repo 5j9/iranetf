@@ -4,6 +4,7 @@ from asyncio import gather as _gather
 from json import JSONDecodeError as _JSONDecodeError
 from logging import (
     error as _error,
+    exception as _excepton,
     info as _info,
     warning as _warning,
 )
@@ -317,6 +318,18 @@ async def update_dataset(*, check_existing_sites=False) -> _DataFrame:
     return new_items[new_items['insCode'].isna()]
 
 
+def _log_errors(func):
+    async def wrapper(arg):
+        try:
+            return await func(arg)
+        except Exception as e:
+            _excepton(f'Exception occurred during checking of {arg}: {e}')
+            return None
+
+    return wrapper
+
+
+@_log_errors
 async def _check_site_type(site: _BaseSite) -> None:
     try:
         detected = await _BaseSite.from_url(site.url)
@@ -337,16 +350,13 @@ async def _check_site_type(site: _BaseSite) -> None:
             _error(f'site.portfolio_id not in portfolio_ids for {site}')
 
 
+@_log_errors
 async def _check_reg_no(row):
     ds_reg_no = row.regNo
     if ds_reg_no is _NA:  # todo: remove this after adding regNo for all
         return
     site: _BaseSite = row.site
-    try:
-        actual_reg_no = await site.reg_no()
-    except Exception as e:
-        _error(f'Exception during checking regNo on {site.url}: {e!r}')
-        return
+    actual_reg_no = await site.reg_no()
     if ds_reg_no == actual_reg_no:
         return
     _error(f'regNo mismatch:\n {site.url=}\n {ds_reg_no=}\n {actual_reg_no=}')
@@ -355,6 +365,7 @@ async def _check_reg_no(row):
 _url_symbols: dict[str, dict[str, int]] = {}
 
 
+@_log_errors
 async def _collect_symbol_counts(site: _BaseSite):
     if (url := site.url) in _url_symbols:
         _url_symbols[url]['actual_count'] += 1
@@ -416,9 +427,9 @@ async def check_dataset(live=False):
     orig_ssl = iranetf.ssl
     iranetf.ssl = False  # many sites fail ssl verification
     try:
-        await _gather(*check_site_coros, return_exceptions=True)
-        await _gather(*check_reg_no_coros, return_exceptions=True)
-        await _gather(*collect_symbol_counts_coros, return_exceptions=True)
+        await _gather(*check_site_coros)
+        await _gather(*check_reg_no_coros)
+        await _gather(*collect_symbol_counts_coros)
     finally:
         iranetf.ssl = orig_ssl
 
