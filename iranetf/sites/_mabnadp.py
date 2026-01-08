@@ -110,10 +110,11 @@ class MabnaDP2(MabnaDPBase):
     @staticmethod
     def _chart_df(j) -> DataFrame:
         df = DataFrame(j['data'])
-        df['date_time'] = df['date_time'].astype('datetime64[ns, UTC+03:30]')  # type: ignore
+        date_time = df['date_time'] = df['date_time'].astype(
+            'datetime64[ns, UTC+03:30]'  # pyright: ignore
+        )
         df.set_index(
-            df['date_time'].dt.normalize().dt.tz_localize(None),  # pyright: ignore[reportAttributeAccessIssue]
-            inplace=True,
+            date_time.dt.normalize().dt.tz_localize(None), inplace=True
         )
         df.index.name = 'date'
         return df
