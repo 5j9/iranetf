@@ -1,4 +1,3 @@
-from numpy import dtype
 from pandas import DataFrame, DatetimeIndex
 
 from iranetf.sites import BaseSite
@@ -6,7 +5,7 @@ from iranetf.sites import BaseSite
 
 def assert_date_index(df: DataFrame):
     index: DatetimeIndex = df.index  # type: ignore
-    assert index.dtype == dtype('<M8[ns]'), index.dtype
+    assert index.dtype in ('datetime64[us]', 'datetime64[ns]'), index.dtype
     assert index.name == 'date'
     assert (index.normalize() == index).all()
 

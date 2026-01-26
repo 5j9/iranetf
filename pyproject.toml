@@ -17,8 +17,8 @@ dependencies = [
     "aiohttp[speedups]",
     "aiohutils >= 0.22.3",
     "jdatetime >= 4.1.0",
-    "pandas[pyarrow] >= 2.2.1",
-    'tsetmc>=2.0.2',
+    "pandas[pyarrow] >= 3.0.0",
+    'tsetmc>=3.0.0',
     'fipiran >= 1.0.2',
 ]
 [dependency-groups]

@@ -74,7 +74,7 @@ async def test_nav_history():
     site: LeveragedTadbirPardaz = BaseSite.from_l18('شتاب')  # type: ignore
     df = await site.nav_history(from_=date(2025, 7, 8), to=date(2025, 8, 26))
     assert df.index.name == 'Date'
-    assert df.index.dtype == 'datetime64[ns]'
+    assert df.index.dtype in ('<M8[ns]', '<M8[us]')
     assert [*df.dtypes.items()] == [
         ('Row', dtype('int64')),
         ('Issue Price', dtype('int64')),

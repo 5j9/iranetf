@@ -44,7 +44,7 @@ async def test_fund_profit():
         ('SumProfitGuarantee', dtype('int64')),
         ('SumAllProfit', dtype('int64')),
     ]
-    assert (index := df.index).dtype == 'datetime64[ns]'
+    assert (index := df.index).dtype == 'datetime64[us]'
     assert index.name == 'ProfitDate'
 
 

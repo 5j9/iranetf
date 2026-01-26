@@ -90,7 +90,7 @@ async def test_dividend_history():
         ('SUMAllProfit', dtype('int64')),
         ('ProfitPercent', dtype('float64')),
     ]
-    assert (index := df.index).dtype == 'datetime64[ns]'
+    assert (index := df.index).dtype == 'datetime64[us]'
     assert index.name == 'ProfitDate'
 
 

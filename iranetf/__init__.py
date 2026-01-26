@@ -1,14 +1,9 @@
 __version__ = '1.0.1.dev1'
 
-import pandas as _pd
 from aiohttp import (
     ClientResponse as _ClientResponse,
 )
 from aiohutils.session import SessionManager
-
-_pd.options.mode.copy_on_write = True
-_pd.options.future.infer_string = True  # type: ignore
-_pd.options.future.no_silent_downcasting = True  # type: ignore
 
 session_manager = SessionManager()
 
