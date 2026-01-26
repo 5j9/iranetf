@@ -392,7 +392,7 @@ class LeveragedTadbirPardaz(BaseTadbirPardaz):
             df.set_index('date', inplace=True)
             append(df)
 
-        df = concat(frames, axis=1)
+        df = concat(frames, axis=1, sort=False)
         return df
 
     async def live_navps(self) -> LeveragedTadbirPardazLiveNAVPS:
