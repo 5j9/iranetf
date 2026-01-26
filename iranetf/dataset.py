@@ -291,7 +291,10 @@ async def _update_existing_rows_using_fipiran(
     ds.loc[common_indices, 'type'] = regno.loc[common_indices, 'type']
 
     # use domain as URL for those who do not have any URL
-    ds.loc[ds['url'].isna(), 'url'] = 'http://' + regno['domain'] + '/'
+    common_indices = ds[ds['url'].isna()].index.intersection(regno.index)
+    ds.loc[common_indices, 'url'] = (
+        'http://' + regno.loc[common_indices, 'domain'] + '/'
+    )
     return ds
 
 
