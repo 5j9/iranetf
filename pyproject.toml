@@ -15,7 +15,7 @@ classifiers = [
 requires-python = ">= 3.13"
 dependencies = [
     "aiohttp[speedups]",
-    "aiohutils >= 0.22.3",
+    "aiohutils >= 0.23.0",
     "jdatetime >= 4.1.0",
     "pandas[pyarrow] >= 3.0.0",
     'tsetmc>=3.0.0',
