@@ -14,6 +14,6 @@ ssl: bool = False  # as horrible as this is, many sites fail ssl verification
 async def _get(
     url: str, params: dict | None = None, cookies: dict | None = None
 ) -> _ClientResponse:
-    return await session_manager.get(
-        url, ssl=ssl, cookies=cookies, params=params
+    return await session_manager.request(
+        'get', url, ssl=ssl, cookies=cookies, params=params
     )
