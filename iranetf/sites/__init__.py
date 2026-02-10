@@ -1,5 +1,5 @@
 from iranetf.sites._lib import BaseSite, LiveNAVPS
-from iranetf.sites._mabnadp import MabnaDP, MabnaDP2
+from iranetf.sites._mabnadp import MabnaDP2
 from iranetf.sites._rayanhamafza import (
     FundData,
     FundList,
@@ -15,9 +15,7 @@ from iranetf.sites._tadbirpardaz import (
     TPLiveNAVPS,
 )
 
-type AnySite = (
-    LeveragedTadbirPardaz | TadbirPardaz | RayanHamafza | MabnaDP | MabnaDP2
-)
+type AnySite = LeveragedTadbirPardaz | TadbirPardaz | RayanHamafza | MabnaDP2
 
 __all__ = [
     'AnySite',
@@ -29,7 +27,6 @@ __all__ = [
     'LeveragedTadbirPardaz',
     'LeveragedTadbirPardazLiveNAVPS',
     'LiveNAVPS',
-    'MabnaDP',
     'MabnaDP2',
     'RayanHamafza',
     'TPLiveNAVPS',

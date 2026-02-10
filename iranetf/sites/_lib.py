@@ -109,8 +109,6 @@ class BaseSite(ABC):
             return sites.RayanHamafza(url)
 
         if rfind(b'://mabnadp.com') != -1:
-            if rfind(rb'/api/v1/') != -1:
-                return sites.MabnaDP(url)
             assert rfind(rb'/api/v2/') != -1, 'Uknown MabnaDP site type.'
             return sites.MabnaDP2(url)
 

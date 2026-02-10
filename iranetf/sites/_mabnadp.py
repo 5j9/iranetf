@@ -4,15 +4,12 @@ from json import loads
 from re import search
 from typing import Any
 
-from jdatetime import datetime as jdatetime
 from pandas import DataFrame
 
 from iranetf.sites._lib import (
     BaseSite,
     LiveNAVPS,
     _get,
-    _read,
-    comma_int,
 )
 
 
@@ -24,67 +21,6 @@ class MabnaDPBase(BaseSite):
         if m:
             d['seo_reg_no'] = m[1]
         return d
-
-
-class MabnaDP(MabnaDPBase):
-    async def _json(self, path, **kwa) -> Any:
-        return await super()._json(f'api/v1/overall/{path}', **kwa)
-
-    async def live_navps(self) -> LiveNAVPS:
-        j: dict = await self._json('navetf.json')
-        j['date'] = jdatetime.strptime(
-            j['date_time'], '%H:%M %Y/%m/%d'
-        ).togregorian()
-        j['creation'] = comma_int(j.pop('purchase_price'))
-        j['redemption'] = comma_int(j.pop('redemption_price'))
-        return j  # type: ignore
-
-    async def navps_history(self) -> DataFrame:
-        j: list[dict] = await self._json('navps.json')
-        df = DataFrame(j[0]['values'])
-        df['date'] = (
-            df['date']
-            .astype(str)
-            .apply(
-                lambda i: jdatetime.strptime(
-                    i, format='%Y%m%d000000'
-                ).togregorian()
-            )
-        )
-        df['creation'] = df.pop('purchase_price')
-        df['redemption'] = df.pop('redeption_price')
-        df['statistical'] = df.pop('statistical_value')
-        df.set_index('date', inplace=True)
-        return df
-
-    async def version(self) -> str:
-        content = await _read(self.url)
-        start = content.find('نگارش '.encode())
-        if start == -1:
-            start = content.find('نسخه '.encode())
-            if start == -1:
-                raise ValueError('version was not found')
-            start += 9
-        else:
-            start += 11
-
-        end = content.find(b'<', start)
-        return content[start:end].strip().decode()
-
-    _aa_keys = {'سهام', 'سایر دارایی ها', 'وجه نقد', 'سایر', 'سپرده بانکی'}
-
-    async def asset_allocation(self) -> dict:
-        j: dict = await self._json(
-            'dailyvalue.json', params={'portfolioIds': '0'}
-        )
-        d = {i['name']: i['percentage'] for i in j['values']}
-        self._check_aa_keys(d)
-        return d
-
-    async def cache(self) -> float:
-        aa = await self.asset_allocation()
-        g = aa.get
-        return g('وجه نقد', 0.0) + g('سپرده بانکی', 0.0)
 
 
 # uses api/v2/ path instead of api/v1/

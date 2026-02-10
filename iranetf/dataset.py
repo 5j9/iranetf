@@ -38,7 +38,6 @@ from iranetf.sites import (
     BaseTadbirPardaz as _BaseTadbirPardaz,
     FundType as _FundType,
     LeveragedTadbirPardaz as _LeveragedTadbirPardaz,
-    MabnaDP as _MabnaDP,
     MabnaDP2 as _MabnaDP2,
     RayanHamafza as _RayanHamafza,
     TadbirPardaz as _TadbirPardaz,
@@ -136,7 +135,7 @@ async def _check_validity(site: _BaseSite, retry=0) -> tuple[str, str] | None:
 
 
 # sorted from most common to least common
-SITE_TYPES = (_RayanHamafza, _TadbirPardaz, _LeveragedTadbirPardaz, _MabnaDP)
+SITE_TYPES = (_RayanHamafza, _TadbirPardaz, _LeveragedTadbirPardaz, _MabnaDP2)
 
 
 async def _url_type(domain: str) -> tuple:
