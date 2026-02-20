@@ -89,7 +89,7 @@ def load_dataset(*, site=True, inst=False) -> _DataFrame:
     )
 
     if site:
-        df['site'] = df[df['siteType'].notna()].apply(_make_site, axis=1)  # type: ignore
+        df['site'] = df[df['siteType'].notna()].apply(_make_site, axis=1)
 
     if inst:
         df['inst'] = df['insCode'].apply(_Instrument)  # type: ignore
@@ -416,7 +416,7 @@ async def check_dataset(live=False):
     if not live:
         return
 
-    ds['site'] = ds[ds['siteType'].notna()].apply(_make_site, axis=1)  # type: ignore
+    ds['site'] = ds[ds['siteType'].notna()].apply(_make_site, axis=1)
 
     rows = [*ds.itertuples()]
     sites: list[_BaseSite] = [row.site for row in rows]  # type: ignore
