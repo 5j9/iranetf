@@ -14,9 +14,11 @@ logging.getLogger().setLevel(logging.INFO)
 
 async def main():
     iranetf.ssl = False  # tolerate week ssl certs
-    return await update_dataset(
+    df = await update_dataset(
         check_existing_sites=config.check_existing_sites,
     )
+    await iranetf.session_manager.close()
+    return df
 
 
 unrecognized_df = run(main())
