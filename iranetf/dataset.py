@@ -324,7 +324,7 @@ def _log_errors(func):
     async def wrapper(arg):
         try:
             return await func(arg)
-        except OSError as e:
+        except (OSError, _ServerDisconnectedError) as e:
             _error(f'{e!r} on {arg}')
         except Exception as e:
             _excepton(f'Exception occurred during checking of {arg}: {e}')
