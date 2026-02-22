@@ -42,6 +42,7 @@ from iranetf.sites import (
     RayanHamafza as _RayanHamafza,
     TadbirPardaz as _TadbirPardaz,
 )
+from iranetf.sites._mabnadp import MabnaDP2
 
 _ETF_TYPES = {  # numbers are according to fipiran
     6: 'Stock',
@@ -324,7 +325,7 @@ def _log_errors(func):
     async def wrapper(arg):
         try:
             return await func(arg)
-        except (OSError, _ServerDisconnectedError) as e:
+        except (OSError, _ServerDisconnectedError, _ClientResponseError) as e:
             _error(f'{e!r} on {arg}')
         except Exception as e:
             _excepton(f'Exception occurred during checking of {arg}: {e}')
@@ -389,6 +390,11 @@ async def _collect_symbol_counts(site: _BaseSite):
         if home_info['isETFMultiNavMode']:
             home_info['basketIDs'].pop('1', None)  # ignore the overall basket
             _url_symbols[url]['expected_count'] = len(home_info['basketIDs'])
+        return
+
+    if isinstance(site, MabnaDP2):
+        portfolios = await site.portfolios()
+        _url_symbols[url]['expected_count'] = len(portfolios)
         return
 
     # for all other site types, assume site is not multi-nav
