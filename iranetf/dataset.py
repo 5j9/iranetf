@@ -411,7 +411,9 @@ async def check_dataset(live=False):
     assert ds['url'].is_unique
     reg_numbers = ds['regNo']
     known_reg_numbers = reg_numbers[reg_numbers.notna()]
-    assert known_reg_numbers.is_unique, ds[known_reg_numbers.duplicated()]
+    assert known_reg_numbers.is_unique, known_reg_numbers[
+        known_reg_numbers.duplicated()
+    ]
 
     if not live:
         return
