@@ -1,15 +1,8 @@
-import logging
 from asyncio import run
 
 import iranetf
 from dev import config
 from iranetf.dataset import update_dataset
-
-logging.basicConfig(
-    format='%(pathname)s:%(lineno)d\n%(asctime)s %(levelname)s %(message)s',
-    datefmt='%H:%M:%S',
-)
-logging.getLogger().setLevel(logging.INFO)
 
 
 async def main():
@@ -17,7 +10,6 @@ async def main():
     df = await update_dataset(
         check_existing_sites=config.check_existing_sites,
     )
-    await iranetf.session_manager.close()
     return df
 
 
