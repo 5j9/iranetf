@@ -5,7 +5,7 @@ build-backend = 'uv_build'
 [project]
 name = "iranetf"
 version = "3.0.1.dev1"
-authors = [{name = "5j9", email = "5j9@users.noreply.github.com"}]
+authors = [{ name = "5j9", email = "5j9@users.noreply.github.com" }]
 description = "a library to fetch data from ETF websites active TSE"
 classifiers = [
     "Programming Language :: Python :: 3",
@@ -15,7 +15,7 @@ classifiers = [
 requires-python = ">= 3.13"
 dependencies = [
     "aiohttp[speedups]",
-    "aiohutils >= 0.23.0",
+    "aiohutils >= 0.24.1",
     "jdatetime >= 4.1.0",
     "pandas[pyarrow] >= 3.0.0",
     'tsetmc>=3.0.0',
