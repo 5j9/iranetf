@@ -2,7 +2,7 @@ from asyncio import gather
 from datetime import datetime
 from json import loads
 from re import search
-from typing import Any
+from typing import Any, TypedDict
 
 from pandas import DataFrame
 
@@ -21,6 +21,11 @@ class MabnaDPBase(BaseSite):
         if m:
             d['seo_reg_no'] = m[1]
         return d
+
+
+class Portolio(TypedDict):
+    id: str
+    name: str
 
 
 # uses api/v2/ path instead of api/v1/
@@ -136,3 +141,6 @@ class MabnaDP2(MabnaDPBase):
             + data['commonUnitRedemptionValueAmount']
             / data['preferredUnitRedemptionValueAmount']
         ) * (1.0 - cache)
+
+    async def portfolios(self) -> list[Portolio]:
+        return (await self._json('portfolios'))['data']
