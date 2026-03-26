@@ -133,13 +133,16 @@ class MabnaDP2(MabnaDPBase):
 
     async def leverage(self) -> float:
         data, cache = await gather(self.home_data(), self.cache())
-        data = data['__REACT_QUERY_STATE__']['queries'][9]['state']['data'][
-            '1'
+        data: dict = data['__REACT_QUERY_STATE__']['queries'][9]['state'][
+            'data'
         ]
+        first = data[next(iter(data))]
+        preferred_redemption = first['preferredUnitRedemptionValueAmount']
+        if preferred_redemption == 0:
+            return 1.0 - cache
         return (
             1.0
-            + data['commonUnitRedemptionValueAmount']
-            / data['preferredUnitRedemptionValueAmount']
+            + first['commonUnitRedemptionValueAmount'] / preferred_redemption
         ) * (1.0 - cache)
 
     async def portfolios(self) -> list[Portolio]:

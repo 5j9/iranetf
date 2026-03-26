@@ -1,7 +1,7 @@
 from math import isclose
 
 from numpy import dtype
-from pytest_aiohutils import file, files, validate_dict
+from pytest_aiohutils import file, file_map, files, validate_dict
 
 from iranetf.sites import BaseSite, LiveNAVPS, MabnaDP2
 from tests import (
@@ -63,6 +63,18 @@ async def test_home_data():
 @files('home.html', 'lmdp_aa.json')
 async def test_leverage():
     await assert_leveraged_leverage(site)
+
+
+hamvazn = MabnaDP2.from_l18('هم وزن')
+
+
+@file_map(
+    ('assets-classification', 'hamvazn_leverage.json'),
+    (hamvazn.url, 'hamvazn.html'),
+)
+async def test_non_leveraged_leverage():
+    lev = await hamvazn.leverage()
+    assert 0.5 < lev <= 1.0
 
 
 @file('md2_assets_history.json')
