@@ -1,12 +1,11 @@
 from asyncio import as_completed, run
-from logging import getLogger
 
 from aiohttp import ClientConnectorDNSError, ClientResponseError
 
+from dev import logger
 from iranetf.dataset import load_dataset
 
 ds = load_dataset()
-logger = getLogger(__name__)
 
 
 async def main():

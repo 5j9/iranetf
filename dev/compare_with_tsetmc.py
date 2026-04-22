@@ -5,6 +5,7 @@ from tsetmc import Flow
 from tsetmc.funds import commodity_etfs, etfs
 from tsetmc.instruments import Instrument
 
+from dev import logger
 from iranetf.dataset import load_dataset
 
 ignore_desc = {
@@ -20,7 +21,7 @@ async def is_valid(l18: str) -> bool:
     desc = info['faraDesc']
     if desc in ignore_desc:
         return False
-    print(f'{l18=!r} {desc=!r}')
+    logger.info(f'{l18=!r} {desc=!r}')
     return True
 
 
@@ -36,11 +37,11 @@ async def main():
     ds_set = set(ds['l18'])
     df_set = set(df['instrument.lVal18AFC'])
 
-    print(f'{ds_set - df_set = }')
+    logger.info(f'{ds_set - df_set = }')
 
     not_in_ds = [i for i in df_set - ds_set if await is_valid(i)]
 
-    print(f'{not_in_ds = }')
+    logger.info(f'{not_in_ds = }')
 
 
 run(main())
