@@ -49,7 +49,6 @@ LogRender.__call__ = _patched_log_render_call  # type: ignore
 
 # Now configure logging normally
 logging.basicConfig(
-    level='NOTSET',
     format='%(message)s',
     datefmt='[%d %X]',
     handlers=[
@@ -61,3 +60,6 @@ logging.basicConfig(
 )
 
 logger = logging.getLogger(__name__)
+# Note: Setting level to 0 is the same as 'NOTSET' which is
+# the same as not calling setLevel at all.
+logger.setLevel('DEBUG')
