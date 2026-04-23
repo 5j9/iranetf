@@ -15,14 +15,14 @@ classifiers = [
 requires-python = ">= 3.13"
 dependencies = [
     "aiohttp[speedups]",
-    "aiohutils >= 0.24.1",
+    "aiohutils>=0.25.1",
     "jdatetime >= 4.1.0",
     "pandas[pyarrow] >= 3.0.0",
     'tsetmc>=3.0.0',
     'fipiran >= 1.0.2',
 ]
 [dependency-groups]
-dev = ["pytest-aiohutils >= 0.22.5", 'rich']
+dev = ["pytest-aiohutils>=0.23.0", 'rich']
 
 [project.readme]
 file = "README.rst"
