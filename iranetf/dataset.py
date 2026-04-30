@@ -101,6 +101,10 @@ def load_dataset(*, site=True, inst=False) -> _DataFrame:
 
 
 def save_dataset(ds: _DataFrame):
+    yk_tt = str.maketrans({'ي': 'ی', 'ك': 'ک'})
+    ds['l18'] = ds['l18'].str.translate(yk_tt)
+    ds['name'] = ds['name'].str.translate(yk_tt)
+
     ds[
         [  # sort columns
             'l18',
