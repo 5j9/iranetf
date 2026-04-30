@@ -425,6 +425,9 @@ async def check_dataset(live=False):
     assert ds['insCode'].is_unique
     assert ds['url'].is_unique
     assert not ds['regNo'].isna().any()
+    assert (
+        ds['url'][ds['regNo'].duplicated(False)].str.rfind('#') != -1
+    ).all()
 
     if not live:
         return
