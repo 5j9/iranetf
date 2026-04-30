@@ -1,4 +1,4 @@
-__version__ = '4.0.2.dev1'
+__version__ = '4.1.0'
 
 from aiohttp import (
     ClientResponse as _ClientResponse,
