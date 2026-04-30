@@ -3,6 +3,7 @@ import logging as _logging
 from asyncio import gather as _gather, sleep as _sleep
 from json import JSONDecodeError as _JSONDecodeError
 from logging import (
+    debug as _debug,
     error as _error,
     exception as _excepton,
     info as _info,
@@ -14,7 +15,7 @@ import pandas as _pd
 from aiohttp import (
     ClientConnectorDNSError as _ClientConnectorDNSError,
     ClientConnectorError as _ClientConnectorError,
-    ClientOSError as _ClientOSError,
+    ClientError as _ClientError,
     ClientResponseError as _ClientResponseError,
     ServerDisconnectedError as _ServerDisconnectedError,
     ServerTimeoutError as _ServerTimeoutError,
@@ -124,10 +125,10 @@ async def _check_validity(site: _BaseSite, retry=0) -> tuple[str, str] | None:
         _JSONDecodeError,
         _ClientConnectorError,
         _ServerTimeoutError,
-        _ClientOSError,
         _TooManyRedirects,
         _ServerDisconnectedError,
         _ClientResponseError,
+        _ClientError,
     ):
         if retry > 0:
             return await _check_validity(site, retry - 1)
@@ -327,12 +328,14 @@ def _log_errors(func):
             try:
                 return await func(arg)
             except _ClientConnectorDNSError:
+                _debug('retrying ClientConnectorDNSError')
                 await _sleep(1)
                 continue
             except (
                 OSError,
                 _ServerDisconnectedError,
                 _ClientResponseError,
+                _ClientError,
             ) as e:
                 _error(f'{e!r} on {arg}')
                 return
@@ -414,7 +417,7 @@ def _check_symbol_counts():
         _error(f'{url=} symbol counts do not match: {counts}')
 
 
-async def check_dataset(live=False):
+async def check_dataset(live=False, sequential: bool = True):
     ds = load_dataset(site=False)
     assert ds['l18'].is_unique
     assert ds['name'].is_unique, ds['name'][ds['name'].duplicated()]
@@ -433,16 +436,28 @@ async def check_dataset(live=False):
 
     rows = [*ds.itertuples()]
     sites: list[_BaseSite] = [row.site for row in rows]  # type: ignore
-    check_site_coros = [_check_site_type(s) for s in sites]
-    check_reg_no_coros = [_check_reg_no(r) for r in rows]
-    collect_symbol_counts_coros = [_collect_symbol_counts(s) for s in sites]
 
     orig_ssl = iranetf.ssl
     iranetf.ssl = False  # many sites fail ssl verification
     try:
-        await _gather(*check_site_coros)
-        await _gather(*check_reg_no_coros)
-        await _gather(*collect_symbol_counts_coros)
+        if sequential:
+            for s in sites:
+                await _check_site_type(s)
+
+            for r in rows:
+                await _check_reg_no(r)
+
+            for s in sites:
+                await _collect_symbol_counts(s)
+        else:
+            check_site_coros = [_check_site_type(s) for s in sites]
+            check_reg_no_coros = [_check_reg_no(r) for r in rows]
+            collect_symbol_counts_coros = [
+                _collect_symbol_counts(s) for s in sites
+            ]
+            await _gather(*check_site_coros)
+            await _gather(*check_reg_no_coros)
+            await _gather(*collect_symbol_counts_coros)
     finally:
         iranetf.ssl = orig_ssl
 

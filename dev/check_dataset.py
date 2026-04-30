@@ -5,7 +5,7 @@ from iranetf.dataset import check_dataset
 
 
 async def main():
-    await check_dataset(live=True)
+    await check_dataset(live=True, sequential=False)
 
 
 run(main())
