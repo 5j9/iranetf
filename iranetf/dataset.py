@@ -230,7 +230,6 @@ async def _fipiran_data(ds: _DataFrame) -> _DataFrame:
             'websiteAddress': 'domain',
             'smallSymbolName': 'l18',
         },
-        copy=False,
         inplace=True,
         errors='raise',
     )
