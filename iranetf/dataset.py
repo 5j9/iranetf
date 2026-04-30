@@ -352,11 +352,8 @@ async def _check_site_type(site: _BaseSite) -> None:
             f' but dataset site type is {type(site).__name__}.'
         )
     if isinstance(site, _MabnaDP2):
-        data = await site.home_data()
-        portfolio_ids = data['__REACT_REDUX_STATE__']['general']['data'][
-            'portfolioIds'
-        ]
-        if site.portfolio_id not in portfolio_ids:
+        portfolios = await site.portfolios()
+        if site.portfolio_id not in (p['id'] for p in portfolios):
             _error(f'site.portfolio_id not in portfolio_ids for {site}')
 
 
