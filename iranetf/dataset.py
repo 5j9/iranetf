@@ -1,6 +1,6 @@
 __version__ = '0.29.1.dev1'
 import logging as _logging
-from asyncio import gather as _gather
+from asyncio import gather as _gather, sleep as _sleep
 from json import JSONDecodeError as _JSONDecodeError
 from logging import (
     error as _error,
@@ -12,6 +12,7 @@ from pathlib import Path as _Path
 
 import pandas as _pd
 from aiohttp import (
+    ClientConnectorDNSError as _ClientConnectorDNSError,
     ClientConnectorError as _ClientConnectorError,
     ClientOSError as _ClientOSError,
     ClientResponseError as _ClientResponseError,
@@ -323,13 +324,22 @@ async def update_dataset(*, check_existing_sites=False) -> _DataFrame:
 
 def _log_errors(func):
     async def wrapper(arg):
-        try:
-            return await func(arg)
-        except (OSError, _ServerDisconnectedError, _ClientResponseError) as e:
-            _error(f'{e!r} on {arg}')
-        except Exception as e:
-            _excepton(f'Exception occurred during checking of {arg}: {e}')
-            return None
+        while True:
+            try:
+                return await func(arg)
+            except _ClientConnectorDNSError:
+                await _sleep(1)
+                continue
+            except (
+                OSError,
+                _ServerDisconnectedError,
+                _ClientResponseError,
+            ) as e:
+                _error(f'{e!r} on {arg}')
+                return
+            except Exception as e:
+                _excepton(f'Exception occurred during checking of {arg}: {e}')
+                return
 
     return wrapper
 
