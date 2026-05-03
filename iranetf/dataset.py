@@ -328,11 +328,15 @@ async def update_dataset(*, check_existing_sites=False) -> _DataFrame:
 
 def _log_errors(func):
     async def wrapper(arg):
-        while True:
+        retry = 10
+        while retry > 0:
             try:
                 return await func(arg)
-            except _ClientConnectorDNSError:
-                _debug('retrying ClientConnectorDNSError')
+            # ClientConnectorError is usually raise after
+            # OSError(22, 'The semaphore timeout period has expired', None, 121, None))
+            except (_ClientConnectorDNSError, _ClientConnectorError) as e:
+                retry -= 1
+                _debug(f'retrying {type(e).__name__}')
                 await _sleep(1)
                 continue
             except (
