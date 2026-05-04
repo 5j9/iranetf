@@ -2,7 +2,6 @@ from asyncio import gather
 from datetime import date
 from io import StringIO
 from json import loads
-from logging import warning
 from re import findall, search, split
 from typing import Any
 
@@ -16,7 +15,7 @@ from pandas import (
     to_numeric,
 )
 
-from iranetf import _get
+from iranetf import _get, logger
 from iranetf.sites._lib import (
     BaseSite,
     LiveNAVPS,
@@ -243,7 +242,7 @@ class TadbirPardaz(BaseTadbirPardaz):
                 try:
                     d[k] = comma_int(d[k])
                 except KeyError:
-                    warning(f'key {k!r} not found')
+                    logger.warning(f'key {k!r} not found')
 
         date = d.pop('publishDate')
         try:

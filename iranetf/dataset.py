@@ -1,14 +1,10 @@
 __version__ = '0.29.1.dev1'
-import logging as _logging
+from contextlib import contextmanager as _contextmanager
+from logging import Logger as _Logger
+
+from aiohutils import logger as _aiohutils_logger
 from asyncio import gather as _gather, sleep as _sleep
 from json import JSONDecodeError as _JSONDecodeError
-from logging import (
-    debug as _debug,
-    error as _error,
-    exception as _excepton,
-    info as _info,
-    warning as _warning,
-)
 from pathlib import Path as _Path
 
 import pandas as _pd
@@ -34,7 +30,7 @@ from tsetmc.instruments import (
 )
 
 import iranetf
-from iranetf import sites as _sites
+from iranetf import sites as _sites, logger as _logger
 from iranetf.sites import (
     BaseSite as _BaseSite,
     BaseTadbirPardaz as _BaseTadbirPardaz,
@@ -145,6 +141,16 @@ async def _check_validity(site: _BaseSite, retry=0) -> tuple[str, str] | None:
 SITE_TYPES = (_RayanHamafza, _TadbirPardaz, _LeveragedTadbirPardaz, _MabnaDP2)
 
 
+@_contextmanager
+def set_level(logger: _Logger, level: str | int):
+    old = logger.level
+    logger.setLevel(level)
+    try:
+        yield
+    finally:
+        logger.setLevel(old)
+
+
 async def _url_type(domain: str) -> tuple:
     coros = [
         _check_validity(SiteType(f'http://{domain}/'), 2)
@@ -156,7 +162,7 @@ async def _url_type(domain: str) -> tuple:
         if result is not None:
             return result
 
-    _warning(f'_url_type failed for {domain}')
+    _logger.warning(f'_url_type failed for {domain}')
     return None, None
 
 
@@ -169,16 +175,15 @@ async def _add_url_and_type(
             ~domains_to_be_checked.isin(known_domains)
         ]
 
-    _info(f'checking site types of {len(domains_to_be_checked)} domains')
+    _logger.info(f'checking site types of {len(domains_to_be_checked)} domains')
     if domains_to_be_checked.empty:
         return
 
     # there will be a lot of redirection warnings, let's silent them
-    _logging.disable()  # to disable redirection warnings
-    list_of_tuples = await _gather(
-        *[_url_type(d) for d in domains_to_be_checked]
-    )
-    _logging.disable(_logging.NOTSET)
+    with set_level(_aiohutils_logger, 'ERROR'):
+        list_of_tuples = await _gather(
+            *[_url_type(d) for d in domains_to_be_checked]
+        )
 
     url, site_type = zip(*list_of_tuples)
     fipiran_df.loc[:, ['url', 'siteType']] = _DataFrame(
@@ -190,7 +195,7 @@ async def _add_ins_code(new_items: _DataFrame) -> None:
     names_without_code = new_items[new_items['insCode'].isna()].name
     if names_without_code.empty:
         return
-    _info('searching names on tsetmc to find their insCode')
+    _logger.info('searching names on tsetmc to find their insCode')
     results = await _gather(
         *[_tsetmc_search(name) for name in names_without_code]
     )
@@ -201,12 +206,12 @@ async def _add_ins_code(new_items: _DataFrame) -> None:
 async def _fipiran_data(ds: _DataFrame) -> _DataFrame:
     import fipiran.funds
 
-    _info('await fipiran.funds.funds()')
+    _logger.info('await fipiran.funds.funds()')
     fipiran_df = await fipiran.funds.funds()
 
     reg_not_in_fipiran = ds[~ds['regNo'].isin(fipiran_df['regNo'])]
     if not reg_not_in_fipiran.empty:
-        _warning(
+        _logger.warning(
             f'Some dataset rows were not found on fipiran:\n{reg_not_in_fipiran}'
         )
 
@@ -247,7 +252,7 @@ async def _fipiran_data(ds: _DataFrame) -> _DataFrame:
 async def _tsetmc_dataset() -> _DataFrame:
     from tsetmc.dataset import LazyDS, update
 
-    _info('await tsetmc.dataset.update()')
+    _logger.info('await tsetmc.dataset.update()')
     await update()
 
     df = LazyDS.df
@@ -264,7 +269,7 @@ def _add_new_items_to_ds(new_items: _DataFrame, ds: _DataFrame) -> _DataFrame:
             [ds, new_with_code.set_index('insCode').drop(columns=['domain'])]
         )
     else:
-        _info('new_with_code is empty!')
+        _logger.info('new_with_code is empty!')
     return ds
 
 
@@ -336,7 +341,7 @@ def _log_errors(func):
             # OSError(22, 'The semaphore timeout period has expired', None, 121, None))
             except (_ClientConnectorDNSError, _ClientConnectorError) as e:
                 retry -= 1
-                _debug(f'retrying {type(e).__name__}')
+                _logger.debug(f'retrying {type(e).__name__}')
                 await _sleep(1)
                 continue
             except (
@@ -345,10 +350,10 @@ def _log_errors(func):
                 _ClientResponseError,
                 _ClientError,
             ) as e:
-                _error(f'{e!r} on {arg}')
+                _logger.error(f'{e!r} on {arg}')
                 return
             except Exception as e:
-                _excepton(f'Exception occurred during checking of {arg}: {e}')
+                _logger.exception(f'Exception occurred during checking of {arg}: {e}')
                 return
 
     return wrapper
@@ -358,14 +363,14 @@ def _log_errors(func):
 async def _check_site_type(site: _BaseSite) -> None:
     detected = await _BaseSite.from_url(site.url)
     if type(detected) is not type(site):
-        _error(
+        _logger.error(
             f'Detected site type for {site.url} is {type(detected).__name__},'
             f' but dataset site type is {type(site).__name__}.'
         )
     if isinstance(site, _MabnaDP2):
         portfolios = await site.portfolios()
         if site.portfolio_id not in (p['id'] for p in portfolios):
-            _error(f'site.portfolio_id not in portfolio_ids for {site}')
+            _logger.error(f'site.portfolio_id not in portfolio_ids for {site}')
 
 
 @_log_errors
@@ -377,7 +382,7 @@ async def _check_reg_no(row):
     actual_reg_no = await site.reg_no()
     if ds_reg_no == actual_reg_no:
         return
-    _error(f'regNo mismatch:\n {site.url=}\n {ds_reg_no=}\n {actual_reg_no=}')
+    _logger.error(f'regNo mismatch:\n {site.url=}\n {ds_reg_no=}\n {actual_reg_no=}')
 
 
 _url_symbols: dict[str, dict[str, int]] = {}
@@ -422,7 +427,7 @@ def _check_symbol_counts():
     for url, counts in _url_symbols.items():
         if counts['expected_count'] == counts['actual_count']:
             continue
-        _error(f'{url=} symbol counts do not match: {counts}')
+        _logger.error(f'{url=} symbol counts do not match: {counts}')
 
 
 async def check_dataset(live=False, sequential: bool = True):
@@ -472,6 +477,6 @@ async def check_dataset(live=False, sequential: bool = True):
     _check_symbol_counts()
 
     if not (no_site := ds[ds['site'].isna()]).empty:
-        _warning(
+        _logger.warning(
             f'some dataset entries have no associated site:\n{no_site["l18"]}'
         )
