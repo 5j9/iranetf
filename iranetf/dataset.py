@@ -261,6 +261,7 @@ async def _tsetmc_dataset() -> _DataFrame:
 
 
 def _add_new_items_to_ds(new_items: _DataFrame, ds: _DataFrame) -> _DataFrame:
+    ds.set_index('insCode', inplace=True)
     if new_items.empty:
         return ds
     new_with_code = new_items[new_items['insCode'].notna()]
@@ -284,27 +285,22 @@ async def _update_existing_rows_using_fipiran(
         else ds['url'].str.extract('//(.*)/')[0],
     )
 
-    # to update existing urls and names
-    # NA values in regNo cause error later due to duplication
-    regno = ds[~ds['regNo'].isna()].set_index('regNo')
-    regno['domain'] = None
-    regno.update(fipiran_df.set_index('regNo'))
+    ds.set_index('regNo', inplace=True)
+    df = fipiran_df.set_index('regNo')
+    ds['domain'] = None
+    # to add fipiran urls and names to ds
+    ds.update(df, overwrite=False)
 
-    ds.set_index('insCode', inplace=True)
-    # Do not overwrite MultiNAV type and URL.
-    regno.set_index('insCode', inplace=True)
-    ds.update(regno, overwrite=False)
-
-    # Update ds types using fipiran values
-    # ds['type'] = regno['type'] will create NA values in type column.
-    common_indices = regno.index.intersection(ds.index)
-    ds.loc[common_indices, 'type'] = regno.loc[common_indices, 'type']
+    # ds['type'] = fipiran_df['type'] will create NA values in type column.
+    common_regno = df.index.intersection(ds.index)
+    ds.loc[common_regno, 'type'] = df.loc[common_regno, 'type']
 
     # use domain as URL for those who do not have any URL
-    common_indices = ds[ds['url'].isna()].index.intersection(regno.index)
-    ds.loc[common_indices, 'url'] = (
-        'http://' + regno.loc[common_indices, 'domain'] + '/'
+    na_urls = ds[ds['url'].isna()].index
+    ds.loc[na_urls, 'url'] = (
+        'http://' + ds.loc[na_urls, 'domain'] + '/'
     )
+    ds.reset_index(inplace=True)
     return ds
 
 
@@ -315,7 +311,6 @@ async def update_dataset(*, check_existing_sites=False) -> _DataFrame:
     ds = await _update_existing_rows_using_fipiran(
         ds, fipiran_df, check_existing_sites
     )
-
     new_items = fipiran_df[~fipiran_df['regNo'].isin(ds['regNo'])]
 
     tsetmc_df = await _tsetmc_dataset()
