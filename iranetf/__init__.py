@@ -1,11 +1,12 @@
 __version__ = '4.1.2.dev1'
 
+from logging import getLogger as _get_logger
+
 from aiohttp import (
     ClientResponse as _ClientResponse,
 )
 from aiohttp.client import ClientTimeout as _ClientTimeout
 from aiohutils.session import SessionManager
-from logging import getLogger as _get_logger
 
 session_manager = SessionManager(timeout=_ClientTimeout(5.0))
 logger = _get_logger(__name__)

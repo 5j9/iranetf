@@ -1,10 +1,8 @@
 __version__ = '0.29.1.dev1'
-from contextlib import contextmanager as _contextmanager
-from logging import Logger as _Logger
-
-from aiohutils import logger as _aiohutils_logger
 from asyncio import gather as _gather, sleep as _sleep
+from contextlib import contextmanager as _contextmanager
 from json import JSONDecodeError as _JSONDecodeError
+from logging import Logger as _Logger
 from pathlib import Path as _Path
 
 import pandas as _pd
@@ -17,6 +15,7 @@ from aiohttp import (
     ServerTimeoutError as _ServerTimeoutError,
     TooManyRedirects as _TooManyRedirects,
 )
+from aiohutils import logger as _aiohutils_logger
 from pandas import (
     NA as _NA,
     DataFrame as _DataFrame,
@@ -30,7 +29,7 @@ from tsetmc.instruments import (
 )
 
 import iranetf
-from iranetf import sites as _sites, logger as _logger
+from iranetf import logger as _logger, sites as _sites
 from iranetf.sites import (
     BaseSite as _BaseSite,
     BaseTadbirPardaz as _BaseTadbirPardaz,
@@ -175,7 +174,9 @@ async def _add_url_and_type(
             ~domains_to_be_checked.isin(known_domains)
         ]
 
-    _logger.info(f'checking site types of {len(domains_to_be_checked)} domains')
+    _logger.info(
+        f'checking site types of {len(domains_to_be_checked)} domains'
+    )
     if domains_to_be_checked.empty:
         return
 
@@ -297,9 +298,7 @@ async def _update_existing_rows_using_fipiran(
 
     # use domain as URL for those who do not have any URL
     na_urls = ds[ds['url'].isna()].index
-    ds.loc[na_urls, 'url'] = (
-        'http://' + ds.loc[na_urls, 'domain'] + '/'
-    )
+    ds.loc[na_urls, 'url'] = 'http://' + ds.loc[na_urls, 'domain'] + '/'
     ds.reset_index(inplace=True)
     return ds
 
@@ -348,7 +347,9 @@ def _log_errors(func):
                 _logger.error(f'{e!r} on {arg}')
                 return
             except Exception as e:
-                _logger.exception(f'Exception occurred during checking of {arg}: {e}')
+                _logger.exception(
+                    f'Exception occurred during checking of {arg}: {e}'
+                )
                 return
 
     return wrapper
@@ -377,7 +378,9 @@ async def _check_reg_no(row):
     actual_reg_no = await site.reg_no()
     if ds_reg_no == actual_reg_no:
         return
-    _logger.error(f'regNo mismatch:\n {site.url=}\n {ds_reg_no=}\n {actual_reg_no=}')
+    _logger.error(
+        f'regNo mismatch:\n {site.url=}\n {ds_reg_no=}\n {actual_reg_no=}'
+    )
 
 
 _url_symbols: dict[str, dict[str, int]] = {}

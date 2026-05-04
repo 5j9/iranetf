@@ -4,6 +4,7 @@ import iranetf
 from dev import config, logger
 from iranetf.dataset import update_dataset
 
+
 async def main():
     iranetf.ssl = False  # tolerate week ssl certs
     df = await update_dataset(
