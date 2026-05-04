@@ -12,7 +12,7 @@ classifiers = [
     "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
     "Operating System :: OS Independent",
 ]
-requires-python = ">= 3.13"
+requires-python = ">= 3.14"
 dependencies = [
     "aiohttp[speedups]",
     "aiohutils>=0.26.0",
