@@ -142,9 +142,6 @@ def _log_and_retry(func):
                     continue
                 _logger.error(f'status {e.status} on {arg}')
                 return
-            except _RegNoError:
-                _logger.error(f'RegNoError on {arg}')
-                return
             except (
                 OSError,
                 _ServerDisconnectedError,
@@ -372,15 +369,16 @@ async def _check_site_type(site: _BaseSite) -> None:
 @_log_and_retry
 async def _check_reg_no(row):
     ds_reg_no = row.regNo
-    if ds_reg_no is _NA:  # todo: remove this after adding regNo for all
-        return
+    assert ds_reg_no is not _NA
     site: _BaseSite = row.site
-    actual_reg_no = await site.reg_no()
-    if ds_reg_no == actual_reg_no:
+    try:
+        site_reg_no = await site.reg_no()
+    except _RegNoError:
+        _logger.error(f'RegNoError on {site}')
         return
-    _logger.error(
-        f'regNo mismatch:\n {site.url=}\n {ds_reg_no=}\n {actual_reg_no=}'
-    )
+    if ds_reg_no == site_reg_no:
+        return
+    _logger.error(f'{site_reg_no=} != {ds_reg_no=}')
 
 
 _url_symbols: dict[str, dict[str, int]] = {}
