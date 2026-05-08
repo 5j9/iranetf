@@ -119,6 +119,8 @@ def save_dataset(ds: _DataFrame):
 async def _check_validity(site: _BaseSite, retry=0) -> tuple[str, str] | None:
     try:
         await site.live_navps()
+    except _ClientResponseError as e:
+        _logger.error(f'ClientResponseError on {site} status: {e.status}')
     except (
         TimeoutError,
         _JSONDecodeError,
@@ -126,7 +128,6 @@ async def _check_validity(site: _BaseSite, retry=0) -> tuple[str, str] | None:
         _ServerTimeoutError,
         _TooManyRedirects,
         _ServerDisconnectedError,
-        _ClientResponseError,
         _ClientError,
     ):
         if retry > 0:
