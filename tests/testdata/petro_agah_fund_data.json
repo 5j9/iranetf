@@ -1,1 +1,25 @@
-{"FundType":5,"FundList":[{"FundId":1,"FundName":"پترو آگاه","IsDefaultFund":true},{"FundId":2,"FundName":"اتو آگاه","IsDefaultFund":false},{"FundId":3,"FundName":"آلیاژ آگاه","IsDefaultFund":false},{"FundId":4,"FundName":"بانکا","IsDefaultFund":false}]}
+{
+    "FundType": 5,
+    "FundList": [
+        {
+            "FundId": 1,
+            "FundName": "پترو آگاه",
+            "IsDefaultFund": true
+        },
+        {
+            "FundId": 2,
+            "FundName": "اتو آگاه",
+            "IsDefaultFund": false
+        },
+        {
+            "FundId": 3,
+            "FundName": "آلیاژ آگاه",
+            "IsDefaultFund": false
+        },
+        {
+            "FundId": 4,
+            "FundName": "بانکا",
+            "IsDefaultFund": false
+        }
+    ]
+}
