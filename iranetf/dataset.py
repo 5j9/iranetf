@@ -26,7 +26,11 @@ from tsetmc.instruments import (
 )
 
 import iranetf
-from iranetf import logger as _logger, sites as _sites
+from iranetf import (
+    RegNoError as _RegNoError,
+    logger as _logger,
+    sites as _sites,
+)
 from iranetf.sites import (
     BaseSite as _BaseSite,
     BaseTadbirPardaz as _BaseTadbirPardaz,
@@ -137,6 +141,9 @@ def _log_and_retry(func):
                     retry -= 1
                     continue
                 _logger.error(f'status {e.status} on {arg}')
+                return
+            except _RegNoError:
+                _logger.error(f'RegNoError on {arg}')
                 return
             except (
                 OSError,

@@ -10,7 +10,7 @@ from pandas import DataFrame
 
 import iranetf
 import iranetf.sites
-from iranetf import _get
+from iranetf import RegNoError, _get
 
 
 class LiveNAVPS(TypedDict):
@@ -131,4 +131,8 @@ class BaseSite(ABC):
             return i
 
     async def reg_no(self) -> str:
-        return (await self.home_info())['seo_reg_no']
+        home_info = await self.home_info()
+        try:
+            return home_info['seo_reg_no']
+        except KeyError:
+            raise RegNoError('"seo_reg_no" not found in home_info') from None

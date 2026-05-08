@@ -14,6 +14,10 @@ logger = _get_logger(__name__)
 ssl: bool = False  # as horrible as this is, many sites fail ssl verification
 
 
+class RegNoError(KeyError):
+    pass
+
+
 async def _get(
     url: str, params: dict | None = None, cookies: dict | None = None
 ) -> _ClientResponse:
