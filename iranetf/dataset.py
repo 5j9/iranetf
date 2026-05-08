@@ -1,7 +1,6 @@
 __version__ = '0.29.1.dev1'
 from asyncio import gather as _gather, sleep as _sleep
 from contextlib import contextmanager as _contextmanager
-from json import JSONDecodeError as _JSONDecodeError
 from logging import Logger as _Logger
 from pathlib import Path as _Path
 
@@ -12,8 +11,6 @@ from aiohttp import (
     ClientError as _ClientError,
     ClientResponseError as _ClientResponseError,
     ServerDisconnectedError as _ServerDisconnectedError,
-    ServerTimeoutError as _ServerTimeoutError,
-    TooManyRedirects as _TooManyRedirects,
 )
 from aiohutils import logger as _aiohutils_logger
 from pandas import (
@@ -116,23 +113,48 @@ def save_dataset(ds: _DataFrame):
     )
 
 
-async def _check_validity(site: _BaseSite, retry=0) -> tuple[str, str] | None:
-    try:
-        await site.live_navps()
-    except _ClientResponseError as e:
-        _logger.error(f'ClientResponseError on {site} status: {e.status}')
-    except (
-        TimeoutError,
-        _JSONDecodeError,
-        _ClientConnectorError,
-        _ServerTimeoutError,
-        _TooManyRedirects,
-        _ServerDisconnectedError,
-        _ClientError,
-    ):
-        if retry > 0:
-            return await _check_validity(site, retry - 1)
-        return None
+def _log_and_retry(func):
+    retry = 3
+
+    async def wrapper(arg):
+        nonlocal retry
+        while True:
+            try:
+                return await func(arg)
+            # ClientConnectorError is usually raise after
+            # OSError(22, 'The semaphore timeout period has expired', None, 121, None))
+            except (_ClientConnectorDNSError, _ClientConnectorError) as e:
+                if retry <= 0:
+                    _logger.error(f'{type(e).__name__} for {arg}')
+                    return
+                retry -= 1
+                _logger.debug(f'retrying {type(e).__name__} for {arg}')
+                await _sleep(2)
+                continue
+            except _ClientResponseError as e:
+                if e.status == 429 and retry > 0:
+                    await _sleep(5)
+                    retry -= 1
+                    continue
+                _logger.error(f'status {e.status} on {arg}')
+                return
+            except (
+                OSError,
+                _ServerDisconnectedError,
+                _ClientError,
+            ) as e:
+                _logger.error(f'{e!r} on {arg}')
+                return
+            except Exception as e:
+                _logger.exception(f'{e!r} on {arg}')
+                return
+
+    return wrapper
+
+
+@_log_and_retry
+async def _check_validity(site: _BaseSite) -> tuple[str, str] | None:
+    await site.live_navps()
     last_url = site.last_response.url  # to avoid redirected URLs
     return f'{last_url.scheme}://{last_url.host}/', type(site).__name__
 
@@ -153,7 +175,7 @@ def set_level(logger: _Logger, level: str | int):
 
 async def _url_type(domain: str) -> tuple:
     coros = [
-        _check_validity(SiteType(f'http://{domain}/'), 2)
+        _check_validity(SiteType(f'http://{domain}/'))
         for SiteType in SITE_TYPES
     ]
     results = await _gather(*coros)
@@ -326,37 +348,7 @@ async def update_dataset(*, check_existing_sites=False) -> _DataFrame:
     return new_items[new_items['insCode'].isna()]
 
 
-def _log_errors(func):
-    async def wrapper(arg):
-        retry = 3
-        while retry > 0:
-            try:
-                return await func(arg)
-            # ClientConnectorError is usually raise after
-            # OSError(22, 'The semaphore timeout period has expired', None, 121, None))
-            except (_ClientConnectorDNSError, _ClientConnectorError) as e:
-                retry -= 1
-                _logger.debug(f'retrying {type(e).__name__} for {arg}')
-                await _sleep(2)
-                continue
-            except (
-                OSError,
-                _ServerDisconnectedError,
-                _ClientResponseError,
-                _ClientError,
-            ) as e:
-                _logger.error(f'{e!r} on {arg}')
-                return
-            except Exception as e:
-                _logger.exception(
-                    f'Exception occurred during checking of {arg}: {e}'
-                )
-                return
-
-    return wrapper
-
-
-@_log_errors
+@_log_and_retry
 async def _check_site_type(site: _BaseSite) -> None:
     detected = await _BaseSite.from_url(site.url)
     if type(detected) is not type(site):
@@ -370,7 +362,7 @@ async def _check_site_type(site: _BaseSite) -> None:
             _logger.error(f'site.portfolio_id not in portfolio_ids for {site}')
 
 
-@_log_errors
+@_log_and_retry
 async def _check_reg_no(row):
     ds_reg_no = row.regNo
     if ds_reg_no is _NA:  # todo: remove this after adding regNo for all
@@ -387,7 +379,7 @@ async def _check_reg_no(row):
 _url_symbols: dict[str, dict[str, int]] = {}
 
 
-@_log_errors
+@_log_and_retry
 async def _collect_symbol_counts(site: _BaseSite):
     if (url := site.url) in _url_symbols:
         _url_symbols[url]['actual_count'] += 1
