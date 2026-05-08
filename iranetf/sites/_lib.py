@@ -136,3 +136,8 @@ class BaseSite(ABC):
             return home_info['seo_reg_no']
         except KeyError:
             raise RegNoError('"seo_reg_no" not found in home_info') from None
+
+    @abstractmethod
+    async def portfolios(self) -> dict[str, str]:
+        """Return a dict mapping portfolio id to portfolio name."""
+        ...

@@ -2,7 +2,7 @@ from asyncio import gather
 from datetime import datetime
 from json import loads
 from re import search
-from typing import Any, TypedDict
+from typing import Any
 
 from pandas import DataFrame
 
@@ -11,11 +11,6 @@ from iranetf.sites._lib import (
     LiveNAVPS,
     _get,
 )
-
-
-class Portolio(TypedDict):
-    id: str
-    name: str
 
 
 # uses api/v2/ path instead of api/v1/
@@ -143,5 +138,6 @@ class MabnaDP2(BaseSite):
             + first['commonUnitRedemptionValueAmount'] / preferred_redemption
         ) * (1.0 - cache)
 
-    async def portfolios(self) -> list[Portolio]:
-        return (await self._json('portfolios'))['data']
+    async def portfolios(self) -> dict[str, str]:
+        portfolios = await self._json('portfolios')
+        return {p['id']: p['name'] for p in portfolios['data']}

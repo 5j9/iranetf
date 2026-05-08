@@ -107,9 +107,9 @@ async def test_alt_home_data_format():
 async def test_portfolios():
     site = MabnaDP2('https://kianfunds9.ir/')
     portfolios = await site.portfolios()
-    for p in portfolios:
-        if p['id'] == '11':
+    for pid, pname in portfolios.items():
+        if pid == '11':
+            assert pname == 'یوتیلیتی'
             break
     else:
         raise RuntimeError('portfolio with id 11 was not found')
-    assert p['name'] == 'یوتیلیتی'

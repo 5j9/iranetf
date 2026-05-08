@@ -226,6 +226,14 @@ class BaseTadbirPardaz(BaseSite):
         df.set_index('Date', inplace=True)
         return df
 
+    async def portfolios(self) -> dict[str, str]:
+        home_info = await self.home_info()
+        if home_info['isETFMultiNavMode']:
+            baskets = home_info['basketIDs']
+            del baskets['1']  # ignore the overall basket
+            return baskets
+        return {'1': self.url}
+
 
 class TadbirPardaz(BaseTadbirPardaz):
     async def live_navps(self) -> TPLiveNAVPS:

@@ -84,3 +84,9 @@ async def test_leverage():
 @file('petro_agah_fund_data.json')
 async def test_fund_data():
     validate_dict(await petro_agah.fund_data(), FundData)
+
+
+@file('petro_agah_fund_data.json')
+async def test_portfolios():
+    ps = await petro_agah.portfolios()
+    assert ps['2'] == 'اتو آگاه'

@@ -152,6 +152,12 @@ async def test_info():
 
 
 @file('mofidsectorfund.html')
+async def test_portfolios():
+    ps = await steel.portfolios()
+    assert ps['2'] == 'استیل'
+
+
+@file('mofidsectorfund.html')
 async def test_reg_no():
     assert await steel.reg_no() == '12150'
 

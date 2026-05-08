@@ -132,3 +132,7 @@ class RayanHamafza(BaseSite):
         fund_data = await self._json('Fund')
         fund_data['FundType'] = FundType(fund_data['FundType'])
         return fund_data
+
+    async def portfolios(self) -> dict[str, str]:
+        fund_data = await self.fund_data()
+        return {str(f['FundId']): f['FundName'] for f in fund_data['FundList']}
