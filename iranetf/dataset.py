@@ -14,7 +14,6 @@ from aiohttp import (
 )
 from aiohutils import logger as _aiohutils_logger
 from pandas import (
-    NA as _NA,
     DataFrame as _DataFrame,
     Series as _Series,
     concat as _concat,
@@ -33,14 +32,11 @@ from iranetf import (
 )
 from iranetf.sites import (
     BaseSite as _BaseSite,
-    BaseTadbirPardaz as _BaseTadbirPardaz,
-    FundType as _FundType,
     LeveragedTadbirPardaz as _LeveragedTadbirPardaz,
     MabnaDP2 as _MabnaDP2,
     RayanHamafza as _RayanHamafza,
     TadbirPardaz as _TadbirPardaz,
 )
-from iranetf.sites._mabnadp import MabnaDP2
 
 _ETF_TYPES = {  # numbers are according to fipiran
     6: 'Stock',
@@ -120,14 +116,19 @@ def save_dataset(ds: _DataFrame):
 def _log_and_retry(func):
     retry = 3
 
-    async def wrapper(arg):
+    async def wrapper(*args):
         nonlocal retry
+        arg = args[0]
         while True:
             try:
-                return await func(arg)
+                return await func(*args)
             # ClientConnectorError is usually raise after
             # OSError(22, 'The semaphore timeout period has expired', None, 121, None))
-            except (_ClientConnectorDNSError, _ClientConnectorError) as e:
+            except (
+                _ClientConnectorDNSError,
+                _ClientConnectorError,
+                _ServerDisconnectedError,
+            ) as e:
                 if retry <= 0:
                     _logger.error(f'{type(e).__name__} for {arg}')
                     return
@@ -144,7 +145,6 @@ def _log_and_retry(func):
                 return
             except (
                 OSError,
-                _ServerDisconnectedError,
                 _ClientError,
             ) as e:
                 _logger.error(f'{e!r} on {arg}')
@@ -362,15 +362,12 @@ async def _check_site_type(site: _BaseSite) -> None:
         )
     if isinstance(site, _MabnaDP2):
         portfolios = await site.portfolios()
-        if site.portfolio_id not in (p['id'] for p in portfolios):
+        if site.portfolio_id not in portfolios:
             _logger.error(f'site.portfolio_id not in portfolio_ids for {site}')
 
 
 @_log_and_retry
-async def _check_reg_no(row):
-    ds_reg_no = row.regNo
-    assert ds_reg_no is not _NA
-    site: _BaseSite = row.site
+async def _check_reg_no(site: _BaseSite, ds_reg_no: str):
     try:
         site_reg_no = await site.reg_no()
     except _RegNoError:
@@ -381,52 +378,34 @@ async def _check_reg_no(row):
     _logger.error(f'{site_reg_no=} != {ds_reg_no=}')
 
 
-_url_symbols: dict[str, dict[str, int]] = {}
-
-
 @_log_and_retry
-async def _collect_symbol_counts(site: _BaseSite):
-    if (url := site.url) in _url_symbols:
-        _url_symbols[url]['dataset_count'] += 1
+async def _check_portfolio_counts(site: _BaseSite, dataset_ids: set[str]):
+    """
+    Fetch portfolio counts from website and validate exact match with dataset.
+
+    Ensures:
+    1. Every portfolio ID from website exists in dataset
+    2. Every portfolio ID from dataset exists on website
+    3. Counts match exactly
+    """
+    site_portfolios = (
+        await site.portfolios()
+    )  # dict: {'2': 'Gold', '11': 'Silver'}
+    site_ids = site_portfolios.keys()
+
+    # Get dataset info for this site
+    url = site.url
+
+    if dataset_ids == {''}:
+        dataset_ids = {'1'}
+
+    # Validation 2: IDs must match exactly (set equality)
+    if site_ids == dataset_ids:
         return
-
-    # set an initual value early to avoid race conditions
-    _url_symbols[url] = {
-        'site_count': 1,
-        'dataset_count': 1,
-    }
-
-    if isinstance(site, _RayanHamafza):
-        fund_data = await site.fund_data()
-        if fund_data['FundType'] is _FundType.HYBRID:
-            return  # site_count == 1
-        _url_symbols[url]['site_count'] = len(fund_data['FundList'])
-        return
-
-    if isinstance(site, _BaseTadbirPardaz):
-        home_info = await site.home_info()
-        if home_info['isETFMultiNavMode']:
-            home_info['basketIDs'].pop('1', None)  # ignore the overall basket
-            _url_symbols[url]['site_count'] = len(home_info['basketIDs'])
-        return
-
-    if isinstance(site, MabnaDP2):
-        portfolios = await site.portfolios()
-        _url_symbols[url]['site_count'] = len(portfolios)
-        return
-
-    # for all other site types, assume site is not multi-nav
+    _logger.error(f'{url}: Portfolio ID mismatch! {dataset_ids=} {site_ids=}')
 
 
-def _check_symbol_counts():
-    """this function should be called after _gather_site_symbol_counts has been run for all sites"""
-    for url, counts in _url_symbols.items():
-        if counts['site_count'] == counts['dataset_count']:
-            continue
-        _logger.error(f'{url=} symbol counts do not match: {counts}')
-
-
-async def check_dataset(live=False, sequential: bool = True):
+async def check_dataset(live=False):
     ds = load_dataset(site=False)
     assert ds['l18'].is_unique
     assert ds['name'].is_unique, ds['name'][ds['name'].duplicated()]
@@ -434,43 +413,48 @@ async def check_dataset(live=False, sequential: bool = True):
     assert ds['insCode'].is_unique
     assert ds['url'].is_unique
     assert not ds['regNo'].isna().any()
+
+    # same regNo -> same base url
+    ds[['base_url', 'portfolio_id']] = ds['url'].str.partition('#')[[0, 2]]
     assert (
-        ds['url'][ds['regNo'].duplicated(False)].str.rfind('#') != -1
-    ).all()
+        ds.groupby('regNo').filter(lambda g: g['base_url'].nunique() > 1).empty
+    )
 
     if not live:
         return
+    ds = ds.join(
+        ds.groupby('base_url')['portfolio_id']
+        .agg(list)
+        .rename('portfolio_ids'),
+        on='base_url',
+    )
 
     ds['site'] = ds[ds['siteType'].notna()].apply(_make_site, axis=1)
 
-    rows = [*ds.itertuples()]
-    sites: list[_BaseSite] = [row.site for row in rows]  # type: ignore
+    check_site_coros = [_check_site_type(s) for s in ds['site']]
+    check_reg_no_coros = [
+        _check_reg_no(site, reg)
+        for (site, reg) in zip(ds['site'], ds['regNo'])
+    ]
+
+    unique_site_pids = ds.loc[
+        ~ds['base_url'].duplicated(), ['site', 'portfolio_ids']
+    ]
+    collect_symbol_counts_coros = [
+        _check_portfolio_counts(s, set(dataset_ids))
+        for (s, dataset_ids) in zip(
+            unique_site_pids['site'], unique_site_pids['portfolio_ids']
+        )
+    ]
 
     orig_ssl = iranetf.ssl
     iranetf.ssl = False  # many sites fail ssl verification
     try:
-        if sequential:
-            for s in sites:
-                await _check_site_type(s)
-
-            for r in rows:
-                await _check_reg_no(r)
-
-            for s in sites:
-                await _collect_symbol_counts(s)
-        else:
-            check_site_coros = [_check_site_type(s) for s in sites]
-            check_reg_no_coros = [_check_reg_no(r) for r in rows]
-            collect_symbol_counts_coros = [
-                _collect_symbol_counts(s) for s in sites
-            ]
-            await _gather(*check_site_coros)
-            await _gather(*check_reg_no_coros)
-            await _gather(*collect_symbol_counts_coros)
+        await _gather(*check_site_coros)
+        await _gather(*check_reg_no_coros)
+        await _gather(*collect_symbol_counts_coros)
     finally:
         iranetf.ssl = orig_ssl
-
-    _check_symbol_counts()
 
     if not (no_site := ds[ds['site'].isna()]).empty:
         _logger.warning(

@@ -230,7 +230,7 @@ class BaseTadbirPardaz(BaseSite):
         home_info = await self.home_info()
         if home_info['isETFMultiNavMode']:
             baskets = home_info['basketIDs']
-            del baskets['1']  # ignore the overall basket
+            baskets.pop('1', None)  # ignore the overall basket
             return baskets
         return {'1': self.url}
 
