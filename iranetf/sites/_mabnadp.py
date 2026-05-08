@@ -13,7 +13,18 @@ from iranetf.sites._lib import (
 )
 
 
-class MabnaDPBase(BaseSite):
+class Portolio(TypedDict):
+    id: str
+    name: str
+
+
+# uses api/v2/ path instead of api/v1/
+class MabnaDP2(BaseSite):
+    def __init__(self, url: str):
+        url, _, portfolio_id = url.partition('#')
+        super().__init__(url)
+        self.portfolio_id = portfolio_id or '1'
+
     async def _home_info(self):
         d = {}
         html = await self._home()
@@ -21,19 +32,6 @@ class MabnaDPBase(BaseSite):
         if m:
             d['seo_reg_no'] = m[1]
         return d
-
-
-class Portolio(TypedDict):
-    id: str
-    name: str
-
-
-# uses api/v2/ path instead of api/v1/
-class MabnaDP2(MabnaDPBase):
-    def __init__(self, url: str):
-        url, _, portfolio_id = url.partition('#')
-        super().__init__(url)
-        self.portfolio_id = portfolio_id or '1'
 
     async def _json(self, path, **kwa) -> Any:
         params: dict | None = kwa.get('params')
