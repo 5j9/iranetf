@@ -382,32 +382,32 @@ _url_symbols: dict[str, dict[str, int]] = {}
 @_log_and_retry
 async def _collect_symbol_counts(site: _BaseSite):
     if (url := site.url) in _url_symbols:
-        _url_symbols[url]['actual_count'] += 1
+        _url_symbols[url]['dataset_count'] += 1
         return
 
     # set an initual value early to avoid race conditions
     _url_symbols[url] = {
-        'expected_count': 1,
-        'actual_count': 1,
+        'site_count': 1,
+        'dataset_count': 1,
     }
 
     if isinstance(site, _RayanHamafza):
         fund_data = await site.fund_data()
         if fund_data['FundType'] is _FundType.HYBRID:
-            return  # expected_count == 1
-        _url_symbols[url]['expected_count'] = len(fund_data['FundList'])
+            return  # site_count == 1
+        _url_symbols[url]['site_count'] = len(fund_data['FundList'])
         return
 
     if isinstance(site, _BaseTadbirPardaz):
         home_info = await site.home_info()
         if home_info['isETFMultiNavMode']:
             home_info['basketIDs'].pop('1', None)  # ignore the overall basket
-            _url_symbols[url]['expected_count'] = len(home_info['basketIDs'])
+            _url_symbols[url]['site_count'] = len(home_info['basketIDs'])
         return
 
     if isinstance(site, MabnaDP2):
         portfolios = await site.portfolios()
-        _url_symbols[url]['expected_count'] = len(portfolios)
+        _url_symbols[url]['site_count'] = len(portfolios)
         return
 
     # for all other site types, assume site is not multi-nav
@@ -416,7 +416,7 @@ async def _collect_symbol_counts(site: _BaseSite):
 def _check_symbol_counts():
     """this function should be called after _gather_site_symbol_counts has been run for all sites"""
     for url, counts in _url_symbols.items():
-        if counts['expected_count'] == counts['actual_count']:
+        if counts['site_count'] == counts['dataset_count']:
             continue
         _logger.error(f'{url=} symbol counts do not match: {counts}')
 
