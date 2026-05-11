@@ -1,6 +1,7 @@
 __version__ = '0.29.1.dev1'
 from asyncio import gather as _gather, sleep as _sleep
 from contextlib import contextmanager as _contextmanager
+from json import JSONDecodeError
 from logging import Logger as _Logger
 from pathlib import Path as _Path
 
@@ -158,7 +159,10 @@ def _log_and_retry(func):
 
 @_log_and_retry
 async def _check_validity(site: _BaseSite) -> tuple[str, str] | None:
-    await site.live_navps()
+    try:
+        await site.live_navps()
+    except JSONDecodeError:
+        return
     last_url = site.last_response.url  # to avoid redirected URLs
     return f'{last_url.scheme}://{last_url.host}/', type(site).__name__
 
