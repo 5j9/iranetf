@@ -1,4 +1,4 @@
-__version__ = '6.0.1'
+__version__ = '6.0.2.dev1'
 
 from logging import getLogger as _get_logger
 
