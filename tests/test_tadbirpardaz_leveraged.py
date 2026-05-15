@@ -2,14 +2,17 @@ from datetime import date
 from math import isclose
 
 from numpy import dtype
-from pytest_aiohutils import file, files, validate_dict
+from pytest_aiohutils import file, files
 
 from iranetf.sites import (
     BaseSite,
     LeveragedTadbirPardaz,
-    LeveragedTadbirPardazLiveNAVPS,
 )
-from tests import assert_leveraged_leverage, assert_navps_history
+from tests import (
+    assert_leveraged_leverage,
+    assert_navps_history,
+    validate_live_navps,
+)
 from tests.test_tadbirpardaz import EXPECTED_TP_VER
 
 tavan: LeveragedTadbirPardaz = BaseSite.from_l18('توان')  # type: ignore
@@ -18,8 +21,7 @@ ahrom: LeveragedTadbirPardaz = BaseSite.from_l18('اهرم')  # type: ignore
 
 @file('ahrom_live.json')
 async def test_live_navps_leveraged():
-    live = await ahrom.live_navps()
-    validate_dict(live, LeveragedTadbirPardazLiveNAVPS)
+    await validate_live_navps(ahrom)
 
 
 @file('ahrom_navps_history.json')

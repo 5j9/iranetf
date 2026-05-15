@@ -1,6 +1,7 @@
 from pandas import DataFrame, DatetimeIndex
+from pytest_aiohutils import validate_dict
 
-from iranetf.sites import BaseSite
+from iranetf.sites import BaseSite, LiveNAVPS
 
 
 def assert_date_index(df: DataFrame):
@@ -19,6 +20,10 @@ async def assert_navps_history(site: BaseSite, has_statistical=True):
     assert (df['redemption'] <= df['creation']).all()
     if has_statistical:
         assert df['statistical'].dtype in numeric_types
+
+
+async def validate_live_navps(site: BaseSite):
+    validate_dict(await site.live_navps(), LiveNAVPS)
 
 
 def test_from_l18():

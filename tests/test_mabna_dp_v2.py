@@ -1,13 +1,14 @@
 from math import isclose
 
 from numpy import dtype
-from pytest_aiohutils import file, file_map, files, validate_dict
+from pytest_aiohutils import file, file_map, files
 
-from iranetf.sites import BaseSite, LiveNAVPS, MabnaDP2
+from iranetf.sites import BaseSite, MabnaDP2
 from tests import (
     assert_date_index,
     assert_leveraged_leverage,
     assert_navps_history,
+    validate_live_navps,
 )
 
 site = MabnaDP2('https://kianfunds10.ir/')
@@ -22,8 +23,7 @@ async def test_from_url():
 
 @file('lmdp_live.json')
 async def test_live_navps():
-    d = await site.live_navps()
-    validate_dict(d, LiveNAVPS)
+    await validate_live_navps(site)
 
 
 @file('lmdp_navps_history.json')

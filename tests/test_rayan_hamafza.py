@@ -6,17 +6,16 @@ from pytest_aiohutils import file, files, validate_dict
 from iranetf.sites import (
     BaseSite,
     FundData,
-    LiveNAVPS,
     RayanHamafza,
 )
-from tests import assert_navps_history
+from tests import assert_navps_history, validate_live_navps
 
 yaqut = RayanHamafza('https://yaghootfund.ir/')
 
 
 @file('almas_live.json')
 async def test_live_navps():
-    validate_dict(await yaqut.live_navps(), LiveNAVPS)
+    await validate_live_navps(yaqut)
 
 
 @file('almas_navps_history.json')

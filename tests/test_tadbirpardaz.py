@@ -11,15 +11,14 @@ from iranetf.sites import (
     TadbirPardazMultiNAV,
     TPLiveNAVPS,
 )
-from tests import assert_navps_history
+from tests import assert_navps_history, validate_live_navps
 
 tadbir = TadbirPardaz('https://modirfund.ir/')
 
 
 @file('modir_live.json')
 async def test_live_navps():
-    d = await tadbir.live_navps()
-    validate_dict(d, TPLiveNAVPS)
+    await validate_live_navps(tadbir)
 
 
 @file('modir_navps_history.json')
