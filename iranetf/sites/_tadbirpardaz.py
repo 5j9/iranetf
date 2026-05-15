@@ -20,6 +20,7 @@ from iranetf.sites._lib import (
     BaseSite,
     LiveNAVPS,
     comma_int,
+    reg_no_from_home_info,
 )
 
 _fa_to_en_tt = str.maketrans(
@@ -74,6 +75,8 @@ class TPLiveNAVPS(LiveNAVPS):
 
 
 class BaseTadbirPardaz(BaseSite):
+    reg_no = reg_no_from_home_info
+
     async def version(self) -> str:
         return (await self.home_info())['version']
 

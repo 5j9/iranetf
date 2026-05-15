@@ -1,15 +1,13 @@
 from __future__ import annotations as _
 
-from abc import ABC, abstractmethod
+from abc import abstractmethod
 from datetime import datetime
 from json import loads
 from logging import warning
-from typing import Any, Self, TypedDict
+from typing import Any, Protocol, Self, TypedDict, runtime_checkable
 
 from pandas import DataFrame
 
-import iranetf
-import iranetf.sites
 from iranetf import RegNoError, _get
 
 
@@ -27,11 +25,12 @@ async def _read(url: str) -> bytes:
     return await (await _get(url)).read()
 
 
-class BaseSite(ABC):
+@runtime_checkable
+class BaseSite(Protocol):
     __slots__ = '_home_info_cache', 'last_response', 'url'
 
     ds: DataFrame
-    _aa_keys: set
+    _aa_keys: set[str]
 
     def __init__(self, url: str):
         assert url[-1] == '/', f'the url must end with `/` {url=}'
@@ -63,13 +62,10 @@ class BaseSite(ABC):
             return DataFrame(j, copy=False)
         return j
 
-    @abstractmethod
     async def live_navps(self) -> LiveNAVPS: ...
 
-    @abstractmethod
     async def navps_history(self) -> DataFrame: ...
 
-    @abstractmethod
     async def cache(self) -> float: ...
 
     @classmethod
@@ -90,7 +86,7 @@ class BaseSite(ABC):
         )
 
     @staticmethod
-    async def from_url(url: str) -> iranetf.sites.AnySite:
+    async def from_url(url: str):
         import iranetf.sites as sites
 
         content = await _read(url)
@@ -104,6 +100,9 @@ class BaseSite(ABC):
             if info['isETFMultiNavMode']:
                 return sites.TadbirPardazMultiNAV(url + '#2')
             return tp_site
+
+        if rfind(b'<!-- Rayanhamafza Front-End Team -->') != -1:
+            return sites.RayanHamafza2(url)
 
         if rfind(b'Rayan Ham Afza') != -1:
             return sites.RayanHamafza(url)
@@ -130,14 +129,16 @@ class BaseSite(ABC):
             i = self._home_info_cache = await self._home_info()
             return i
 
-    async def reg_no(self) -> str:
-        home_info = await self.home_info()
-        try:
-            return home_info['seo_reg_no']
-        except KeyError:
-            raise RegNoError('"seo_reg_no" not found in home_info') from None
+    async def reg_no(self) -> str: ...
 
-    @abstractmethod
     async def portfolios(self) -> dict[str, str]:
         """Return a dict mapping portfolio id to portfolio name."""
         ...
+
+
+async def reg_no_from_home_info(self: BaseSite) -> str:
+    home_info = await self.home_info()
+    try:
+        return home_info['seo_reg_no']
+    except KeyError:
+        raise RegNoError('"seo_reg_no" not found in home_info') from None

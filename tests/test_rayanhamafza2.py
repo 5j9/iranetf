@@ -5,20 +5,20 @@ from pytest_aiohutils import file, files, validate_dict
 
 from iranetf.sites import (
     BaseSite,
-    FundData,
-    RayanHamafza,
+    RayanHamafza2,
 )
+from iranetf.sites._rayanhamafza import FundItem
 from tests import assert_navps_history, validate_live_navps
 
-yaqut = RayanHamafza('https://yaghootfund.ir/')
+yaqut = RayanHamafza2('https://yaghootfund.ir/')
 
 
-@file('almas_live.json')
+@file('yaqut_live.json')
 async def test_live_navps():
     await validate_live_navps(yaqut)
 
 
-@file('almas_navps_history.json')
+@file('yaqut_navps_history.json')
 async def test_navps_history():
     await assert_navps_history(yaqut)
 
@@ -30,30 +30,29 @@ async def test_reg_no():
 
 @file('homay_profit.json')
 async def test_fund_profit():
-    df = await RayanHamafza('https://www.homayeagah.ir/').dividend_history()
+    df = await RayanHamafza2('https://www.homayeagah.ir/').dividend_history()
     assert [*df.dtypes.items()] == [
-        ('FundId', dtype('int64')),
-        ('FundApId', dtype('int64')),
-        ('FundUnit', dtype('int64')),
-        ('ProfitGuaranteeUnit', dtype('int64')),
-        ('UnitProfit', dtype('int64')),
-        ('ExtraProfit', dtype('int64')),
-        ('SumUnitProfit', dtype('int64')),
-        ('SumExtraProfit', dtype('int64')),
-        ('SumProfitGuarantee', dtype('int64')),
-        ('SumAllProfit', dtype('int64')),
+        ('fundId', dtype('int64')),
+        ('fundUnit', dtype('int64')),
+        ('profitGuaranteeUnit', dtype('int64')),
+        ('unitProfit', dtype('int64')),
+        ('extraProfit', dtype('int64')),
+        ('sumUnitProfit', dtype('int64')),
+        ('sumExtraProfit', dtype('int64')),
+        ('sumProfitGuarantee', dtype('int64')),
+        ('sumAllProfit', dtype('int64')),
     ]
     assert (index := df.index).dtype == 'datetime64[us]'
-    assert index.name == 'ProfitDate'
+    assert index.name == 'profitDate'
 
 
-petro_agah: RayanHamafza = BaseSite.from_l18('پتروآگاه')  # type: ignore
-auto_agah: RayanHamafza = BaseSite.from_l18('اتوآگاه')  # type: ignore
+petro_agah: RayanHamafza2 = BaseSite.from_l18('پتروآگاه')  # type: ignore
+auto_agah: RayanHamafza2 = BaseSite.from_l18('اتوآگاه')  # type: ignore
 
 
 @files('petroagah.json', 'autoagah.json')
 async def test_multinav():
-    assert type(auto_agah) is RayanHamafza
+    assert type(auto_agah) is RayanHamafza2
     assert petro_agah.url == auto_agah.url
     petro_nav = await petro_agah.live_navps()
     auto_nav = await auto_agah.live_navps()
@@ -65,7 +64,7 @@ async def test_multinav():
 async def test_asset_allocation():
     aa = await petro_agah.asset_allocation()
     assert aa.keys() <= petro_agah._aa_keys
-    assert type(aa.pop('JalaliDate')) is str
+    assert type(aa.pop('jalaliDate')) is str
     assert isclose(sum(aa.values()), 1.0)
 
 
@@ -80,12 +79,13 @@ async def test_leverage():
     assert type(await petro_agah.leverage()) is float
 
 
-@file('petro_agah_fund_data.json')
+@file('petro_agah_fund_items.json')
 async def test_fund_data():
-    validate_dict(await petro_agah.fund_data(), FundData)
+    items = await petro_agah.fund_items()
+    validate_dict(items[0], FundItem)
 
 
-@file('petro_agah_fund_data.json')
+@file('petro_agah_fund_items.json')
 async def test_portfolios():
     ps = await petro_agah.portfolios()
     assert ps['2'] == 'اتو آگاه'

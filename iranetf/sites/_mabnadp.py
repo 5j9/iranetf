@@ -10,6 +10,7 @@ from iranetf.sites._lib import (
     BaseSite,
     LiveNAVPS,
     _get,
+    reg_no_from_home_info,
 )
 
 
@@ -27,6 +28,8 @@ class MabnaDP2(BaseSite):
         if m:
             d['seo_reg_no'] = m[1]
         return d
+
+    reg_no = reg_no = reg_no_from_home_info
 
     async def _json(self, path, **kwa) -> Any:
         params: dict | None = kwa.get('params')

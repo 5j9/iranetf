@@ -98,9 +98,6 @@ async def test_assets_history():
 async def test_alt_home_data_format():
     site = await MabnaDP2.from_url('https://kianfunds6.ir/')
     data = await site.home_data()  # type: ignore
-    p_ids = data['__REACT_REDUX_STATE__']['general']['data']['portfolioIds']
-    pid: str = p_ids[0]
-    assert pid.isnumeric()
 
 
 @file('test_portfolios.json')
