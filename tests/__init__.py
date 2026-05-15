@@ -23,7 +23,9 @@ async def assert_navps_history(site: BaseSite, has_statistical=True):
 
 
 async def validate_live_navps(site: BaseSite):
-    validate_dict(await site.live_navps(), LiveNAVPS)
+    d = await site.live_navps()
+    validate_dict(d, LiveNAVPS)
+    assert d['creation'] > d['redemption']
 
 
 def test_from_l18():
