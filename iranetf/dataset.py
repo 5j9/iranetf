@@ -62,7 +62,7 @@ def _make_site(row) -> _BaseSite:
     return site_class(row['url'])
 
 
-def load_dataset(*, site=True, inst=False) -> _DataFrame:
+def read_dataset(*, site=True, inst=False) -> _DataFrame:
     """Load dataset.csv as a DataFrame.
 
     If site is True, convert url and siteType columns to site object.
@@ -93,7 +93,7 @@ def load_dataset(*, site=True, inst=False) -> _DataFrame:
     return df
 
 
-def save_dataset(ds: _DataFrame):
+def write_dataset(ds: _DataFrame):
     yk_tt = str.maketrans({'ي': 'ی', 'ك': 'ک'})
     ds['l18'] = ds['l18'].str.translate(yk_tt)
     ds['name'] = ds['name'].str.translate(yk_tt)
@@ -336,7 +336,7 @@ async def _update_existing_rows_using_fipiran(
 
 async def update_dataset(*, check_existing_sites=False) -> _DataFrame:
     """Update dataset and return newly found that could not be added."""
-    ds = load_dataset(site=False)
+    ds = read_dataset(site=False)
     fipiran_df = await _fipiran_data(ds)
     ds = await _update_existing_rows_using_fipiran(
         ds, fipiran_df, check_existing_sites
@@ -351,7 +351,7 @@ async def update_dataset(*, check_existing_sites=False) -> _DataFrame:
     ds.update(tsetmc_df)
 
     ds.reset_index(inplace=True)
-    save_dataset(ds)
+    write_dataset(ds)
 
     return new_items[new_items['insCode'].isna()]
 
@@ -410,7 +410,7 @@ async def _check_portfolio_counts(site: _BaseSite, dataset_ids: set[str]):
 
 
 async def check_dataset(live=False):
-    ds = load_dataset(site=False)
+    ds = read_dataset(site=False)
     assert ds['l18'].is_unique
     assert ds['name'].is_unique, ds['name'][ds['name'].duplicated()]
     assert ds['type'].unique().isin(_ETF_TYPES.values()).all()  # type: ignore

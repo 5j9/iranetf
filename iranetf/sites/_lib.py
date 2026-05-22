@@ -73,9 +73,9 @@ class BaseSite(Protocol):
         try:
             ds = cls.ds
         except AttributeError:
-            from iranetf.dataset import load_dataset
+            from iranetf.dataset import read_dataset
 
-            ds = cls.ds = load_dataset(site=True).set_index('l18')
+            ds = cls.ds = read_dataset(site=True).set_index('l18')
         return ds.loc[l18, 'site']  # type: ignore
 
     def _check_aa_keys(self, d: dict):

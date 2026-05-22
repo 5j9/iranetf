@@ -3,10 +3,10 @@ from collections import defaultdict
 
 from aiohttp import ClientConnectorCertificateError
 
-from iranetf.dataset import load_dataset
+from iranetf.dataset import read_dataset
 from iranetf.sites import RayanHamafza
 
-ds = load_dataset()
+ds = read_dataset()
 
 
 async def check_version(site):

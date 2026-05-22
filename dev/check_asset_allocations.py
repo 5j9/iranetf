@@ -3,9 +3,9 @@ from asyncio import as_completed, run
 from aiohttp import ClientConnectorDNSError, ClientResponseError
 
 from dev import logger
-from iranetf.dataset import load_dataset
+from iranetf.dataset import read_dataset
 
-ds = load_dataset()
+ds = read_dataset()
 
 
 async def main():

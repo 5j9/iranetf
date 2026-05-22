@@ -6,7 +6,7 @@ from tsetmc.funds import commodity_etfs, etfs
 from tsetmc.instruments import Instrument
 
 from dev import logger
-from iranetf.dataset import load_dataset
+from iranetf.dataset import read_dataset
 
 ignore_desc = {
     'نوع صندوق : خصوصی',
@@ -26,7 +26,7 @@ async def is_valid(l18: str) -> bool:
 
 
 async def main():
-    ds = load_dataset(site=False)
+    ds = read_dataset(site=False)
 
     # note: some etfs do not show up in any of the flows; reason: unknown
     df1 = await etfs(flow=Flow.BOURSE)

@@ -1,10 +1,10 @@
 from asyncio import run
 
 from dev import logger
-from iranetf.dataset import load_dataset
+from iranetf.dataset import read_dataset
 from iranetf.rahavard365 import etfs
 
-ds = load_dataset(site=False)
+ds = read_dataset(site=False)
 
 
 rdf = run(etfs(short_name=True))

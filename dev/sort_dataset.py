@@ -1,3 +1,3 @@
-from iranetf.dataset import load_dataset, save_dataset
+from iranetf.dataset import read_dataset, write_dataset
 
-save_dataset(load_dataset(site=False))
+write_dataset(read_dataset(site=False))
