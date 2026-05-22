@@ -1,15 +1,14 @@
 from asyncio import run
 
 import iranetf
-from dev import config, logger
+from dev import logger
 from iranetf.dataset import update_dataset
 
 
 async def main():
     iranetf.ssl = False  # tolerate week ssl certs
-    df = await update_dataset(
-        check_existing_sites=config.check_existing_sites,
-    )
+    # Note: check_existing_sites will significantly increase the update time
+    df = await update_dataset(check_existing_sites=False)
     return df
 
 
