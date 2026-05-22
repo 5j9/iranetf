@@ -8,7 +8,7 @@ from iranetf.dataset import update_dataset
 async def main():
     iranetf.ssl = False  # tolerate week ssl certs
     # Note: check_existing_sites will significantly increase the update time
-    df = await update_dataset(check_existing_sites=False)
+    df = await update_dataset(update_existing=False)
     return df
 
 

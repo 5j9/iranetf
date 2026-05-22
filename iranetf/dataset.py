@@ -307,13 +307,13 @@ def _add_new_items_to_ds(new_items: _DataFrame, ds: _DataFrame) -> _DataFrame:
 
 
 async def _update_existing_rows_using_fipiran(
-    ds: _DataFrame, fipiran_df: _DataFrame, check_existing_sites: bool
+    ds: _DataFrame, fipiran_df: _DataFrame, update_existing: bool
 ) -> _DataFrame:
     """Note: ds index will be set to insCode."""
     await _add_url_and_type(
         fipiran_df,
         known_domains=None
-        if check_existing_sites
+        if update_existing
         else ds['url'].str.extract('//(.*)/')[0],
     )
 
@@ -334,12 +334,12 @@ async def _update_existing_rows_using_fipiran(
     return ds
 
 
-async def update_dataset(*, check_existing_sites=False) -> _DataFrame:
+async def update_dataset(*, update_existing=False) -> _DataFrame:
     """Update dataset and return newly found that could not be added."""
     ds = read_dataset(site=False)
     fipiran_df = await _fipiran_data(ds)
     ds = await _update_existing_rows_using_fipiran(
-        ds, fipiran_df, check_existing_sites
+        ds, fipiran_df, update_existing
     )
     new_items = fipiran_df[~fipiran_df['regNo'].isin(ds['regNo'])]
 
