@@ -357,17 +357,14 @@ async def update_dataset(*, update_existing=False) -> _DataFrame:
 
 
 @_log_and_retry
-async def _check_site_type(site: _BaseSite) -> None:
-    detected = await _BaseSite.from_url(site.url)
-    if type(detected) is not type(site):
-        _logger.error(
-            f'Detected site type for {site.url} is {type(detected).__name__},'
+async def _new_site_type(site: _BaseSite) -> str | None:
+    new_site_type = type(await _BaseSite.from_url(site.url)).__name__
+    if new_site_type != type(site).__name__:
+        _logger.warning(
+            f'Detected site type for {site.url} is {new_site_type},'
             f' but dataset site type is {type(site).__name__}.'
         )
-    if isinstance(site, _MabnaDP2):
-        portfolios = await site.portfolios()
-        if site.portfolio_id not in portfolios:
-            _logger.error(f'site.portfolio_id not in portfolio_ids for {site}')
+        return new_site_type
 
 
 @_log_and_retry
@@ -416,6 +413,7 @@ async def check_dataset(live=False):
     assert ds['type'].unique().isin(_ETF_TYPES.values()).all()  # type: ignore
     assert ds['insCode'].is_unique
     assert ds['url'].is_unique
+    assert not ds['siteType'].isna().any(), 'siteType contains NA'
     assert not ds['regNo'].isna().any()
 
     # same regNo -> same base url
@@ -435,7 +433,7 @@ async def check_dataset(live=False):
 
     ds['site'] = ds[ds['siteType'].notna()].apply(_make_site, axis=1)
 
-    check_site_coros = [_check_site_type(s) for s in ds['site']]
+    check_site_coros = [_new_site_type(s) for s in ds['site']]
     check_reg_no_coros = [
         _check_reg_no(site, reg)
         for (site, reg) in zip(ds['site'], ds['regNo'])
@@ -454,11 +452,19 @@ async def check_dataset(live=False):
     orig_ssl = iranetf.ssl
     iranetf.ssl = False  # many sites fail ssl verification
     try:
-        await _gather(*check_site_coros)
+        new_site_types = await _gather(*check_site_coros)
         await _gather(*check_reg_no_coros)
         await _gather(*collect_symbol_counts_coros)
     finally:
         iranetf.ssl = orig_ssl
+
+    # only write back non-None site_types
+    changed_site_types = [st for st in new_site_types if st is not None]
+    if changed_site_types:
+        ds.loc[[st is not None for st in new_site_types], 'siteType'] = (
+            changed_site_types
+        )
+        write_dataset(ds)
 
     if not (no_site := ds[ds['site'].isna()]).empty:
         _logger.warning(
