@@ -84,13 +84,13 @@ async def test_dividend_history():
     assert len(df) >= 22
     assert [*df.dtypes.items()] == [
         ('row', dtype('int64')),
-        ('FundUnit', dtype('int64')),
-        ('UnitProfit', dtype('int64')),
-        ('SUMAllProfit', dtype('int64')),
-        ('ProfitPercent', dtype('float64')),
+        ('fundUnit', dtype('int64')),
+        ('unitProfit', dtype('int64')),
+        ('sumAllProfit', dtype('int64')),
+        ('profitPercent', dtype('float64')),
     ]
     assert (index := df.index).dtype == 'datetime64[us]'
-    assert index.name == 'ProfitDate'
+    assert index.name == 'profitDate'
 
 
 @files(
@@ -116,7 +116,7 @@ async def test_invalid_dividend_history_value(test_config):
         from_date=date(2025, 1, 19), to_date=date(2025, 1, 19)
     )
     assert len(df) == 1
-    assert df.at['2025-01-19', 'ProfitPercent'] == 1.81671169356907e18
+    assert df.at['2025-01-19', 'profitPercent'] == 1.81671169356907e18
 
 
 EXPECTED_TP_VER = '9.2.5'

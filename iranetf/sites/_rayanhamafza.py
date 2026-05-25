@@ -10,7 +10,8 @@ from iranetf.sites._lib import BaseSite, LiveNAVPS, reg_no_from_home_info
 
 
 def _j2g(s: str) -> datetime:
-    return jdatetime(*[int(i) for i in s.split('/')]).togregorian()
+    y, m, d = [int(i) for i in s.split('/')]
+    return jdatetime(y, m, d).togregorian()
 
 
 class RHNavLight(TypedDict):
@@ -59,7 +60,6 @@ class BaseRayanHamafza(BaseSite):
     _portfolio_industries_path: str
     _asset_allocation_path: str
     _dividend_history_path: str
-    _dividend_history_date_col: str
     _dividend_history_data_key: str | None
 
     async def _json(self, path, **kwa) -> Any:
@@ -101,7 +101,9 @@ class BaseRayanHamafza(BaseSite):
         else:
             data = j[key]
         df = DataFrame(data)
-        date_col = self._dividend_history_date_col
+        if isinstance(self, RayanHamafza):
+            df.columns = [col[0].lower() + col[1:] for col in df.columns]
+        date_col = 'profitDate'
         df[date_col] = df[date_col].apply(
             lambda i: jdatetime.strptime(i, format='%Y/%m/%d').togregorian()
         )
@@ -127,7 +129,6 @@ class RayanHamafza(BaseRayanHamafza):
     _portfolio_industries_path = 'Industries/'
     _asset_allocation_path = 'MixAsset/'
     _dividend_history_path = 'Profit/'
-    _dividend_history_date_col = 'ProfitDate'
     _dividend_history_data_key = 'data'
     _aa_keys = {
         'DepositTodayPercent',
@@ -214,7 +215,6 @@ class RayanHamafza2(BaseRayanHamafza):
     _aa_keys = {i[0].lower() + i[1:] for i in RayanHamafza._aa_keys}
     _asset_allocation_path = 'public/mixAsset/'
     _dividend_history_path = 'public/fundProfits/'
-    _dividend_history_date_col = 'profitDate'
     _dividend_history_data_key = None
 
     async def live_navps(self) -> LiveNAVPS:

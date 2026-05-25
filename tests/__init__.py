@@ -1,3 +1,4 @@
+from numpy import dtype
 from pandas import DataFrame, DatetimeIndex
 from pytest_aiohutils import validate_dict
 
@@ -36,3 +37,19 @@ async def assert_leveraged_leverage(site: BaseSite):
     lev = await site.leverage()
     assert type(lev) is float
     assert lev > 1.0
+
+
+def assert_divident_history(df: DataFrame):
+    assert [*df.dtypes.items()] == [
+        ('fundId', dtype('int64')),
+        ('fundUnit', dtype('int64')),
+        ('profitGuaranteeUnit', dtype('int64')),
+        ('unitProfit', dtype('int64')),
+        ('extraProfit', dtype('int64')),
+        ('sumUnitProfit', dtype('int64')),
+        ('sumExtraProfit', dtype('int64')),
+        ('sumProfitGuarantee', dtype('int64')),
+        ('sumAllProfit', dtype('int64')),
+    ]
+    assert (index := df.index).dtype == 'datetime64[us]'
+    assert index.name == 'profitDate'

@@ -1,6 +1,5 @@
 from math import isclose
 
-from numpy import dtype
 from pytest_aiohutils import file, files, validate_dict
 
 from iranetf.sites import (
@@ -8,7 +7,11 @@ from iranetf.sites import (
     FundData,
     RayanHamafza,
 )
-from tests import assert_navps_history, validate_live_navps
+from tests import (
+    assert_divident_history,
+    assert_navps_history,
+    validate_live_navps,
+)
 
 roz = RayanHamafza('https://roz.fund/')
 
@@ -31,20 +34,9 @@ async def test_reg_no():
 @file('toranj_profit.json')
 async def test_fund_profit():
     df = await RayanHamafza('https://toranj.fund/').dividend_history()
-    assert [*df.dtypes.items()] == [
-        ('FundId', dtype('int64')),
-        ('FundApId', dtype('int64')),
-        ('FundUnit', dtype('int64')),
-        ('ProfitGuaranteeUnit', dtype('int64')),
-        ('UnitProfit', dtype('int64')),
-        ('ExtraProfit', dtype('int64')),
-        ('SumUnitProfit', dtype('int64')),
-        ('SumExtraProfit', dtype('int64')),
-        ('SumProfitGuarantee', dtype('int64')),
-        ('SumAllProfit', dtype('int64')),
-    ]
-    assert (index := df.index).dtype == 'datetime64[us]'
-    assert index.name == 'ProfitDate'
+    ap_id = df.pop('fundApId')
+    assert ap_id.dtype == 'int64'
+    assert_divident_history(df)
 
 
 feleza: RayanHamafza = BaseSite.from_l18('فلزا')  # type: ignore

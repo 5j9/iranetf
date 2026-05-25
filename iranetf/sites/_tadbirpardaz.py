@@ -332,20 +332,20 @@ class TadbirPardaz(BaseTadbirPardaz):
             all_rows,
             columns=[
                 'row',
-                'ProfitDate',
-                'FundUnit',
-                'UnitProfit',
-                'SUMAllProfit',
-                'ProfitPercent',
+                'profitDate',
+                'fundUnit',
+                'unitProfit',
+                'sumAllProfit',
+                'profitPercent',
             ],
         )
-        df['ProfitDate'] = df['ProfitDate'].apply(_jymd_to_greg)
-        comma_cols = ['FundUnit', 'SUMAllProfit']
+        df['profitDate'] = df['profitDate'].apply(_jymd_to_greg)
+        comma_cols = ['fundUnit', 'sumAllProfit']
         df[comma_cols] = df[comma_cols].map(comma_int)
-        int_cols = ['row', 'UnitProfit']
+        int_cols = ['row', 'unitProfit']
         df[int_cols] = df[int_cols].map(comma_int)
-        df['ProfitPercent'] = df['ProfitPercent'].map(_comma_float)
-        df.set_index('ProfitDate', inplace=True)
+        df['profitPercent'] = df['profitPercent'].map(_comma_float)
+        df.set_index('profitDate', inplace=True)
         return df
 
 

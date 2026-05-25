@@ -1,6 +1,5 @@
 from math import isclose
 
-from numpy import dtype
 from pytest_aiohutils import file, files, validate_dict
 
 from iranetf.sites import (
@@ -8,7 +7,11 @@ from iranetf.sites import (
     RayanHamafza2,
 )
 from iranetf.sites._rayanhamafza import FundItem
-from tests import assert_navps_history, validate_live_navps
+from tests import (
+    assert_divident_history,
+    assert_navps_history,
+    validate_live_navps,
+)
 
 yaqut = RayanHamafza2('https://yaghootfund.ir/')
 
@@ -30,20 +33,9 @@ async def test_reg_no():
 
 @file('homay_profit.json')
 async def test_fund_profit():
-    df = await RayanHamafza2('https://www.homayeagah.ir/').dividend_history()
-    assert [*df.dtypes.items()] == [
-        ('fundId', dtype('int64')),
-        ('fundUnit', dtype('int64')),
-        ('profitGuaranteeUnit', dtype('int64')),
-        ('unitProfit', dtype('int64')),
-        ('extraProfit', dtype('int64')),
-        ('sumUnitProfit', dtype('int64')),
-        ('sumExtraProfit', dtype('int64')),
-        ('sumProfitGuarantee', dtype('int64')),
-        ('sumAllProfit', dtype('int64')),
-    ]
-    assert (index := df.index).dtype == 'datetime64[us]'
-    assert index.name == 'profitDate'
+    assert_divident_history(
+        await RayanHamafza2('https://www.homayeagah.ir/').dividend_history()
+    )
 
 
 petro_agah: RayanHamafza2 = BaseSite.from_l18('پتروآگاه')  # type: ignore
