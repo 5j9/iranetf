@@ -299,15 +299,15 @@ async def _fipiran_data(ds: pl.LazyFrame) -> pl.LazyFrame:
 
     _logger.info('await fipiran.funds.funds()')
     # Use global inference scope for any incoming external dynamic dataframes
-    fipiran_raw = await fipiran.funds.funds()
-    fipiran_df = pl.DataFrame(fipiran_raw, infer_schema_length=None)
+    fipiran_pd_df = await fipiran.funds.funds()
+    fipiran_df = pl.from_pandas(fipiran_pd_df)
 
     ds_collected = ds.collect()
     reg_not_in_fipiran = ds_collected.filter(
         ~pl.col('regNo').is_in(fipiran_df['regNo'])
     )
 
-    if max(reg_not_in_fipiran.shape) > 0:
+    if not reg_not_in_fipiran.is_empty():
         _logger.warning(
             f'Some dataset rows were not found on fipiran:\n{reg_not_in_fipiran}'
         )
@@ -339,9 +339,7 @@ async def _tsetmc_dataset() -> pl.LazyFrame:
 
     _logger.info('await tsetmc.dataset.update()')
     await update()
-
-    # Safely cast incoming datasets to optimized LazyFrame expressions
-    lf = pl.LazyFrame(LazyDS.df, infer_schema_length=None)
+    lf = pl.from_pandas(LazyDS.df, include_index=True).lazy()
     return lf.drop(['l30', 'isin', 'cisin'])
 
 
@@ -392,9 +390,9 @@ async def _update_existing_rows_using_fipiran(
             pl.coalesce(['url', 'url_fip']).alias('url'),
             pl.coalesce(['siteType', 'siteType_fip']).alias('siteType'),
             pl.coalesce(['type_fip', 'type']).alias('type'),
-            pl.col('domain_fip').alias('domain'),
+            pl.col('domain'),
         ]
-    ).drop(['url_fip', 'siteType_fip', 'type_fip', 'domain'])
+    ).drop(['url_fip', 'siteType_fip', 'type_fip'])
 
     # Build fallbacks if the primary URL structures are missing
     ds_updated = ds_updated.with_columns(
@@ -421,7 +419,13 @@ async def update_dataset(*, update_existing=False) -> pl.DataFrame:
     ds = _add_new_items_to_ds(new_items, ds)
 
     # Perform a left join update to bring over updated data tracks from TSETMC
-    ds = ds.join(tsetmc_df, on='insCode', how='left', suffix='_tsetmc')
+    ds = ds.join(
+        tsetmc_df,
+        how='left',
+        suffix='_tsetmc',
+        left_on='insCode',
+        right_on='ins_code',
+    )
 
     # Coalesce tracking changes updates
     update_cols = [
@@ -512,7 +516,7 @@ async def check_dataset(live=False):
         .agg(pl.col('base_url').n_unique().alias('cnt'))
         .filter(pl.col('cnt') > 1)
     )
-    assert max(grouped_check.shape) == 0
+    assert grouped_check.is_empty()
 
     if not live:
         return
