@@ -192,7 +192,7 @@ async def _url_type(domain: str) -> tuple:
         if result is not None:
             return result
 
-    _logger.warning(f'_url_type failed for {domain}')
+    _logger.warning(f'failed for {domain}')
     return None, None
 
 
