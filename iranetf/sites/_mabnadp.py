@@ -4,7 +4,7 @@ from json import loads
 from re import search
 from typing import Any
 
-from pandas import DataFrame
+import polars as pl
 
 from iranetf.sites._lib import (
     BaseSite,
@@ -14,7 +14,7 @@ from iranetf.sites._lib import (
 )
 
 
-# uses api/v2/ path instead of api/v1/
+# Uses api/v2/ path instead of api/v1/
 class MabnaDP2(BaseSite):
     def __init__(self, url: str):
         url, _, portfolio_id = url.partition('#')
@@ -29,7 +29,7 @@ class MabnaDP2(BaseSite):
             d['seo_reg_no'] = m[1]
         return d
 
-    reg_no = reg_no = reg_no_from_home_info
+    reg_no = reg_no_from_home_info
 
     async def _json(self, path, **kwa) -> Any:
         params: dict | None = kwa.get('params')
@@ -50,31 +50,39 @@ class MabnaDP2(BaseSite):
         return data
 
     @staticmethod
-    def _chart_df(j) -> DataFrame:
-        df = DataFrame(j['data'])
-        date_time = df['date_time'] = df['date_time'].astype(
-            'datetime64[ns, UTC+03:30]'  # pyright: ignore
+    def _chart_df(j: dict) -> pl.LazyFrame:
+        """
+        Builds a LazyFrame pipeline directly from incoming dictionary payload sequences.
+        Uses infer_schema_length=None to ensure schema safety across all rows.
+        """
+        return pl.LazyFrame(j['data'], infer_schema_length=None).with_columns(
+            [
+                # 1. Create the 'date' column expected by assert_date_column()
+                pl.col('date_time')
+                .str.to_datetime(time_zone='UTC', time_unit='us')
+                .dt.convert_time_zone('Asia/Tehran')
+                .dt.replace_time_zone(None)
+                .dt.truncate('1d')
+                .alias('date'),
+                # 2. Parse 'date_time' using official database timezones
+                pl.col('date_time')
+                .str.to_datetime(time_zone='UTC', time_unit='ns')
+                # Use 'Asia/Tehran' directly—it is fully supported and won't crash!
+                .dt.convert_time_zone('Asia/Tehran'),
+            ]
         )
-        df.set_index(
-            date_time.dt.normalize().dt.tz_localize(None), inplace=True
-        )
-        df.index.name = 'date'
-        return df
 
-    async def navps_history(self) -> DataFrame:
+    async def navps_history(self) -> pl.LazyFrame:
         j = await self._json('chart')
-        df = self._chart_df(j)
-        df.rename(
-            columns={
+        return self._chart_df(j).rename(
+            {
                 'redemption_price': 'redemption',
                 'statistical_value': 'statistical',
                 'purchase_price': 'creation',
-            },
-            inplace=True,
+            }
         )
-        return df
 
-    async def assets_history(self):
+    async def assets_history(self) -> pl.LazyFrame:
         j = await self._json('navps/assets-chart')
         return self._chart_df(j)
 

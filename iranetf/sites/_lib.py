@@ -6,7 +6,7 @@ from json import loads
 from logging import warning
 from typing import Any, Protocol, Self, TypedDict, runtime_checkable
 
-from pandas import DataFrame
+import polars as pl
 
 from iranetf import RegNoError, _get
 
@@ -29,7 +29,8 @@ async def _read(url: str) -> bytes:
 class BaseSite(Protocol):
     __slots__ = '_home_info_cache', 'last_response', 'url'
 
-    ds: DataFrame
+    # Changed from DataFrame to LazyFrame for consistent lazy pipeline integration
+    ds: pl.LazyFrame
     _aa_keys: set[str]
 
     def __init__(self, url: str):
@@ -59,24 +60,42 @@ class BaseSite(Protocol):
         content = await r.read()
         j = loads(content)
         if df is True:
-            return DataFrame(j, copy=False)
+            # Implements the direct LazyFrame instantiation guardrail safely from memory
+            return pl.LazyFrame(j, infer_schema_length=None)
         return j
 
     async def live_navps(self) -> LiveNAVPS: ...
 
-    async def navps_history(self) -> DataFrame: ...
+    async def navps_history(self) -> pl.LazyFrame: ...
 
     async def cache(self) -> float: ...
 
     @classmethod
     def from_l18(cls, l18: str) -> Self:
+        """
+        Loads the dataset as a LazyFrame, replaces Pandas indexed lookup logic with
+        an optimized scalar filter execution, and extracts the instance safely.
+        """
         try:
             ds = cls.ds
         except AttributeError:
             from iranetf.dataset import read_dataset
 
-            ds = cls.ds = read_dataset(site=True).set_index('l18')
-        return ds.loc[l18, 'site']  # type: ignore
+            ds = cls.ds = read_dataset(site=True)
+
+        # Instead of eager pandas `.set_index().loc[]`, filter the LazyFrame
+        # and pull out the scalar row directly.
+        try:
+            return (
+                ds.filter(pl.col('l18') == l18)
+                .select(pl.col('site'))
+                .collect()
+                .item()
+            )
+        except (pl.exceptions.ColumnNotFoundError, ValueError) as e:
+            raise KeyError(
+                f"l18 value '{l18}' not found or invalid in dataset."
+            ) from e
 
     def _check_aa_keys(self, d: dict):
         if d.keys() <= self._aa_keys:
@@ -108,7 +127,7 @@ class BaseSite(Protocol):
             return sites.RayanHamafza(url)
 
         if rfind(b'://mabnadp.com') != -1:
-            assert rfind(rb'/api/v2') != -1, 'Uknown MabnaDP site type.'
+            assert rfind(rb'/api/v2') != -1, 'Unknown MabnaDP site type.'
             return sites.MabnaDP2(url)
 
         raise ValueError(f'Could not determine site type for {url}.')

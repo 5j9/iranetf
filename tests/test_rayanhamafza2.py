@@ -8,7 +8,7 @@ from iranetf.sites import (
 )
 from iranetf.sites._rayanhamafza import FundItem
 from tests import (
-    assert_divident_history,
+    assert_dividend_history,  # Corrected spelling mapping layout to match core utils
     assert_navps_history,
     validate_live_navps,
 )
@@ -33,7 +33,8 @@ async def test_reg_no():
 
 @file('homay_profit.json')
 async def test_fund_profit():
-    assert_divident_history(
+    # Safely passes the returned LazyFrame over to your core assertions ruleblock
+    assert_dividend_history(
         await RayanHamafza2('https://www.homayeagah.ir/').dividend_history()
     )
 
@@ -44,7 +45,7 @@ auto_agah: RayanHamafza2 = BaseSite.from_l18('اتوآگاه')  # type: ignore
 
 @files('petroagah.json', 'autoagah.json')
 async def test_multinav():
-    assert type(auto_agah) is RayanHamafza2
+    assert isinstance(auto_agah, RayanHamafza2)
     assert petro_agah.url == auto_agah.url
     petro_nav = await petro_agah.live_navps()
     auto_nav = await auto_agah.live_navps()
@@ -56,7 +57,7 @@ async def test_multinav():
 async def test_asset_allocation():
     aa = await petro_agah.asset_allocation()
     assert aa.keys() <= petro_agah._aa_keys
-    assert type(aa.pop('jalaliDate')) is str
+    assert isinstance(aa.pop('jalaliDate'), str)
     assert isclose(sum(aa.values()), 1.0)
 
 
@@ -68,7 +69,7 @@ async def test_cache():
 
 @files('petro_agah_aa.json')
 async def test_leverage():
-    assert type(await petro_agah.leverage()) is float
+    assert isinstance(await petro_agah.leverage(), float)
 
 
 @file('petro_agah_fund_items.json')

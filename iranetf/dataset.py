@@ -1,11 +1,12 @@
-__version__ = '0.29.1.dev1'
+from __future__ import annotations as _
+
 from asyncio import gather as _gather, sleep as _sleep
 from contextlib import contextmanager as _contextmanager
 from json import JSONDecodeError
 from logging import Logger as _Logger
 from pathlib import Path as _Path
 
-import pandas as _pd
+import polars as pl
 from aiohttp import (
     ClientConnectorDNSError as _ClientConnectorDNSError,
     ClientConnectorError as _ClientConnectorError,
@@ -14,12 +15,6 @@ from aiohttp import (
     ServerDisconnectedError as _ServerDisconnectedError,
 )
 from aiohutils import logger as _aiohutils_logger
-from pandas import (
-    DataFrame as _DataFrame,
-    Series as _Series,
-    concat as _concat,
-    read_csv as _read_csv,
-)
 from tsetmc.instruments import (
     Instrument as _Instrument,
     search as _tsetmc_search,
@@ -52,65 +47,99 @@ _ETF_TYPES = {  # numbers are according to fipiran
     24: 'Guarantee',
 }
 
-
 _DATASET_PATH = _Path(__file__).parent / 'dataset.csv'
 
 
-def _make_site(row) -> _BaseSite:
+def _make_site(row: dict) -> _BaseSite:
     type_str = row['siteType']
     site_class = getattr(_sites, type_str)
     return site_class(row['url'])
 
 
-def read_dataset(*, site=True, inst=False) -> _DataFrame:
-    """Load dataset.csv as a DataFrame.
+def read_dataset(*, site=True, inst=False) -> pl.LazyFrame:
+    """Load dataset.csv as a LazyFrame.
 
     If site is True, convert url and siteType columns to site object.
     """
-    df = _read_csv(
+    # Enforces explicit schema and maps categorization values natively
+    lf = pl.scan_csv(
         _DATASET_PATH,
-        encoding='utf-8-sig',
-        low_memory=False,
-        lineterminator='\n',
-        dtype={
-            'l18': 'string',
-            'name': 'string',
-            'type': _pd.CategoricalDtype([*_ETF_TYPES.values()]),
-            'insCode': 'string',
-            'regNo': 'string',
-            'url': 'string',
-            'siteType': 'category',
-            'dps_interval': 'Int8',
+        encoding='utf8',  # Polars strips the BOM automatically under "utf8"
+        null_values=[''],
+        schema={  # Changed from 'dtypes' to 'schema'
+            'l18': pl.String,
+            'name': pl.String,
+            'type': pl.String,
+            'insCode': pl.String,
+            'regNo': pl.String,
+            'url': pl.String,
+            'siteType': pl.String,
+            'dps_interval': pl.Int8,
         },
     )
 
-    if site:
-        df['site'] = df[df['siteType'].notna()].apply(_make_site, axis=1)
+    if site or inst:
+        # Materialize momentarily to handle row-level complex custom Python Object mappings
+        df = lf.collect()
 
-    if inst:
-        df['inst'] = df['insCode'].apply(_Instrument)  # type: ignore
+        if site:
+            # Map row dict structures via an explicit vectorized approach instead of axis=1
+            df = df.with_columns(
+                pl.struct(['siteType', 'url'])
+                .map_elements(
+                    lambda r: (
+                        _make_site(r)
+                        if r.get('siteType') is not None
+                        else None
+                    ),
+                    return_dtype=pl.Object,
+                )
+                .alias('site')
+            )
 
-    return df
+        if inst:
+            df = df.with_columns(
+                pl.col('insCode')
+                .map_elements(
+                    lambda c: _Instrument(c) if c is not None else None,
+                    return_dtype=pl.Object,
+                )
+                .alias('inst')
+            )
+        return df.lazy()
+
+    return lf
 
 
-def write_dataset(ds: _DataFrame):
-    yk_tt = str.maketrans({'ي': 'ی', 'ك': 'ک'})
-    ds['l18'] = ds['l18'].str.translate(yk_tt)
-    ds['name'] = ds['name'].str.translate(yk_tt)
+def write_dataset(ds: pl.LazyFrame | pl.DataFrame):
+    """
+    Collects the LazyFrame pipeline data and writes it back cleanly to disk.
+    """
+    df = ds.collect() if isinstance(ds, pl.LazyFrame) else ds
 
-    ds[
-        [  # sort columns
-            'l18',
-            'name',
-            'type',
-            'insCode',
-            'regNo',
-            'url',
-            'siteType',
-            'dps_interval',
+    # Fast, vectorized text translations in Polars
+    df = df.with_columns(
+        [
+            pl.col('l18').str.replace_all('ي', 'ی').str.replace_all('ك', 'ک'),
+            pl.col('name').str.replace_all('ي', 'ی').str.replace_all('ك', 'ک'),
         ]
-    ].sort_values('l18').to_csv(
-        _DATASET_PATH, lineterminator='\n', encoding='utf-8-sig', index=False
+    )
+
+    columns_order = [
+        'l18',
+        'name',
+        'type',
+        'insCode',
+        'regNo',
+        'url',
+        'siteType',
+        'dps_interval',
+    ]
+
+    # Extract only matching dataset columns and sort purely via vector chainss
+    df.select(columns_order).sort('l18').write_csv(
+        _DATASET_PATH,
+        include_bom=True,  # This replaces encoding='utf-8-sig' to protect Persian characters
     )
 
 
@@ -123,8 +152,6 @@ def _log_and_retry(func):
         while True:
             try:
                 return await func(*args)
-            # ClientConnectorError is usually raise after
-            # OSError(22, 'The semaphore timeout period has expired', None, 121, None))
             except (
                 _ClientConnectorDNSError,
                 _ClientConnectorError,
@@ -144,10 +171,7 @@ def _log_and_retry(func):
                     continue
                 _logger.error(f'status {e.status} on {arg}')
                 return
-            except (
-                OSError,
-                _ClientError,
-            ) as e:
+            except (OSError, _ClientError) as e:
                 _logger.error(f'{e!r} on {arg}')
                 return
             except Exception as e:
@@ -163,11 +187,10 @@ async def _check_validity(site: _BaseSite) -> tuple[str, str] | None:
         await site.live_navps()
     except JSONDecodeError:
         return
-    last_url = site.last_response.url  # to avoid redirected URLs
+    last_url = site.last_response.url
     return f'{last_url.scheme}://{last_url.host}/', type(site).__name__
 
 
-# sorted from most common to least common
 SITE_TYPES = (_RayanHamafza, _TadbirPardaz, _LeveragedTadbirPardaz, _MabnaDP2)
 
 
@@ -197,163 +220,220 @@ async def _url_type(domain: str) -> tuple:
 
 
 async def _add_url_and_type(
-    fipiran_df: _DataFrame, known_domains: _Series | None
+    fipiran_lf: pl.LazyFrame, known_domains: list[str] | None
 ):
-    domains_to_be_checked = fipiran_df['domain'][~fipiran_df['domain'].isna()]
+    fipiran_df = fipiran_lf.collect()
+
+    # Filter domains using vector syntax
+    domains_filter = fipiran_df['domain'].is_not_null()
     if known_domains is not None:
-        domains_to_be_checked = domains_to_be_checked[
-            ~domains_to_be_checked.isin(known_domains)
-        ]
+        domains_filter = domains_filter & (
+            ~fipiran_df['domain'].is_in(known_domains)
+        )
+
+    domains_to_be_checked = fipiran_df.filter(domains_filter)[
+        'domain'
+    ].to_list()
 
     _logger.info(
         f'checking site types of {len(domains_to_be_checked)} domains'
     )
-    if domains_to_be_checked.empty:
-        return
+    if not domains_to_be_checked:
+        return fipiran_df.lazy()
 
-    # there will be a lot of redirection warnings, let's silent them
     with set_level(_aiohutils_logger, 'ERROR'):
         list_of_tuples = await _gather(
             *[_url_type(d) for d in domains_to_be_checked]
         )
 
-    url, site_type = zip(*list_of_tuples)
-    fipiran_df.loc[:, ['url', 'siteType']] = _DataFrame(
-        {'url': url, 'siteType': site_type}, index=domains_to_be_checked.index
+    url_list, site_type_list = zip(*list_of_tuples)
+
+    # Map back changes using a side table join instead of index-dependent .loc modifications
+    updates_df = pl.DataFrame(
+        {
+            'domain': domains_to_be_checked,
+            'url_new': url_list,
+            'siteType_new': site_type_list,
+        }
     )
 
+    res_df = (
+        fipiran_df.join(updates_df, on='domain', how='left')
+        .with_columns(
+            [
+                pl.col('url_new').alias('url'),
+                pl.col('siteType_new').alias('siteType'),
+            ]
+        )
+        .drop(['url_new', 'siteType_new'])
+    )
 
-async def _add_ins_code(new_items: _DataFrame) -> None:
-    names_without_code = new_items[new_items['insCode'].isna()].name
-    if names_without_code.empty:
-        return
+    return res_df.lazy()
+
+
+async def _add_ins_code(new_items: pl.DataFrame) -> pl.DataFrame:
+    names_without_code = new_items.filter(pl.col('insCode').is_null())[
+        'name'
+    ].to_list()
+    if not names_without_code:
+        return new_items
+
     _logger.info('searching names on tsetmc to find their insCode')
     results = await _gather(
         *[_tsetmc_search(name) for name in names_without_code]
     )
     ins_codes = [(None if len(r) != 1 else r[0]['insCode']) for r in results]
-    new_items.loc[names_without_code.index, 'insCode'] = ins_codes
+
+    codes_map = pl.DataFrame(
+        {'name': names_without_code, 'insCode_new': ins_codes}
+    )
+    return (
+        new_items.join(codes_map, on='name', how='left')
+        .with_columns(pl.coalesce(['insCode_new', 'insCode']).alias('insCode'))
+        .drop('insCode_new')
+    )
 
 
-async def _fipiran_data(ds: _DataFrame) -> _DataFrame:
+async def _fipiran_data(ds: pl.LazyFrame) -> pl.LazyFrame:
     import fipiran.funds
 
     _logger.info('await fipiran.funds.funds()')
-    fipiran_df = await fipiran.funds.funds()
+    # Use global inference scope for any incoming external dynamic dataframes
+    fipiran_raw = await fipiran.funds.funds()
+    fipiran_df = pl.DataFrame(fipiran_raw, infer_schema_length=None)
 
-    reg_not_in_fipiran = ds[~ds['regNo'].isin(fipiran_df['regNo'])]
-    if not reg_not_in_fipiran.empty:
+    ds_collected = ds.collect()
+    reg_not_in_fipiran = ds_collected.filter(
+        ~pl.col('regNo').is_in(fipiran_df['regNo'])
+    )
+
+    if max(reg_not_in_fipiran.shape) > 0:
         _logger.warning(
             f'Some dataset rows were not found on fipiran:\n{reg_not_in_fipiran}'
         )
 
-    df = fipiran_df[
-        (fipiran_df['typeOfInvest'] == 'Negotiable')
-        # 11: 'Market Maker', 12: 'VC', 13: 'Project', 14: 'Land and building',
-        # 16: 'PE'
-        & ~(fipiran_df['fundType'].isin((11, 12, 13, 14, 16)))
-        & fipiran_df['isCompleted']
-    ]
-
-    df = df[
+    df = fipiran_df.filter(
+        (pl.col('typeOfInvest') == 'Negotiable')
+        & ~(pl.col('fundType').is_in([11, 12, 13, 14, 16]))
+        & pl.col('isCompleted')
+    ).select(
         [
-            'regNo',
-            'smallSymbolName',
-            'name',
-            'fundType',
-            'websiteAddress',
-            'insCode',
+            pl.col('regNo'),
+            pl.col('smallSymbolName').alias('l18'),
+            pl.col('name'),
+            pl.col('fundType').alias('type'),
+            pl.col('websiteAddress').alias('domain'),
+            pl.col('insCode'),
         ]
-    ]
-
-    df.rename(
-        columns={
-            'fundType': 'type',
-            'websiteAddress': 'domain',
-            'smallSymbolName': 'l18',
-        },
-        inplace=True,
-        errors='raise',
     )
 
-    df['type'] = df['type'].replace(_ETF_TYPES)
+    # Map mapping transformations via high performance native replacement steps
+    df = df.with_columns(
+        pl.col('type').replace(_ETF_TYPES, default=pl.col('type'))
+    )
+    return df.lazy()
 
-    return df
 
-
-async def _tsetmc_dataset() -> _DataFrame:
+async def _tsetmc_dataset() -> pl.LazyFrame:
     from tsetmc.dataset import LazyDS, update
 
     _logger.info('await tsetmc.dataset.update()')
     await update()
 
-    df = LazyDS.df
-    df.drop(columns=['l30', 'isin', 'cisin'], inplace=True)
-    return df
+    # Safely cast incoming datasets to optimized LazyFrame expressions
+    lf = pl.LazyFrame(LazyDS.df, infer_schema_length=None)
+    return lf.drop(['l30', 'isin', 'cisin'])
 
 
-def _add_new_items_to_ds(new_items: _DataFrame, ds: _DataFrame) -> _DataFrame:
-    ds.set_index('insCode', inplace=True)
-    if new_items.empty:
+def _add_new_items_to_ds(
+    new_items: pl.DataFrame, ds: pl.DataFrame
+) -> pl.DataFrame:
+    if max(new_items.shape) == 0:
         return ds
-    new_with_code = new_items[new_items['insCode'].notna()]
-    if not new_with_code.empty:
-        ds = _concat(
-            [ds, new_with_code.set_index('insCode').drop(columns=['domain'])]
-        )
-    else:
-        _logger.info('new_with_code is empty!')
+
+    new_with_code = new_items.filter(pl.col('insCode').is_not_null()).drop(
+        'domain'
+    )
+    if max(new_with_code.shape) > 0:
+        # Align column structures dynamically and concatenate
+        return pl.concat([ds, new_with_code], how='diagonal_relaxed')
+
+    _logger.info('new_with_code is empty!')
     return ds
 
 
 async def _update_existing_rows_using_fipiran(
-    ds: _DataFrame, fipiran_df: _DataFrame, update_existing: bool
-) -> _DataFrame:
-    """Note: ds index will be set to insCode."""
-    await _add_url_and_type(
-        fipiran_df,
-        known_domains=None
-        if update_existing
-        else ds['url'].str.extract('//(.*)/')[0],
+    ds: pl.DataFrame, fipiran_df: pl.DataFrame, update_existing: bool
+) -> pl.DataFrame:
+
+    known_domains = None
+    if not update_existing:
+        known_domains = (
+            ds.filter(pl.col('url').is_not_null())['url']
+            .str.extract(r'//([^/]+)/')
+            .drop_nulls()
+            .to_list()
+        )
+
+    fipiran_lazy = await _add_url_and_type(fipiran_df.lazy(), known_domains)
+    fipiran_df = fipiran_lazy.collect()
+
+    # Join data streams using relational keys instead of legacy index overrides
+    joined = ds.join(
+        fipiran_df.select(['regNo', 'domain', 'type', 'url', 'siteType']),
+        on='regNo',
+        how='left',
+        suffix='_fip',
     )
 
-    ds.set_index('regNo', inplace=True)
-    df = fipiran_df.set_index('regNo')
-    ds['domain'] = None
-    # to add fipiran urls and names to ds
-    ds.update(df, overwrite=False)
+    # Coalesce values to overwrite fields safely without adding extra rows
+    ds_updated = joined.with_columns(
+        [
+            pl.coalesce(['url', 'url_fip']).alias('url'),
+            pl.coalesce(['siteType', 'siteType_fip']).alias('siteType'),
+            pl.coalesce(['type_fip', 'type']).alias('type'),
+            pl.col('domain_fip').alias('domain'),
+        ]
+    ).drop(['url_fip', 'siteType_fip', 'type_fip', 'domain'])
 
-    # ds['type'] = fipiran_df['type'] will create NA values in type column.
-    common_regno = df.index.intersection(ds.index)
-    ds.loc[common_regno, 'type'] = df.loc[common_regno, 'type']
+    # Build fallbacks if the primary URL structures are missing
+    ds_updated = ds_updated.with_columns(
+        pl.when(pl.col('url').is_null() & pl.col('domain').is_not_null())
+        .then(pl.lit('http://') + pl.col('domain') + pl.lit('/'))
+        .otherwise(pl.col('url'))
+        .alias('url')
+    )
+    return ds_updated
 
-    # use domain as URL for those who do not have any URL
-    na_urls = ds[ds['url'].isna()].index
-    ds.loc[na_urls, 'url'] = 'http://' + ds.loc[na_urls, 'domain'] + '/'
-    ds.reset_index(inplace=True)
-    return ds
 
-
-async def update_dataset(*, update_existing=False) -> _DataFrame:
+async def update_dataset(*, update_existing=False) -> pl.DataFrame:
     """Update dataset and return newly found that could not be added."""
-    ds = read_dataset(site=False)
-    fipiran_df = await _fipiran_data(ds)
+    ds = read_dataset(site=False).collect()
+    fipiran_df = (await _fipiran_data(ds.lazy())).collect()
+
     ds = await _update_existing_rows_using_fipiran(
         ds, fipiran_df, update_existing
     )
-    new_items = fipiran_df[~fipiran_df['regNo'].isin(ds['regNo'])]
+    new_items = fipiran_df.filter(~pl.col('regNo').is_in(ds['regNo']))
 
-    tsetmc_df = await _tsetmc_dataset()
-    await _add_ins_code(new_items)
+    tsetmc_df = (await _tsetmc_dataset()).collect()
+    new_items = await _add_ins_code(new_items)
     ds = _add_new_items_to_ds(new_items, ds)
 
-    # update all data, old or new, using tsetmc_df
-    ds.update(tsetmc_df)
+    # Perform a left join update to bring over updated data tracks from TSETMC
+    ds = ds.join(tsetmc_df, on='insCode', how='left', suffix='_tsetmc')
 
-    ds.reset_index(inplace=True)
+    # Coalesce tracking changes updates
+    update_cols = [
+        c for c in tsetmc_df.columns if c in ds.columns and c != 'insCode'
+    ]
+    for col in update_cols:
+        ds = ds.with_columns(
+            pl.coalesce([f'{col}_tsetmc', col]).alias(col)
+        ).drop(f'{col}_tsetmc')
+
     write_dataset(ds)
-
-    return new_items[new_items['insCode'].isna()]
+    return new_items.filter(pl.col('insCode').is_null())
 
 
 @_log_and_retry
@@ -381,57 +461,74 @@ async def _check_reg_no(site: _BaseSite, ds_reg_no: str):
 
 @_log_and_retry
 async def _check_portfolio_counts(site: _BaseSite, dataset_ids: set[str]):
-    """
-    Fetch portfolio counts from website and validate exact match with dataset.
-
-    Ensures:
-    1. Every portfolio ID from website exists in dataset
-    2. Every portfolio ID from dataset exists on website
-    3. Counts match exactly
-    """
-    site_portfolios = (
-        await site.portfolios()
-    )  # dict: {'2': 'Gold', '11': 'Silver'}
+    site_portfolios = await site.portfolios()
     site_ids = site_portfolios.keys()
-
-    # Get dataset info for this site
     url = site.url
 
     if dataset_ids == {''}:
         dataset_ids = {'1'}
 
-    # Validation 2: IDs must match exactly (set equality)
     if site_ids == dataset_ids:
         return
     _logger.error(f'{url}: Portfolio ID mismatch! {dataset_ids=} {site_ids=}')
 
 
 async def check_dataset(live=False):
-    ds = read_dataset(site=False)
-    assert ds['l18'].is_unique
-    assert ds['name'].is_unique, ds['name'][ds['name'].duplicated()]
-    assert ds['type'].unique().isin(_ETF_TYPES.values()).all()  # type: ignore
-    assert ds['insCode'].is_unique
-    assert ds['url'].is_unique
-    assert not ds['siteType'].isna().any(), 'siteType contains NA'
-    assert not ds['regNo'].isna().any()
+    ds = read_dataset(site=False).collect()
 
-    # same regNo -> same base url
-    ds[['base_url', 'portfolio_id']] = ds['url'].str.partition('#')[[0, 2]]
-    assert (
-        ds.groupby('regNo').filter(lambda g: g['base_url'].nunique() > 1).empty
+    # Guardrail Match: All validation checks collapsed to true single boolean scalars
+    assert ds['l18'].is_unique().all()
+    assert ds['name'].is_unique().all()
+    assert ds['type'].is_in(list(_ETF_TYPES.values())).all()
+    assert ds['insCode'].is_unique().all()
+    assert ds['url'].is_unique().all()
+    assert (ds['siteType'].is_not_null()).all(), 'siteType contains NA'
+    assert (ds['regNo'].is_not_null()).all()
+
+    # Split the URL string exactly once by the '#' character into a struct
+    # containing 'field_0' and 'field_1'
+    ds = (
+        ds.with_columns(
+            pl.col('url').str.split_exact('#', 1).alias('url_parts')
+        )
+        .with_columns(
+            [
+                # field_0 is everything before the '#'
+                pl.col('url_parts').struct.field('field_0').alias('base_url'),
+                # field_1 is everything after. If there was no '#', field_1 is null,
+                # so we fill it with ''
+                pl.col('url_parts')
+                .struct.field('field_1')
+                .fill_null('')
+                .alias('portfolio_id'),
+            ]
+        )
+        .drop('url_parts')
     )
+
+    # Replaces Pandas groupby lambda filtering blocks with native relational expressions
+    grouped_check = (
+        ds.group_by('regNo')
+        .agg(pl.col('base_url').n_unique().alias('cnt'))
+        .filter(pl.col('cnt') > 1)
+    )
+    assert max(grouped_check.shape) == 0
 
     if not live:
         return
-    ds = ds.join(
-        ds.groupby('base_url')['portfolio_id']
-        .agg(list)
-        .rename('portfolio_ids'),
-        on='base_url',
-    )
 
-    ds['site'] = ds[ds['siteType'].notna()].apply(_make_site, axis=1)
+    # Build list aggregations natively
+    agg_pids = ds.group_by('base_url').agg(
+        pl.col('portfolio_id').alias('portfolio_ids')
+    )
+    ds = ds.join(agg_pids, on='base_url', how='left')
+
+    # Safely apply object mappings to generate your site list properties
+    ds = ds.with_columns(
+        pl.struct(['siteType', 'url'])
+        .map_elements(lambda r: _make_site(r), return_dtype=pl.Object)
+        .alias('site')
+    )
 
     check_site_coros = [_new_site_type(s) for s in ds['site']]
     check_reg_no_coros = [
@@ -439,18 +536,19 @@ async def check_dataset(live=False):
         for (site, reg) in zip(ds['site'], ds['regNo'])
     ]
 
-    unique_site_pids = ds.loc[
-        ~ds['base_url'].duplicated(), ['site', 'portfolio_ids']
-    ]
+    unique_site_pids = ds.unique(subset=['base_url']).select(
+        ['site', 'portfolio_ids']
+    )
     collect_symbol_counts_coros = [
         _check_portfolio_counts(s, set(dataset_ids))
         for (s, dataset_ids) in zip(
-            unique_site_pids['site'], unique_site_pids['portfolio_ids']
+            unique_site_pids['site'].to_list(),
+            unique_site_pids['portfolio_ids'].to_list(),
         )
     ]
 
     orig_ssl = iranetf.ssl
-    iranetf.ssl = False  # many sites fail ssl verification
+    iranetf.ssl = False
     try:
         new_site_types = await _gather(*check_site_coros)
         await _gather(*check_reg_no_coros)
@@ -458,15 +556,20 @@ async def check_dataset(live=False):
     finally:
         iranetf.ssl = orig_ssl
 
-    # only write back non-None site_types
-    changed_site_types = [st for st in new_site_types if st is not None]
-    if changed_site_types:
-        ds.loc[[st is not None for st in new_site_types], 'siteType'] = (
-            changed_site_types
+    # Dynamically update the specific row contents without altering unassigned blocks
+    if any(st is not None for st in new_site_types):
+        updates = pl.DataFrame({'l18': ds['l18'], 'new_st': new_site_types})
+        ds = (
+            ds.join(updates, on='l18', how='left')
+            .with_columns(
+                pl.coalesce(['new_st', 'siteType']).alias('siteType')
+            )
+            .drop('new_st')
         )
         write_dataset(ds)
 
-    if not (no_site := ds[ds['site'].isna()]).empty:
+    no_site = ds.filter(pl.col('site').is_null())
+    if max(no_site.shape) > 0:
         _logger.warning(
-            f'some dataset entries have no associated site:\n{no_site["l18"]}'
+            f'some dataset entries have no associated site:\n{no_site["l18"].to_list()}'
         )

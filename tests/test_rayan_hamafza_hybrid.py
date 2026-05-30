@@ -15,7 +15,9 @@ site: RayanHamafza = RayanHamafza.from_l18('ضمان')
 
 @file('rhh_main.html')
 async def test_rhh_from_url():
-    assert type(await BaseSite.from_url(site.url) is RayanHamafza)
+    # Fixed the type checking comparison structure to be fully type-safe
+    instance = await BaseSite.from_url(site.url)
+    assert isinstance(instance, RayanHamafza)
 
 
 @file('rhh_live.json')
@@ -27,6 +29,7 @@ async def test_rhh_live_navps():
 
 @file('rhh_navps_history.json')
 async def test_rhh_navps_history():
+    # This safely intercepts and validates the migrated polars.LazyFrame result
     await assert_navps_history(site)
 
 
@@ -34,7 +37,7 @@ async def test_rhh_navps_history():
 async def test_asset_allocation():
     aa = await site.asset_allocation()
     assert aa.keys() <= site._aa_keys
-    assert type(aa.pop('JalaliDate')) is str
+    assert isinstance(aa.pop('JalaliDate'), str)
     assert isclose(sum(aa.values()), 1.0)
 
 

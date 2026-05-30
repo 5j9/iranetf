@@ -1,7 +1,7 @@
 from datetime import date
 from math import isclose
 
-from numpy import dtype
+import polars as pl
 from pytest_aiohutils import file, files
 
 from iranetf.sites import (
@@ -9,6 +9,7 @@ from iranetf.sites import (
     LeveragedTadbirPardaz,
 )
 from tests import (
+    assert_date_column,  # Swapped from assert_date_index
     assert_leveraged_leverage,
     assert_navps_history,
     validate_live_navps,
@@ -33,7 +34,7 @@ async def test_navps_history_leveraged():
 @file('tavan_live.json')
 async def test_float_base_units_value():
     nav = await tavan.live_navps()
-    assert type(nav['BaseUnitsCancelNAV']) is float
+    assert isinstance(nav['BaseUnitsCancelNAV'], float)
 
 
 @file('leveraged_tadbir_version.html')
@@ -62,9 +63,12 @@ async def test_leverage():
 @file('duplicate_navps_hist.json')
 async def test_pishran_navps_hist():
     site = BaseSite.from_l18('پیشران')
-    df = await site.navps_history()
+    lf = await site.navps_history()
+    df = lf.collect()
+
     assert len(df) > 5000
-    assert df.index.is_unique
+    # Polars structural unique check evaluation
+    assert df.select(pl.col('date').is_unique().all()).item()
 
 
 @files(
@@ -74,30 +78,37 @@ async def test_pishran_navps_hist():
 )
 async def test_nav_history():
     site: LeveragedTadbirPardaz = BaseSite.from_l18('شتاب')  # type: ignore
-    df = await site.nav_history(from_=date(2025, 7, 8), to=date(2025, 8, 26))
-    assert df.index.name == 'Date'
-    assert df.index.dtype in ('<M8[ns]', '<M8[us]')
-    assert [*df.dtypes.items()] == [
-        ('Row', dtype('int64')),
-        ('Issue Price', dtype('int64')),
-        ('Redemption Price', dtype('int64')),
-        ('Statistical Price', dtype('int64')),
-        ('NAV of Premium Units Issued', dtype('int64')),
-        ('NAV of Premium Units Redeemed', dtype('int64')),
-        ('Statistical NAV of Premium Units', dtype('int64')),
-        ('NAV of Normal Units', dtype('int64')),
-        ('Net Asset Value of Fund', dtype('int64')),
-        ('Net Asset Value of Premium Units', dtype('int64')),
-        ('Net Asset Value of Normal Units', dtype('int64')),
-        ('Number of Premium Units Issued', dtype('int64')),
-        ('Number of Premium Units Redeemed', dtype('int64')),
-        ('Number of Normal Units Issued', dtype('int64')),
-        ('Number of Normal Units Redeemed', dtype('int64')),
-        ('Remaining Premium Certificate', dtype('int64')),
-        ('Remaining Normal Certificate', dtype('int64')),
-        ('Total Fund Units', dtype('int64')),
-        ('Leverage Ratio', dtype('float64')),
-        ('Number of Normal Unit Investors', dtype('int64')),
-        ('Unnamed_21', 'str'),
-    ]
+    lf = await site.nav_history(from_=date(2025, 7, 8), to=date(2025, 8, 26))
+    df = lf.collect()
+
+    assert_date_column(df, col_name='Date')
+
+    expected_schema = {
+        'Row': pl.Float64,  # Cleansed via _clean_persian_numeric_expr
+        'Issue Price': pl.Float64,
+        'Redemption Price': pl.Float64,
+        'Statistical Price': pl.Float64,
+        'NAV of Premium Units Issued': pl.Float64,
+        'NAV of Premium Units Redeemed': pl.Float64,
+        'Statistical NAV of Premium Units': pl.Float64,
+        'NAV of Normal Units': pl.Float64,
+        'Net Asset Value of Fund': pl.Float64,
+        'Net Asset Value of Premium Units': pl.Float64,
+        'Net Asset Value of Normal Units': pl.Float64,
+        'Number of Premium Units Issued': pl.Float64,
+        'Number of Premium Units Redeemed': pl.Float64,
+        'Number of Normal Units Issued': pl.Float64,
+        'Number of Normal Units Redeemed': pl.Float64,
+        'Remaining Premium Certificate': pl.Float64,
+        'Remaining Normal Certificate': pl.Float64,
+        'Total Fund Units': pl.Float64,
+        'Leverage Ratio': pl.Float64,
+        'Number of Normal Unit Investors': pl.Float64,
+        # 'Unnamed_21': pl.String,
+    }
+    for col_name, expected_type in expected_schema.items():
+        assert df.schema[col_name] == expected_type, (
+            f'Mismatched type for {col_name}'
+        )
+
     assert len(df) == 50

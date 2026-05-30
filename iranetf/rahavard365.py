@@ -1,7 +1,7 @@
 from json import loads
 
+import polars as pl
 from aiohutils.session import SessionManager
-from pandas import DataFrame
 
 session_manager = SessionManager()
 
@@ -10,7 +10,7 @@ API = f'{HOME}api/v2/'
 
 
 async def api(path: str) -> dict:
-    r = await session_manager.get(f'{API}{path}')
+    r = await session_manager.request('get', f'{API}{path}')
     return (await r.json())['data']
 
 
@@ -23,21 +23,27 @@ class Rahavard365:
     async def specification(self) -> dict:
         return await api(f'asset/{self.asset_id}/specification')
 
-    async def values(self) -> tuple[dict, DataFrame]:
-        r = await session_manager.get(f'{HOME}asset/{self.asset_id}/values')
+    async def values(self) -> tuple[dict, pl.DataFrame]:
+        r = await session_manager.request(
+            'get', f'{HOME}asset/{self.asset_id}/values'
+        )
         text = await r.text()
         start = text.find('var layoutModel = ') + 18
         end = text.find(';', start)
         j = loads(text[start:end])
+
+        # Migrated storage container logic to native Polars memory allocation
         if (funds := j.pop('funds', None)) is not None:
-            j['funds'] = DataFrame(funds)
+            j['funds'] = pl.DataFrame(funds)
         return j
 
 
-async def etfs(short_name=False) -> DataFrame:
+async def etfs(short_name=False) -> pl.DataFrame:
     data = await api('market-data/etf-funds')
     if short_name:
         for item in data:
             specification = await Rahavard365(item['asset_id']).specification()
             item['short_name'] = specification['instruments'][0]['short_name']
-    return DataFrame(data)
+
+    # Directly structuralizes the data payload table
+    return pl.DataFrame(data)

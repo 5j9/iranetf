@@ -1,7 +1,7 @@
 from datetime import date
 from unittest.mock import patch
 
-from numpy import dtype
+import polars as pl
 from pytest import raises, skip
 from pytest_aiohutils import file, files, validate_dict
 
@@ -11,7 +11,7 @@ from iranetf.sites import (
     TadbirPardazMultiNAV,
     TPLiveNAVPS,
 )
-from tests import assert_navps_history, validate_live_navps
+from tests import assert_date_column, assert_navps_history, validate_live_navps
 
 tadbir = TadbirPardaz('https://modirfund.ir/')
 
@@ -36,7 +36,7 @@ async def test_navps_date_ends_with_space():
 async def test_multinav():
     still = BaseSite.from_l18('استیل')
     khodran = BaseSite.from_l18('خودران')
-    assert type(khodran) is TadbirPardazMultiNAV
+    assert isinstance(khodran, TadbirPardazMultiNAV)
     assert still.url == khodran.url
     still_nav = await still.live_navps()
     khodran_nav = await khodran.live_navps()
@@ -79,18 +79,27 @@ async def test_multinav_live_navps_path():
 )
 async def test_dividend_history():
     site = BaseSite.from_l18('آفاق')
-    assert type(site) is TadbirPardaz
-    df = await site.dividend_history()
+    assert isinstance(site, TadbirPardaz)
+
+    lf = await site.dividend_history()
+    df = lf.collect()
+
     assert len(df) >= 22
-    assert [*df.dtypes.items()] == [
-        ('row', dtype('int64')),
-        ('fundUnit', dtype('int64')),
-        ('unitProfit', dtype('int64')),
-        ('sumAllProfit', dtype('int64')),
-        ('profitPercent', dtype('float64')),
-    ]
-    assert (index := df.index).dtype == 'datetime64[us]'
-    assert index.name == 'profitDate'
+
+    expected_schema = {
+        'row': pl.Int64,
+        'fundUnit': pl.Int64,
+        'unitProfit': pl.Int64,
+        'sumAllProfit': pl.Int64,
+        'profitPercent': pl.Float64,
+    }
+
+    for col_name, expected_type in expected_schema.items():
+        assert df.schema[col_name] == expected_type, (
+            f'Mismatched type for {col_name}'
+        )
+
+    assert_date_column(df, col_name='profitDate')
 
 
 @files(
@@ -99,10 +108,12 @@ async def test_dividend_history():
 )
 async def test_dividend_history_with_dates():
     site = BaseSite.from_l18('امین یکم')
-    assert type(site) is TadbirPardaz
-    df = await site.dividend_history(
+    assert isinstance(site, TadbirPardaz)
+
+    lf = await site.dividend_history(
         from_date=date(2024, 11, 20), to_date=date(2025, 9, 22)
     )
+    df = lf.collect()
     assert len(df) == 11
 
 
@@ -111,12 +122,22 @@ async def test_invalid_dividend_history_value(test_config):
     if not test_config['OFFLINE_MODE']:
         raise skip('not offline')
     site = BaseSite.from_l18('آسان')
-    assert type(site) is TadbirPardaz
-    df = await site.dividend_history(
+    assert isinstance(site, TadbirPardaz)
+
+    lf = await site.dividend_history(
         from_date=date(2025, 1, 19), to_date=date(2025, 1, 19)
     )
+    df = lf.collect()
     assert len(df) == 1
-    assert df.at['2025-01-19', 'profitPercent'] == 1.81671169356907e18
+
+    # Replaced index-based .at lookup with type-safe filtering expressions
+    target_value = (
+        df.filter(pl.col('profitDate') == date(2025, 1, 19))
+        .select('profitPercent')
+        .item()
+    )
+
+    assert target_value == 1.81671169356907e18
 
 
 EXPECTED_TP_VER = '9.2.5'
@@ -134,7 +155,7 @@ steel: TadbirPardaz = BaseSite.from_l18('استیل')  # type: ignore
 async def test_info():
     assert await steel.home_info() == {
         'basketIDs': {
-            '1': 'صندوق سرمایه\u200cگذاری بخشی صنایع مفید',
+            '1': 'صندوق سرمایه‌گذاری بخشی صنایع مفید',
             '2': 'استیل',
             '3': 'خودران',
             '4': 'سیمانو',
@@ -172,5 +193,9 @@ async def test_option_in_asset_allocation(caplog):
 async def test_empty_divident_hist():
     site = TadbirPardaz('https://maskanamfund.ir/')
     dt = date(2025, 10, 29)
-    df = await site.dividend_history(from_date=dt, to_date=dt)
-    assert df.empty
+
+    lf = await site.dividend_history(from_date=dt, to_date=dt)
+    df = lf.collect()
+
+    # Clean check replacing pandas .empty property evaluation
+    assert df.height == 0

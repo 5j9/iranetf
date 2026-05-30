@@ -1,11 +1,11 @@
 from math import isclose
 
-from numpy import dtype
+import polars as pl
 from pytest_aiohutils import file, file_map, files
 
 from iranetf.sites import BaseSite, MabnaDP2
 from tests import (
-    assert_date_index,
+    assert_date_column,  # Swapped from assert_date_index
     assert_leveraged_leverage,
     assert_navps_history,
     validate_live_navps,
@@ -80,18 +80,18 @@ async def test_non_leveraged_leverage():
 @file('md2_assets_history.json')
 async def test_assets_history():
     site = MabnaDP2('https://gitidamavandfund.ir/')
-    df = await site.assets_history()
-    assert_date_index(df)
-    assert [*df.dtypes.items()] == [
-        (
-            'date_time',
-            'datetime64[ns, UTC+03:30]',
-        ),
-        (
-            'value',
-            dtype('int64'),
-        ),
-    ]
+
+    # Materialize the lazy data block to introspect structural schema types
+    lf = await site.assets_history()
+    df = lf.collect()
+
+    assert_date_column(df, col_name='date')
+
+    # Assert exact schema structural matching using clean Polars type mappings
+    assert df.schema['date_time'] == pl.Datetime(
+        time_unit='ns', time_zone='Asia/Tehran'
+    )
+    assert df.schema['value'] == pl.Int64
 
 
 @file('test_alt_home_data_format_mabnadp2.html')

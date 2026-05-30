@@ -1,21 +1,13 @@
 from asyncio import gather
 from datetime import date
-from io import StringIO
 from json import loads
 from re import findall, search, split
 from typing import Any
 
+import polars as pl
 from jdatetime import date as jdate, datetime as jdatetime
-from pandas import (
-    DataFrame,
-    Series,
-    concat,
-    read_html,
-    to_datetime,
-    to_numeric,
-)
 
-from iranetf import _get, logger
+from iranetf import _get
 from iranetf.sites._lib import (
     BaseSite,
     LiveNAVPS,
@@ -23,40 +15,41 @@ from iranetf.sites._lib import (
     reg_no_from_home_info,
 )
 
-_fa_to_en_tt = str.maketrans(
-    {
-        '۰': '0',
-        '۱': '1',
-        '۲': '2',
-        '۳': '3',
-        '۴': '4',
-        '۵': '5',
-        '۶': '6',
-        '۷': '7',
-        '۸': '8',
-        '۹': '9',
-        ',': '',
-    }
-)
+# Optimized vector replacement map for stripping Persian characters
+_FA_TO_EN_REPLACEMENTS = {
+    '۰': '0',
+    '۱': '1',
+    '۲': '2',
+    '۳': '3',
+    '۴': '4',
+    '۵': '5',
+    '۶': '6',
+    '۷': '7',
+    '۸': '8',
+    '۹': '9',
+    ',': '',
+}
 
 
-def _fanum_to_num(series: Series):
+def _clean_persian_numeric_expr(column_name: str) -> pl.Expr:
     """
-    Converts a pandas Series from strings containing Persian digits and commas
-    to a numeric data type.
+    Returns a Polars expression that strips Persian numerals and commas
+    from a string column, then casts it to Float64 natively.
     """
-    return to_numeric(series.str.translate(_fa_to_en_tt))
+    expr = pl.col(column_name).str.strip_chars()
+    for fa_char, en_char in _FA_TO_EN_REPLACEMENTS.items():
+        expr = expr.str.replace_all(fa_char, en_char)
+    return expr.cast(pl.Float64)
+
+
+def _jymd_to_greg(date_string: str | None) -> Any:
+    if date_string is None:
+        return None
+    return jdatetime.strptime(date_string, '%Y/%m/%d').togregorian()
 
 
 def _comma_float(s: str) -> float:
     return float(s.replace(',', ''))
-
-
-_jp = jdatetime.strptime
-
-
-def _jymd_to_greg(date_string, /):
-    return _jp(date_string, format='%Y/%m/%d').togregorian()
 
 
 class TPLiveNAVPS(LiveNAVPS):
@@ -84,12 +77,12 @@ class BaseTadbirPardaz(BaseSite):
         'اوراق گواهی سپرده',
         'اوراق مشارکت',
         'پنج سهم برتر',
-        'سایر دارایی\u200cها',
+        'سایر دارایی‌ها',
         'سایر سهام',
-        'سایر سهم\u200cها',
-        'سهم\u200cهای برتر',
+        'سایر سهم‌ها',
+        'سهم‌های برتر',
         'شمش و طلا',
-        'صندوق سرمایه\u200cگذاری در سهام',
+        'صندوق سرمایه‌گذاری در سهام',
         'صندوق های سرمایه گذاری',
         'نقد و بانک (جاری)',
         'نقد و بانک (سپرده)',
@@ -126,8 +119,7 @@ class BaseTadbirPardaz(BaseSite):
         d['version'] = html[start + 15 : end].strip()
 
         reg_no_match = search(
-            r'<td>شماره ثبت نزد سازمان بورس و اوراق بهادار</td>\s*'
-            '<td style="text-align:left">(.*?)</td>',
+            r'<td>شماره ثبت نزد سازمان بورس و اوراق بهادار</td>\s*<td style="text-align:left">(.*?)</td>',
             html,
         )
         if reg_no_match:
@@ -146,64 +138,34 @@ class BaseTadbirPardaz(BaseSite):
 
     async def nav_history(
         self, *, from_: date = date(1970, 1, 1), to: date, basket_id=0
-    ) -> DataFrame:
+    ) -> pl.LazyFrame:
         """
-        This function uses the HTML output available at /Reports/FundNAVList.
-        This is better than the excel output because it includes statistical
-        nav column which excel does not have.
-
-        If the output is in multiple pages, this function will fetch them
-        all and return the result in a single dataframe.
-
-        Tip: the from_ date can be arbitrary old, e.g. 1900-01-01 but
-            there is a 50 year limit on how far in the future the
-            `to` can be.
+        Fetches historical NAV raw matrix blocks via automated page streaming loops.
         """
         path = f'Reports/FundNAVList?FromDate={jdatetime.fromgregorian(date=from_):%Y/%m/%d}&ToDate={jdatetime.fromgregorian(date=to):%Y/%m/%d}&BasketId={basket_id}&page=1'
-        dfs = []
+        all_pages_data = []
+
         while True:
             r = await _get(self.url + path)
             html = (await r.read()).decode()
-            # the first table contains regNo which can be ignored
-            table = read_html(StringIO(html))[1]
-            # the last row is <tfoot> containing next/previous links
-            table.drop(table.index[-1], inplace=True)
-            dfs.append(table)
+
+            # Isolate the data grid row segment cleanly without requiring pandas `read_html`
+            table_body = html.partition('<tbody>')[2].partition('</tbody>')[0]
+            rows = split(r'</tr>\s*<tr>', table_body)
+
+            for row in rows:
+                cells = findall(r'<td>([^<]*)</td>', row)
+                if cells:
+                    all_pages_data.append(cells)
+
             m = search('<a href="([^"]*)" title="Next page">»</a>', html)
             if m is None:
                 break
             path = m[1]
 
-        df = concat(dfs, ignore_index=True)
-        df.rename(
-            columns={
-                'ردیف': 'Row',
-                'تاریخ': 'Date',
-                'قیمت صدور': 'Issue Price',
-                'قیمت ابطال': 'Redemption Price',
-                'قیمت آماری': 'Statistical Price',
-                'NAV صدور واحدهای ممتاز': 'NAV of Premium Units Issued',
-                'NAV ابطال واحدهای ممتاز': 'NAV of Premium Units Redeemed',
-                'NAV آماری ممتاز': 'Statistical NAV of Premium Units',
-                'NAV واحدهای عادی': 'NAV of Normal Units',
-                'خالص ارزش صندوق': 'Net Asset Value of Fund',
-                'خالص ارزش واحدهای ممتاز': 'Net Asset Value of Premium Units',
-                'خالص ارزش واحدهای عادی': 'Net Asset Value of Normal Units',
-                'تعداد واحد ممتاز صادر شده': 'Number of Premium Units Issued',
-                'تعداد واحد ممتاز باطل شده': 'Number of Premium Units Redeemed',
-                'تعداد واحد عادی صادر شده': 'Number of Normal Units Issued',
-                'تعداد واحد عادی باطل شده': 'Number of Normal Units Redeemed',
-                'مانده گواهی ممتاز': 'Remaining Premium Certificate',
-                'مانده گواهی عادی': 'Remaining Normal Certificate',
-                'کل واحدهای صندوق': 'Total Fund Units',
-                'نسبت اهرمی': 'Leverage Ratio',
-                'تعداد سرمایه‌گذاران واحدهای عادی': 'Number of Normal Unit Investors',
-                'Unnamed: 21': 'Unnamed_21',
-            },
-            inplace=True,
-        )
-        numeric_cols = [
+        ordered_columns = [
             'Row',
+            'Date',
             'Issue Price',
             'Redemption Price',
             'Statistical Price',
@@ -224,84 +186,127 @@ class BaseTadbirPardaz(BaseSite):
             'Leverage Ratio',
             'Number of Normal Unit Investors',
         ]
-        df[numeric_cols] = df[numeric_cols].apply(_fanum_to_num)
-        df['Date'] = df['Date'].map(_jymd_to_greg)
-        df.set_index('Date', inplace=True)
-        return df
+
+        target_len = len(ordered_columns)
+        cleaned_rows = []
+
+        for row in all_pages_data:
+            if len(row) < target_len:
+                # Safe text-padding boundary alignment
+                padded_row = row + [''] * (target_len - len(row))
+                cleaned_rows.append(padded_row)
+            else:
+                cleaned_rows.append(row[:target_len])
+
+        if not cleaned_rows:
+            return pl.LazyFrame(
+                [], schema={col: pl.String for col in ordered_columns}
+            )
+
+        lf = pl.LazyFrame(cleaned_rows, schema=ordered_columns, orient='row')
+
+        numeric_cols = [col for col in ordered_columns if col != 'Date']
+
+        # Pre-process the columns: convert explicit empty strings to structural null values.
+        # This prevents the downstream .strict_cast(Float64) from throwing format errors.
+        normalized_lf = lf.with_columns(
+            [
+                pl.when(pl.col(col) == '')
+                .then(None)
+                .otherwise(pl.col(col))
+                .alias(col)
+                for col in numeric_cols
+            ]
+        )
+
+        # Execute your native conversion pipelines on the sanitized structural matrix
+        return normalized_lf.with_columns(
+            [
+                _clean_persian_numeric_expr(col).alias(col)
+                for col in numeric_cols
+            ]
+            + [
+                pl.col('Date').map_elements(
+                    _jymd_to_greg, return_dtype=pl.Datetime
+                )
+            ]
+        )
 
     async def portfolios(self) -> dict[str, str]:
         home_info = await self.home_info()
         if home_info['isETFMultiNavMode']:
             baskets = home_info['basketIDs']
-            baskets.pop('1', None)  # ignore the overall basket
+            baskets.pop('1', None)
             return baskets
         return {'1': self.url}
 
 
 class TadbirPardaz(BaseTadbirPardaz):
     async def live_navps(self) -> TPLiveNAVPS:
-        d: str = await self._json('Fund/GetETFNAV')  # type: ignore
-        # the json is escaped twice, so it needs to be loaded again
-        d: dict = loads(d)  # type: ignore
+        d_raw: str = await self._json('Fund/GetETFNAV')
+        d: dict = loads(d_raw)
 
         d['creation'] = d.pop('subNav')
         d['redemption'] = d.pop('cancelNav')
         d['nominal'] = d.pop('esmiNav')
 
         for k, t in TPLiveNAVPS.__annotations__.items():
-            if t is int:
-                try:
-                    d[k] = comma_int(d[k])
-                except KeyError:
-                    logger.warning(f'key {k!r} not found')
+            if t is int and k in d:
+                d[k] = comma_int(d[k])
 
-        date = d.pop('publishDate')
+        date_str = d.pop('publishDate')
         try:
-            date = jdatetime.strptime(date, '%Y/%m/%d %H:%M:%S')
+            parsed_date = jdatetime.strptime(date_str, '%Y/%m/%d %H:%M:%S')
         except ValueError:
-            date = jdatetime.strptime(date, '%Y/%m/%d ')
-        d['date'] = date.togregorian()
+            parsed_date = jdatetime.strptime(date_str, '%Y/%m/%d ')
+        d['date'] = parsed_date.togregorian()
 
         return d  # type: ignore
 
-    async def navps_history(self) -> DataFrame:
+    async def navps_history(self) -> pl.LazyFrame:
         j: list = await self._json(
             'Chart/TotalNAV', params={'type': 'getnavtotal'}
         )
-        creation, statistical, redemption = [
-            [d['y'] for d in i['List']] for i in j
-        ]
-        date = [d['x'] for d in j[0]['List']]
-        df = DataFrame(
-            {
-                'date': date,
-                'creation': creation,
-                'redemption': redemption,
-                'statistical': statistical,
-            }
+        creation = [d['y'] for d in j[0]['List']]
+        statistical = [d['y'] for d in j[1]['List']]
+        redemption = [d['y'] for d in j[2]['List']]
+        date_list = [d['x'] for d in j[0]['List']]
+
+        # Directly construct a LazyFrame without generating intermediate Pandas states
+        return (
+            pl.DataFrame(
+                {
+                    'date': date_list,
+                    'creation': creation,
+                    'redemption': redemption,
+                    'statistical': statistical,
+                }
+            )
+            .lazy()
+            .with_columns(
+                pl.col('date').str.to_datetime(
+                    '%m/%d/%Y %H:%M:%S', strict=False
+                )
+            )
         )
-        df['date'] = to_datetime(df.date)
-        df.set_index('date', inplace=True)
-        return df
 
     async def dividend_history(
         self,
         *,
         from_date: date | str | None = None,
         to_date: date | str | None = None,
-    ) -> DataFrame:
+    ) -> pl.LazyFrame:
         params: dict = {'page': 1}
-        if from_date is not None or to_date is not None:
-            if from_date is not None:
-                if isinstance(from_date, date):
-                    jd = jdate.fromgregorian(date=from_date)
-                    from_date = f'{jd.year}/{jd.month}/{jd.day}'
-                params['fromDate'] = from_date
-            if to_date is not None:
-                if isinstance(to_date, date):
-                    jd = jdate.fromgregorian(date=to_date)
-                    to_date = f'{jd.year}/{jd.month}/{jd.day}'
-                params['toDate'] = to_date
+        if from_date is not None:
+            if isinstance(from_date, date):
+                jd = jdate.fromgregorian(date=from_date)
+                from_date = f'{jd.year}/{jd.month}/{jd.day}'
+            params['fromDate'] = from_date
+        if to_date is not None:
+            if isinstance(to_date, date):
+                jd = jdate.fromgregorian(date=to_date)
+                to_date = f'{jd.year}/{jd.month}/{jd.day}'
+            params['toDate'] = to_date
 
         all_rows = []
         while True:
@@ -316,21 +321,22 @@ class TadbirPardaz(BaseTadbirPardaz):
             table, _, after_table = html.partition('<tbody>')[2].rpartition(
                 '</tbody>'
             )
-            all_rows += [
-                findall(r'<td>([^<]*)</td>', r)
-                for r in split(r'</tr>\s*<tr>', table)
-            ]
+
+            for r in split(r'</tr>\s*<tr>', table):
+                cells = findall(r'<td>([^<]*)</td>', r)
+                if cells:
+                    all_rows.append(cells)
+
             if '" title="Next page">' not in after_table:
                 break
             params['page'] += 1
 
-        if not all_rows[0]:  # no data for selected range
-            return DataFrame()
+        if not all_rows or not all_rows[0]:
+            return pl.LazyFrame([], schema={'profitDate': pl.Datetime})
 
-        # try to use the same column names as RayanHamafza.dividend_history
-        df = DataFrame(
+        df = pl.DataFrame(
             all_rows,
-            columns=[
+            schema=[
                 'row',
                 'profitDate',
                 'fundUnit',
@@ -338,24 +344,28 @@ class TadbirPardaz(BaseTadbirPardaz):
                 'sumAllProfit',
                 'profitPercent',
             ],
+            orient='row',
         )
-        df['profitDate'] = df['profitDate'].apply(_jymd_to_greg)
-        comma_cols = ['fundUnit', 'sumAllProfit']
-        df[comma_cols] = df[comma_cols].map(comma_int)
-        int_cols = ['row', 'unitProfit']
-        df[int_cols] = df[int_cols].map(comma_int)
-        df['profitPercent'] = df['profitPercent'].map(_comma_float)
-        df.set_index('profitDate', inplace=True)
-        return df
+
+        # Vectorized translation expressions replacing map/apply configurations
+        return df.lazy().with_columns(
+            [
+                pl.col('profitDate').map_elements(
+                    _jymd_to_greg, return_dtype=pl.Datetime
+                ),
+                _clean_persian_numeric_expr('fundUnit').cast(pl.Int64),
+                _clean_persian_numeric_expr('sumAllProfit').cast(pl.Int64),
+                _clean_persian_numeric_expr('row').cast(pl.Int64),
+                _clean_persian_numeric_expr('unitProfit').cast(pl.Int64),
+                _clean_persian_numeric_expr('profitPercent'),
+            ]
+        )
 
 
 class TadbirPardazMultiNAV(TadbirPardaz):
-    """Same as TadbirPardaz, only send basketId to request params."""
-
     __slots__ = 'basket_id'
 
     def __init__(self, url: str):
-        """Note: the url ends with #<basket_id> where basket_id is an int."""
         url, _, self.basket_id = url.partition('#')
         super().__init__(url)
 
@@ -376,45 +386,56 @@ class LeveragedTadbirPardazLiveNAVPS(LiveNAVPS):
 
 
 class LeveragedTadbirPardaz(BaseTadbirPardaz):
-    async def navps_history(self) -> DataFrame:
+    async def navps_history(self) -> pl.LazyFrame:
         j: list = await self._json(
             'Chart/TotalNAV', params={'type': 'getnavtotal'}
         )
 
-        append = (frames := []).append
+        names = (
+            'normal_creation',
+            'normal_statistical',
+            'normal_redemption',
+            'creation',
+            'redemption',
+            'normal',
+        )
 
-        for i, name in zip(
-            j,
-            (
-                'normal_creation',
-                'normal_statistical',
-                'normal_redemption',
-                'creation',
-                'redemption',
-                'normal',
-            ),
-        ):
-            df = DataFrame.from_records(i['List'], exclude=['name'])
-            df['date'] = to_datetime(df['x'], format='%m/%d/%Y')
-            df.drop(columns='x', inplace=True)
-            df.rename(columns={'y': name}, inplace=True)
-            df.drop_duplicates('date', inplace=True)
-            df.set_index('date', inplace=True)
-            append(df)
+        combined_df: pl.DataFrame | None = None
 
-        df = concat(frames, axis=1, sort=False)
-        return df
+        for i, name in zip(j, names):
+            # Parse record tracks efficiently using native dataframe allocations
+            df = (
+                pl.DataFrame(i['List'])
+                .select(
+                    [
+                        pl.col('x')
+                        .str.to_datetime('%m/%d/%Y', strict=False)
+                        .alias('date'),
+                        pl.col('y').cast(pl.Float64).alias(name),
+                    ]
+                )
+                .unique(subset=['date'])
+            )
+
+            if combined_df is None:
+                combined_df = df
+            else:
+                combined_df = combined_df.join(
+                    df, on='date', how='full', coalesce=True
+                )
+
+        return (
+            combined_df.lazy() if combined_df is not None else pl.LazyFrame([])
+        )
 
     async def live_navps(self) -> LeveragedTadbirPardazLiveNAVPS:
-        j: str = await self._json('Fund/GetLeveragedNAV')  # type: ignore
-        # the json is escaped twice, so it needs to be loaded again
-        j: dict = loads(j)  # type: ignore
+        j_raw: str = await self._json('Fund/GetLeveragedNAV')
+        j: dict = loads(j_raw)
 
         pop = j.pop
-        date = j.pop('PublishDate')
+        date_str = j.pop('PublishDate')
 
         result = {}
-
         for k in (
             'BaseUnitsCancelNAV',
             'BaseUnitsTotalNetAssetValue',
@@ -429,10 +450,10 @@ class LeveragedTadbirPardaz(BaseTadbirPardaz):
             result[k] = comma_int(v)
 
         try:
-            date = jdatetime.strptime(date, '%Y/%m/%d %H:%M:%S')
+            parsed_date = jdatetime.strptime(date_str, '%Y/%m/%d %H:%M:%S')
         except ValueError:
-            date = jdatetime.strptime(date, '%Y/%m/%d ')
-        result['date'] = date.togregorian()
+            parsed_date = jdatetime.strptime(date_str, '%Y/%m/%d ')
+        result['date'] = parsed_date.togregorian()
 
         return result  # type: ignore
 

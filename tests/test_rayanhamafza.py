@@ -1,5 +1,6 @@
 from math import isclose
 
+import polars as pl
 from pytest_aiohutils import file, files, validate_dict
 
 from iranetf.sites import (
@@ -8,7 +9,7 @@ from iranetf.sites import (
     RayanHamafza,
 )
 from tests import (
-    assert_divident_history,
+    assert_dividend_history,  # Corrected spelling to match core test utils file
     assert_navps_history,
     validate_live_navps,
 )
@@ -33,10 +34,15 @@ async def test_reg_no():
 
 @file('toranj_profit.json')
 async def test_fund_profit():
-    df = await RayanHamafza('https://toranj.fund/').dividend_history()
-    ap_id = df.pop('fundApId')
-    assert ap_id.dtype == 'int64'
-    assert_divident_history(df)
+    # Returns a polars.LazyFrame or polars.DataFrame depending on the scraper design
+    df_or_lf = await RayanHamafza('https://toranj.fund/').dividend_history()
+    df = df_or_lf.collect()
+
+    # Enforced type safety checks on schema configurations instead of in-place pandas popping
+    assert df.schema['fundApId'] == pl.Int64
+    clean_df = df.drop('fundApId')
+
+    assert_dividend_history(clean_df)
 
 
 feleza: RayanHamafza = BaseSite.from_l18('فلزا')  # type: ignore
@@ -45,7 +51,7 @@ ppadash: RayanHamafza = BaseSite.from_l18('پتروپاداش')  # type: ignore
 
 @files('feleza.json', 'ppadash.json')
 async def test_multinav():
-    assert type(ppadash) is RayanHamafza
+    assert isinstance(ppadash, RayanHamafza)
     assert feleza.url == ppadash.url
     petro_nav = await feleza.live_navps()
     auto_nav = await ppadash.live_navps()
@@ -57,7 +63,7 @@ async def test_multinav():
 async def test_asset_allocation():
     aa = await feleza.asset_allocation()
     assert aa.keys() <= feleza._aa_keys
-    assert type(aa.pop('JalaliDate')) is str
+    assert isinstance(aa.pop('JalaliDate'), str)
     assert isclose(sum(aa.values()), 1.0)
 
 
@@ -69,7 +75,7 @@ async def test_cache():
 
 @files('ppadash_aa.json')
 async def test_leverage():
-    assert type(await feleza.leverage()) is float
+    assert isinstance(await feleza.leverage(), float)
 
 
 @file('ppadash_fund_data.json')

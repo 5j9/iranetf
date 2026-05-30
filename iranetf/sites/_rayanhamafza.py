@@ -3,8 +3,8 @@ from enum import IntEnum
 from re import search
 from typing import Any, TypedDict
 
+import polars as pl
 from jdatetime import datetime as jdatetime
-from pandas import DataFrame
 
 from iranetf.sites._lib import BaseSite, LiveNAVPS, reg_no_from_home_info
 
@@ -25,8 +25,6 @@ class RHNavLight(TypedDict):
 
 
 class FundType(IntEnum):
-    # the values are defined in the first line of public.min.js e.g. in
-    # https://tazmin.charismafunds.ir/bundles/js/public.min.js?v=202508170532
     # fundType={simple:1,simpleETF:2,hybrid:3,multiFund:4,multiETF:5};
     SIMPLE = 1
     SIMPLE_ETF = 2
@@ -65,24 +63,41 @@ class BaseRayanHamafza(BaseSite):
     async def _json(self, path, **kwa) -> Any:
         return await super()._json(f'{self._api_path}/{path}', **kwa)
 
-    async def navps_history(self) -> DataFrame:
-        df: DataFrame = await self._json(
+    async def navps_history(self) -> pl.LazyFrame:
+        # Pulls the in-memory payload lazily and updates expressions together
+        lf: pl.LazyFrame = await self._json(
             f'{self._navps_history_path}{self.fund_id}', df=True
         )
-        df.columns = ['date', 'creation', 'redemption', 'statistical']
-        df['date'] = df['date'].map(_j2g)
-        df.set_index('date', inplace=True)
-        return df
 
-    async def nav_history(self) -> DataFrame:
-        df: DataFrame = await self._json(
+        # Uses pl.nth() positional indices to abstract away casing/naming variances
+        # between RayanHamafza and RayanHamafza2 JSON payloads.
+        return lf.select(
+            [
+                pl.nth(0)
+                .map_elements(_j2g, return_dtype=pl.Datetime)
+                .alias('date'),
+                pl.nth(1).alias('creation'),
+                pl.nth(2).alias('redemption'),
+                pl.nth(3).alias('statistical'),
+            ]
+        )
+
+    async def nav_history(self) -> pl.LazyFrame:
+        lf: pl.LazyFrame = await self._json(
             f'{self._nav_history_path}{self.fund_id}', df=True
         )
-        df.columns = ['nav', 'date', 'creation_navps']
-        df['date'] = df['date'].map(_j2g)
-        return df
 
-    async def portfolio_industries(self) -> DataFrame:
+        return lf.select(
+            [
+                pl.col('column_0').alias('nav'),
+                pl.col('column_1')
+                .map_elements(_j2g, return_dtype=pl.Datetime)
+                .alias('date'),
+                pl.col('column_2').alias('creation_navps'),
+            ]
+        )
+
+    async def portfolio_industries(self) -> pl.LazyFrame:
         return await self._json(
             f'{self._portfolio_industries_path}{self.fund_id}', df=True
         )
@@ -92,23 +107,37 @@ class BaseRayanHamafza(BaseSite):
             f'{self._asset_allocation_path}{self.fund_id}'
         )
         self._check_aa_keys(d)
-        return {k: v / 100 if type(v) is not str else v for k, v in d.items()}
+        return {
+            k: v / 100 if not isinstance(v, str) else v for k, v in d.items()
+        }
 
-    async def dividend_history(self) -> DataFrame:
+    async def dividend_history(self) -> pl.LazyFrame:
         j = await self._json(f'{self._dividend_history_path}{self.fund_id}')
-        if (key := self._dividend_history_data_key) is None:
-            data = j
-        else:
-            data = j[key]
-        df = DataFrame(data)
-        if isinstance(self, RayanHamafza):
-            df.columns = [col[0].lower() + col[1:] for col in df.columns]
-        date_col = 'profitDate'
-        df[date_col] = df[date_col].apply(
-            lambda i: jdatetime.strptime(i, format='%Y/%m/%d').togregorian()
+        data = (
+            j if (key := self._dividend_history_data_key) is None else j[key]
         )
-        df.set_index(date_col, inplace=True)
-        return df
+
+        # Enforce clean structural schema safety directly from raw memory sequence
+        lf = pl.LazyFrame(data, infer_schema_length=None)
+
+        if isinstance(self, RayanHamafza):
+            # Dynamic camelCase/PascalCase adjustment using native expression alias workflows
+            schema = lf.collect_schema()
+            lf = lf.rename(
+                {col: col[0].lower() + col[1:] for col in schema.names()}
+            )
+
+        date_col = 'profitDate'
+        return lf.with_columns(
+            pl.col(date_col).map_elements(
+                lambda i: (
+                    jdatetime.strptime(i, '%Y/%m/%d').togregorian()
+                    if i is not None
+                    else None
+                ),
+                return_dtype=pl.Datetime,
+            )
+        )
 
     async def cache(self) -> float:
         aa = await self.asset_allocation()
@@ -138,7 +167,7 @@ class RayanHamafza(BaseRayanHamafza):
         'BondTodayPercent',
         'OtherStock',
         'JalaliDate',
-        'CcdTodayPercent',  # Commodity Certificates of Deposit
+        'CcdTodayPercent',
     }
 
     async def live_navps(self) -> LiveNAVPS:
