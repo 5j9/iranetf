@@ -30,7 +30,6 @@ class BaseSite(Protocol):
     __slots__ = '_home_info_cache', 'last_response', 'url'
 
     # Changed from DataFrame to LazyFrame for consistent lazy pipeline integration
-    ds: pl.LazyFrame
     _aa_keys: set[str]
 
     def __init__(self, url: str):
@@ -70,32 +69,28 @@ class BaseSite(Protocol):
 
     async def cache(self) -> float: ...
 
+    _l18_to_site_map: dict
+
     @classmethod
     def from_l18(cls, l18: str) -> Self:
         """
-        Loads the dataset as a LazyFrame, replaces Pandas indexed lookup logic with
-        an optimized scalar filter execution, and extracts the instance safely.
+        Loads the dataset into an in-memory dictionary lookup cache on first call,
+        leaving no lingering dataset objects on the class namespace.
         """
         try:
-            ds = cls.ds
-        except AttributeError:
-            from iranetf.dataset import read_dataset
-
-            ds = cls.ds = read_dataset(site=True)
-
-        # Instead of eager pandas `.set_index().loc[]`, filter the LazyFrame
-        # and pull out the scalar row directly.
-        try:
-            return (
-                ds.filter(pl.col('l18') == l18)
-                .select(pl.col('site'))
-                .collect()
-                .item()
-            )
-        except (pl.exceptions.ColumnNotFoundError, ValueError) as e:
+            return cls._l18_to_site_map[l18]
+        except KeyError as e:
             raise KeyError(
                 f"l18 value '{l18}' not found or invalid in dataset."
             ) from e
+        except AttributeError:
+            from iranetf.dataset import read_dataset
+
+            df = read_dataset(site=True).select(['l18', 'site']).collect()
+            mp = cls._l18_to_site_map = dict(
+                zip(df['l18'].to_list(), df['site'].to_list())
+            )
+            return mp[l18]
 
     def _check_aa_keys(self, d: dict):
         if d.keys() <= self._aa_keys:
