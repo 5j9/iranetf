@@ -98,6 +98,11 @@ async def test_assets_history():
 async def test_alt_home_data_format():
     site = await MabnaDP2.from_url('https://kianfunds6.ir/')
     data = await site.home_data()  # type: ignore
+    assert data.keys() == {
+        '__REACT_QUERY_STATE__',
+        '__REACT_REDUX_STATE__',
+        '__ENV__',
+    }
 
 
 @file('test_portfolios.json')
