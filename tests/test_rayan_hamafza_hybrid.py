@@ -6,18 +6,18 @@ from pytest_aiohutils import file, validate_dict
 from iranetf.sites import (
     BaseSite,
     LiveNAVPS,
-    RayanHamafza,
+    RayanHamafza2,
 )
 from tests import assert_navps_history
 
-site: RayanHamafza = RayanHamafza.from_l18('ضمان')
+site: RayanHamafza2 = RayanHamafza2.from_l18('ضمان')
 
 
 @file('rhh_main.html')
 async def test_rhh_from_url():
     # Fixed the type checking comparison structure to be fully type-safe
     instance = await BaseSite.from_url(site.url)
-    assert isinstance(instance, RayanHamafza)
+    assert isinstance(instance, RayanHamafza2)
 
 
 @file('rhh_live.json')
@@ -37,13 +37,13 @@ async def test_rhh_navps_history():
 async def test_asset_allocation():
     aa = await site.asset_allocation()
     assert aa.keys() <= site._aa_keys
-    assert isinstance(aa.pop('JalaliDate'), str)
+    assert isinstance(aa.pop('jalaliDate'), str)
     assert isclose(sum(aa.values()), 1.0)
 
 
 @file('rhh_asset_allocation.json')
 async def test_cache():
-    with patch.object(RayanHamafza, '_json', side_effect=site._json) as m:
+    with patch.object(RayanHamafza2, '_json', side_effect=site._json) as m:
         cache = await site.cache()
-    m.assert_called_once_with('MixAsset/2')
+    m.assert_called_once_with('public/mixAsset/2')
     assert 0.0 <= cache <= 0.6
