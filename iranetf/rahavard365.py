@@ -23,7 +23,7 @@ class Rahavard365:
     async def specification(self) -> dict:
         return await api(f'asset/{self.asset_id}/specification')
 
-    async def values(self) -> tuple[dict, pl.DataFrame]:
+    async def values(self) -> tuple[dict, pl.LazyFrame]:
         r = await session_manager.request(
             'get', f'{HOME}asset/{self.asset_id}/values'
         )
@@ -34,11 +34,11 @@ class Rahavard365:
 
         # Migrated storage container logic to native Polars memory allocation
         if (funds := j.pop('funds', None)) is not None:
-            j['funds'] = pl.DataFrame(funds)
+            j['funds'] = pl.LazyFrame(funds)
         return j
 
 
-async def etfs(short_name=False) -> pl.DataFrame:
+async def etfs(short_name=False) -> pl.LazyFrame:
     data = await api('market-data/etf-funds')
     if short_name:
         for item in data:
@@ -46,4 +46,4 @@ async def etfs(short_name=False) -> pl.DataFrame:
             item['short_name'] = specification['instruments'][0]['short_name']
 
     # Directly structuralizes the data payload table
-    return pl.DataFrame(data)
+    return pl.LazyFrame(data)
