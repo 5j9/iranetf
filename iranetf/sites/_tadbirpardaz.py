@@ -395,12 +395,12 @@ class LeveragedTadbirPardaz(BaseTadbirPardaz):
             'normal',
         )
 
-        combined_df: pl.DataFrame | None = None
+        combined_df: pl.LazyFrame | None = None
 
         for i, name in zip(j, names):
             # Parse record tracks efficiently using native dataframe allocations
-            df = (
-                pl.DataFrame(i['List'])
+            lf = (
+                pl.LazyFrame(i['List'])
                 .select(
                     [
                         pl.col('x')
@@ -413,15 +413,13 @@ class LeveragedTadbirPardaz(BaseTadbirPardaz):
             )
 
             if combined_df is None:
-                combined_df = df
+                combined_df = lf
             else:
                 combined_df = combined_df.join(
-                    df, on='date', how='full', coalesce=True
+                    lf, on='date', how='full', coalesce=True
                 )
 
-        return (
-            combined_df.lazy() if combined_df is not None else pl.LazyFrame([])
-        )
+        return combined_df if combined_df is not None else pl.LazyFrame([])
 
     async def live_navps(self) -> LeveragedTadbirPardazLiveNAVPS:
         j_raw: str = await self._json('Fund/GetLeveragedNAV')
