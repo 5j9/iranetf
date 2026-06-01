@@ -271,24 +271,15 @@ class TadbirPardaz(BaseTadbirPardaz):
         statistical = [d['y'] for d in j[1]['List']]
         redemption = [d['y'] for d in j[2]['List']]
         date_list = [d['x'] for d in j[0]['List']]
-
-        # Directly construct a LazyFrame without generating intermediate Pandas states
-        return (
-            pl.DataFrame(
-                {
-                    'date': date_list,
-                    'creation': creation,
-                    'redemption': redemption,
-                    'statistical': statistical,
-                }
-            )
-            .lazy()
-            .with_columns(
-                pl.col('date').str.to_datetime(
-                    '%m/%d/%Y %H:%M:%S', strict=False
-                )
-            )
+        lf = pl.LazyFrame(
+            {
+                'date': date_list,
+                'creation': creation,
+                'redemption': redemption,
+                'statistical': statistical,
+            }
         )
+        return lf.with_columns(pl.col('date').str.to_datetime('%m/%d/%Y'))
 
     async def dividend_history(
         self,
@@ -334,7 +325,7 @@ class TadbirPardaz(BaseTadbirPardaz):
         if not all_rows or not all_rows[0]:
             return pl.LazyFrame([], schema={'profitDate': pl.Datetime})
 
-        df = pl.DataFrame(
+        lf = pl.LazyFrame(
             all_rows,
             schema=[
                 'row',
@@ -347,8 +338,12 @@ class TadbirPardaz(BaseTadbirPardaz):
             orient='row',
         )
 
+        lf = lf.with_columns(
+            pl.col('profitPercent').str.strip_chars().replace('∞', None)
+        )
+
         # Vectorized translation expressions replacing map/apply configurations
-        return df.lazy().with_columns(
+        return lf.lazy().with_columns(
             [
                 pl.col('profitDate').map_elements(
                     _jymd_to_greg, return_dtype=pl.Datetime
