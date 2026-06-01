@@ -87,10 +87,10 @@ class BaseSite(Protocol):
             from iranetf.dataset import read_dataset
 
             df = read_dataset(site=True).select(['l18', 'site']).collect()
-            mp = cls._l18_to_site_map = dict(
+            to_site = cls._l18_to_site_map = dict(
                 zip(df['l18'].to_list(), df['site'].to_list())
             )
-            return mp[l18]
+            return to_site[l18]
 
     def _check_aa_keys(self, d: dict):
         if d.keys() <= self._aa_keys:
