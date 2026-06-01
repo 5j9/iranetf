@@ -419,7 +419,14 @@ class LeveragedTadbirPardaz(BaseTadbirPardaz):
                     lf, on='date', how='full', coalesce=True
                 )
 
-        return combined_df if combined_df is not None else pl.LazyFrame([])
+        if combined_df is None:
+            # Return empty LazyFrame with proper schema
+            schema: dict = {'date': pl.Date}
+            for name in names:
+                schema[name] = pl.Float64
+            return pl.LazyFrame(schema=schema)
+
+        return combined_df
 
     async def live_navps(self) -> LeveragedTadbirPardazLiveNAVPS:
         j_raw: str = await self._json('Fund/GetLeveragedNAV')
