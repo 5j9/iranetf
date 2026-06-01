@@ -99,7 +99,7 @@ async def test_dividend_history():
             f'Mismatched type for {col_name}'
         )
 
-    assert_date_column(df, col_name='profitDate')
+    assert_date_column(df)
 
 
 @files(
@@ -132,7 +132,7 @@ async def test_invalid_dividend_history_value(test_config):
 
     # Replaced index-based .at lookup with type-safe filtering expressions
     target_value = (
-        df.filter(pl.col('profitDate') == date(2025, 1, 19))
+        df.filter(pl.col('date') == date(2025, 1, 19))
         .select('profitPercent')
         .item()
     )

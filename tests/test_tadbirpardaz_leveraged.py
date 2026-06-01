@@ -81,7 +81,7 @@ async def test_nav_history():
     lf = await site.nav_history(from_=date(2025, 7, 8), to=date(2025, 8, 26))
     df = lf.collect()
 
-    assert_date_column(df, col_name='Date')
+    assert_date_column(df)
 
     expected_schema = {
         'Row': pl.Float64,  # Cleansed via _clean_persian_numeric_expr

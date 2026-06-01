@@ -45,7 +45,8 @@ def _clean_persian_numeric_expr(column_name: str) -> pl.Expr:
 def _jymd_to_greg(date_string: str | None) -> Any:
     if date_string is None:
         return None
-    return jdatetime.strptime(date_string, '%Y/%m/%d').togregorian()
+    y, m, d = [int(i) for i in date_string.split('/')]
+    return jdate(y, m, d).togregorian()
 
 
 def _comma_float(s: str) -> float:
@@ -226,9 +227,9 @@ class BaseTadbirPardaz(BaseSite):
                 for col in numeric_cols
             ]
             + [
-                pl.col('Date').map_elements(
-                    _jymd_to_greg, return_dtype=pl.Datetime
-                )
+                pl.col('Date')
+                .map_elements(_jymd_to_greg, return_dtype=pl.Date)
+                .alias('date')
             ]
         )
 
@@ -279,7 +280,7 @@ class TadbirPardaz(BaseTadbirPardaz):
                 'statistical': statistical,
             }
         )
-        return lf.with_columns(pl.col('date').str.to_datetime('%m/%d/%Y'))
+        return lf.with_columns(pl.col('date').str.to_date('%m/%d/%Y'))
 
     async def dividend_history(
         self,
@@ -323,13 +324,13 @@ class TadbirPardaz(BaseTadbirPardaz):
             params['page'] += 1
 
         if not all_rows or not all_rows[0]:
-            return pl.LazyFrame([], schema={'profitDate': pl.Datetime})
+            return pl.LazyFrame([], schema={'date': pl.Date})
 
         lf = pl.LazyFrame(
             all_rows,
             schema=[
                 'row',
-                'profitDate',
+                'date',
                 'fundUnit',
                 'unitProfit',
                 'sumAllProfit',
@@ -345,8 +346,8 @@ class TadbirPardaz(BaseTadbirPardaz):
         # Vectorized translation expressions replacing map/apply configurations
         return lf.lazy().with_columns(
             [
-                pl.col('profitDate').map_elements(
-                    _jymd_to_greg, return_dtype=pl.Datetime
+                pl.col('date').map_elements(
+                    _jymd_to_greg, return_dtype=pl.Date
                 ),
                 _clean_persian_numeric_expr('fundUnit').cast(pl.Int64),
                 _clean_persian_numeric_expr('sumAllProfit').cast(pl.Int64),
@@ -404,7 +405,7 @@ class LeveragedTadbirPardaz(BaseTadbirPardaz):
                 .select(
                     [
                         pl.col('x')
-                        .str.to_datetime('%m/%d/%Y', strict=False)
+                        .str.to_date('%m/%d/%Y', strict=False)
                         .alias('date'),
                         pl.col('y').cast(pl.Float64).alias(name),
                     ]

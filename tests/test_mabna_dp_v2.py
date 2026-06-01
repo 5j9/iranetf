@@ -85,7 +85,7 @@ async def test_assets_history():
     lf = await site.assets_history()
     df = lf.collect()
 
-    assert_date_column(df, col_name='date')
+    assert_date_column(df)
 
     # Assert exact schema structural matching using clean Polars type mappings
     assert df.schema['date_time'] == pl.Datetime(

@@ -4,28 +4,16 @@ from pytest_aiohutils import validate_dict
 from iranetf.sites import BaseSite, LiveNAVPS
 
 
-def assert_date_column(df: pl.DataFrame, col_name: str = 'date'):
+def assert_date_column(df: pl.DataFrame):
     """
     Validates that the given date column contains proper date/datetime types
     and doesn't contain time-of-day offsets.
     """
-    assert col_name in df.columns, (
-        f"Column '{col_name}' missing from DataFrame"
-    )
+    assert 'date' in df.columns, "Column 'date' missing from DataFrame"
 
     # Check that it's mapped to a Polars Datetime or Date structural representation
-    dtype = df.schema[col_name]
-    assert dtype in (pl.Datetime, pl.Date), (
-        f'Unexpected date column dtype: {dtype}'
-    )
-
-    # Evaluates the expression directly within the dataframe and pulls out
-    # the scalar boolean result using .item()
-    all_normalized = df.select(
-        (pl.col(col_name).dt.time() == pl.time(0, 0, 0)).all()
-    ).item()
-
-    assert all_normalized, 'Date column contains non-normalized time values'
+    dtype = df.schema['date']
+    assert dtype == pl.Date, f'Unexpected date column dtype: {dtype}'
 
 
 async def assert_navps_history(site: BaseSite, has_statistical=True):
@@ -33,7 +21,7 @@ async def assert_navps_history(site: BaseSite, has_statistical=True):
     lf = await site.navps_history()
     df = lf.collect()
 
-    assert_date_column(df, col_name='date')
+    assert_date_column(df)
 
     numeric_types = (pl.Int64, pl.Float64, pl.Int32, pl.Float32)
     assert df.schema['creation'] in numeric_types
@@ -89,4 +77,4 @@ def assert_dividend_history(df_or_lf: pl.DataFrame | pl.LazyFrame):
             f'Mismatched type for {col_name}'
         )
 
-    assert_date_column(df, col_name='profitDate')
+    assert_date_column(df)

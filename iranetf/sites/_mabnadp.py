@@ -55,21 +55,16 @@ class MabnaDP2(BaseSite):
         Builds a LazyFrame pipeline directly from incoming dictionary payload sequences.
         Uses infer_schema_length=None to ensure schema safety across all rows.
         """
-        return pl.LazyFrame(j['data'], infer_schema_length=None).with_columns(
-            [
-                # 1. Create the 'date' column expected by assert_date_column()
-                pl.col('date_time')
-                .str.to_datetime(time_zone='UTC', time_unit='us')
-                .dt.convert_time_zone('Asia/Tehran')
-                .dt.replace_time_zone(None)
-                .dt.truncate('1d')
-                .alias('date'),
-                # 2. Parse 'date_time' using official database timezones
+        return (
+            pl.LazyFrame(j['data'], infer_schema_length=None)
+            .with_columns(
                 pl.col('date_time')
                 .str.to_datetime(time_zone='UTC', time_unit='ns')
-                # Use 'Asia/Tehran' directly—it is fully supported and won't crash!
-                .dt.convert_time_zone('Asia/Tehran'),
-            ]
+                .dt.convert_time_zone('Asia/Tehran')
+            )
+            .with_columns(
+                pl.col('date_time').cast(pl.Date).alias('date'),
+            )
         )
 
     async def navps_history(self) -> pl.LazyFrame:

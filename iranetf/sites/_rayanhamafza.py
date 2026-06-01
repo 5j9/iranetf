@@ -7,11 +7,7 @@ import polars as pl
 from jdatetime import datetime as jdatetime
 
 from iranetf.sites._lib import BaseSite, LiveNAVPS, reg_no_from_home_info
-
-
-def _j2g(s: str) -> datetime:
-    y, m, d = [int(i) for i in s.split('/')]
-    return jdatetime(y, m, d).togregorian()
+from iranetf.sites._tadbirpardaz import _jymd_to_greg
 
 
 class RHNavLight(TypedDict):
@@ -74,7 +70,7 @@ class BaseRayanHamafza(BaseSite):
         return lf.select(
             [
                 pl.nth(0)
-                .map_elements(_j2g, return_dtype=pl.Datetime)
+                .map_elements(_jymd_to_greg, return_dtype=pl.Date)
                 .alias('date'),
                 pl.nth(1).alias('creation'),
                 pl.nth(2).alias('redemption'),
@@ -91,7 +87,7 @@ class BaseRayanHamafza(BaseSite):
             [
                 pl.col('column_0').alias('nav'),
                 pl.col('column_1')
-                .map_elements(_j2g, return_dtype=pl.Datetime)
+                .map_elements(_jymd_to_greg, return_dtype=pl.Date)
                 .alias('date'),
                 pl.col('column_2').alias('creation_navps'),
             ]
@@ -126,17 +122,13 @@ class BaseRayanHamafza(BaseSite):
             lf = lf.rename(
                 {col: col[0].lower() + col[1:] for col in schema.names()}
             )
-
-        date_col = 'profitDate'
         return lf.with_columns(
-            pl.col(date_col).map_elements(
-                lambda i: (
-                    jdatetime.strptime(i, '%Y/%m/%d').togregorian()
-                    if i is not None
-                    else None
-                ),
-                return_dtype=pl.Datetime,
+            pl.col('profitDate')
+            .map_elements(
+                lambda i: _jymd_to_greg(i) if i is not None else None,
+                return_dtype=pl.Date,
             )
+            .alias('date')
         )
 
     async def cache(self) -> float:
