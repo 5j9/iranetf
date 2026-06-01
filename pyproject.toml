@@ -25,8 +25,8 @@ dependencies = [
 dev = ["applog>=0.1.1", "pytest-aiohutils>=0.23.0", 'rich']
 
 [project.readme]
-file = "README.rst"
-content-type = "text/x-rst"
+file = "README.md"
+content-type = "text/markdown"
 
 [project.urls]
 Homepage = "https://github.com/5j9/iranetf"
