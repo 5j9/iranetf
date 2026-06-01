@@ -169,7 +169,13 @@ def _log_and_retry(func):
                     await _sleep(5)
                     retry -= 1
                     continue
-                _logger.error(f'status {e.status} on {arg}')
+                _logger.error(f'status {e.status} on {e.request_info.url}')
+                return
+            except TimeoutError:
+                if retry > 0:
+                    retry -= 1
+                    continue
+                _logger.error(f'TimeoutError on {arg}')
                 return
             except (OSError, _ClientError) as e:
                 _logger.error(f'{e!r} on {arg}')
