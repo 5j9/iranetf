@@ -20,6 +20,7 @@ dependencies = [
     "pandas[pyarrow] >= 3.0.0",
     'tsetmc>=3.0.2',
     "fipiran>=3.0.0",
+    "polars>=1.41.2",
 ]
 [dependency-groups]
 dev = ["applog>=0.1.1", "pytest-aiohutils>=0.23.0", 'rich']
