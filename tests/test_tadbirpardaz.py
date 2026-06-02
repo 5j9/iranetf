@@ -197,5 +197,4 @@ async def test_empty_divident_hist():
     lf = await site.dividend_history(from_date=dt, to_date=dt)
     df = lf.collect()
 
-    # Clean check replacing pandas .empty property evaluation
     assert df.height == 0

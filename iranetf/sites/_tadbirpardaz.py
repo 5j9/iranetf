@@ -144,7 +144,6 @@ class BaseTadbirPardaz(BaseSite):
             r = await _get(self.url + path)
             html = (await r.read()).decode()
 
-            # Isolate the data grid row segment cleanly without requiring pandas `read_html`
             table_body = html.partition('<tbody>')[2].partition('</tbody>')[0]
             rows = split(r'</tr>\s*<tr>', table_body)
 

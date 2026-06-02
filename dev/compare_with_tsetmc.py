@@ -1,6 +1,6 @@
 from asyncio import run
 
-from pandas import concat
+from polars import col, concat, from_pandas
 from tsetmc import Flow
 from tsetmc.funds import commodity_etfs, etfs
 from tsetmc.instruments import Instrument
@@ -26,22 +26,37 @@ async def is_valid(l18: str) -> bool:
 
 
 async def main():
-    ds = read_dataset(site=False)
+    ds = read_dataset(site=False)  # Polars LazyFrame
 
-    # note: some etfs do not show up in any of the flows; reason: unknown
-    df1 = await etfs(flow=Flow.BOURSE)
-    df2 = await etfs(flow=Flow.OTC)
-    df3 = await commodity_etfs()
-    df = concat([df1, df2, df3], ignore_index=True)
+    # Load all data as Polars LazyFrames
+    lf1 = from_pandas(await etfs(flow=Flow.BOURSE)).lazy()
+    lf2 = from_pandas(await etfs(flow=Flow.OTC)).lazy()
+    lf3 = from_pandas(await commodity_etfs()).lazy()
 
-    ds_set = set(ds['l18'])
-    df_set = set(df['instrument.lVal18AFC'])
+    lf = concat([lf1, lf2, lf3])
 
-    logger.info(f'{ds_set - df_set = }')
+    # Anti-join to find instruments not in ds
+    not_in_ds = (
+        lf.join(
+            ds.select(col('l18')),
+            left_on='instrument.lVal18AFC',
+            right_on='l18',
+            how='anti',
+        )
+        .select('instrument.lVal18AFC')
+        .unique()
+    )
 
-    not_in_ds = [i for i in df_set - ds_set if await is_valid(i)]
+    instruments_to_check = (
+        not_in_ds.select('instrument.lVal18AFC').collect().to_series()
+    )
 
-    logger.info(f'{not_in_ds = }')
+    valid_instruments = [
+        inst for inst in instruments_to_check if await is_valid(inst)
+    ]
+
+    logger.info(f'{valid_instruments = }')
+    logger.info(f'Count: {len(valid_instruments)} instruments not in dataset')
 
 
 run(main())
