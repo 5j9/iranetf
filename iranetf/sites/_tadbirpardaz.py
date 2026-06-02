@@ -11,6 +11,7 @@ from iranetf import _get
 from iranetf.sites._lib import (
     BaseSite,
     LiveNAVPS,
+    _jymd_to_greg,
     comma_int,
     reg_no_from_home_info,
 )
@@ -40,13 +41,6 @@ def _clean_persian_numeric_expr(column_name: str) -> pl.Expr:
     for fa_char, en_char in _FA_TO_EN_REPLACEMENTS.items():
         expr = expr.str.replace_all(fa_char, en_char)
     return expr.cast(pl.Float64)
-
-
-def _jymd_to_greg(date_string: str | None) -> Any:
-    if date_string is None:
-        return None
-    y, m, d = [int(i) for i in date_string.split('/')]
-    return jdate(y, m, d).togregorian()
 
 
 def _comma_float(s: str) -> float:

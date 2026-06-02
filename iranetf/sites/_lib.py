@@ -7,6 +7,7 @@ from logging import warning
 from typing import Any, Protocol, Self, TypedDict, runtime_checkable
 
 import polars as pl
+from jdatetime import date as jdate
 
 from iranetf import RegNoError, _get
 
@@ -156,3 +157,10 @@ async def reg_no_from_home_info(self: BaseSite) -> str:
         return home_info['seo_reg_no']
     except KeyError:
         raise RegNoError('"seo_reg_no" not found in home_info') from None
+
+
+def _jymd_to_greg(date_string: str | None) -> Any:
+    if date_string is None:
+        return None
+    y, m, d = [int(i) for i in date_string.split('/')]
+    return jdate(y, m, d).togregorian()
