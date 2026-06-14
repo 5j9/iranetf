@@ -137,10 +137,14 @@ def _log_and_retry(func):
                 _ServerDisconnectedError,
             ) as e:
                 if retry <= 0:
-                    _logger.error(f'{type(e).__name__} for {arg}')
+                    _logger.error(
+                        f'{func.__name__}: {type(e).__name__} for {arg}'
+                    )
                     return
                 retry -= 1
-                _logger.debug(f'retrying {type(e).__name__} for {arg}')
+                _logger.debug(
+                    f'{func.__name__}: retrying {type(e).__name__} for {arg}'
+                )
                 await _sleep(2)
                 continue
             except _ClientResponseError as e:
@@ -148,19 +152,21 @@ def _log_and_retry(func):
                     await _sleep(5)
                     retry -= 1
                     continue
-                _logger.error(f'status {e.status} on {e.request_info.url}')
+                _logger.error(
+                    f'{func.__name__}: status {e.status} on {e.request_info.url}'
+                )
                 return
             except TimeoutError:
                 if retry > 0:
                     retry -= 1
                     continue
-                _logger.error(f'TimeoutError on {arg}')
+                _logger.error(f'{func.__name__}: TimeoutError on {arg}')
                 return
             except (OSError, _ClientError) as e:
-                _logger.error(f'{e!r} on {arg}')
+                _logger.error(f'{func.__name__}: {e!r} on {arg}')
                 return
             except Exception as e:
-                _logger.exception(f'{e!r} on {arg}')
+                _logger.exception(f'{func.__name__}: {e!r} on {arg}')
                 return
 
     return wrapper
