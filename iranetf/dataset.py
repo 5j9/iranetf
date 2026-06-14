@@ -5,6 +5,7 @@ from contextlib import contextmanager as _contextmanager
 from json import JSONDecodeError
 from logging import Logger as _Logger
 from pathlib import Path as _Path
+from warnings import deprecated
 
 import polars as _pl
 from aiohttp import (
@@ -56,17 +57,17 @@ def _make_site(row: dict) -> _BaseSite:
     return site_class(row['url'])
 
 
-def read_dataset(*, site=True, inst=False) -> _pl.LazyFrame:
-    """Load dataset.csv as a LazyFrame.
+def scan_dataset() -> _pl.LazyFrame:
+    """Load dataset.csv as a LazyFrame with site and inst structures pre-configured.
 
-    If site is True, convert url and siteType columns to site object.
+    Transformations are evaluated lazily; Polars will optimize away these columns
+    if they are not selected downstream.
     """
-    # Enforces explicit schema and maps categorization values natively
-    lf = _pl.scan_csv(
+    return _pl.scan_csv(
         _DATASET_PATH,
-        encoding='utf8',  # Polars strips the BOM automatically under "utf8"
+        encoding='utf8',
         null_values=[''],
-        schema={  # Changed from 'dtypes' to 'schema'
+        schema={
             'l18': _pl.String,
             'name': _pl.String,
             'type': _pl.String,
@@ -76,39 +77,25 @@ def read_dataset(*, site=True, inst=False) -> _pl.LazyFrame:
             'siteType': _pl.String,
             'dps_interval': _pl.Int8,
         },
+    ).with_columns(
+        _pl.struct(['siteType', 'url'])
+        .map_elements(
+            lambda r: _make_site(r) if r.get('siteType') is not None else None,
+            return_dtype=_pl.Object,
+        )
+        .alias('site'),
+        _pl.col('insCode')
+        .map_elements(
+            lambda c: _Instrument(c) if c is not None else None,
+            return_dtype=_pl.Object,
+        )
+        .alias('inst'),
     )
 
-    if site or inst:
-        # Materialize momentarily to handle row-level complex custom Python Object mappings
-        df = lf.collect()
 
-        if site:
-            # Map row dict structures via an explicit vectorized approach instead of axis=1
-            df = df.with_columns(
-                _pl.struct(['siteType', 'url'])
-                .map_elements(
-                    lambda r: (
-                        _make_site(r)
-                        if r.get('siteType') is not None
-                        else None
-                    ),
-                    return_dtype=_pl.Object,
-                )
-                .alias('site')
-            )
-
-        if inst:
-            df = df.with_columns(
-                _pl.col('insCode')
-                .map_elements(
-                    lambda c: _Instrument(c) if c is not None else None,
-                    return_dtype=_pl.Object,
-                )
-                .alias('inst')
-            )
-        return df.lazy()
-
-    return lf
+@deprecated('Use `scan_dataset()` instead.')
+def read_dataset(*args, **kwargs) -> _pl.LazyFrame:
+    return scan_dataset()
 
 
 def write_dataset(ds: _pl.LazyFrame | _pl.DataFrame):
