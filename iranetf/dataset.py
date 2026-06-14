@@ -30,7 +30,7 @@ from iranetf.sites import (
     BaseSite as _BaseSite,
     LeveragedTadbirPardaz as _LeveragedTadbirPardaz,
     MabnaDP2 as _MabnaDP2,
-    RayanHamafza as _RayanHamafza,
+    RayanHamafza2 as _RayanHamafza2,
     TadbirPardaz as _TadbirPardaz,
 )
 
@@ -125,10 +125,8 @@ def sink_dataset(ds: _pl.LazyFrame):
 
 
 def _log_and_retry(func):
-    retry = 3
-
     async def wrapper(*args):
-        nonlocal retry
+        retry = 3
         arg = args[0]
         while True:
             try:
@@ -178,7 +176,7 @@ async def _check_validity(site: _BaseSite) -> tuple[str, str] | None:
     return f'{last_url.scheme}://{last_url.host}/', type(site).__name__
 
 
-SITE_TYPES = (_RayanHamafza, _TadbirPardaz, _LeveragedTadbirPardaz, _MabnaDP2)
+SITE_TYPES = (_RayanHamafza2, _TadbirPardaz, _LeveragedTadbirPardaz, _MabnaDP2)
 
 
 @_contextmanager
@@ -196,7 +194,9 @@ async def _url_type(domain: str) -> tuple:
         _check_validity(SiteType(f'http://{domain}/'))
         for SiteType in SITE_TYPES
     ]
-    results = await _gather(*coros)
+
+    with set_level(_logger, 'CRITICAL'):
+        results = await _gather(*coros)
 
     for result in results:
         if result is not None:
