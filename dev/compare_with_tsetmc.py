@@ -6,7 +6,7 @@ from tsetmc.funds import commodity_etfs, etfs
 from tsetmc.instruments import Instrument
 
 from dev import logger
-from iranetf.dataset import read_dataset
+from iranetf.dataset import scan_dataset
 
 ignore_desc = {
     'نوع صندوق : خصوصی',
@@ -26,7 +26,7 @@ async def is_valid(l18: str) -> bool:
 
 
 async def main():
-    ds = read_dataset(site=False)  # Polars LazyFrame
+    ds = scan_dataset()
 
     # Load all data as Polars LazyFrames
     lf1 = from_pandas(await etfs(flow=Flow.BOURSE)).lazy()

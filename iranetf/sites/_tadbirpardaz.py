@@ -352,16 +352,14 @@ class TadbirPardaz(BaseTadbirPardaz):
 
 
 class TadbirPardazMultiNAV(TadbirPardaz):
-    __slots__ = 'basket_id'
-
     def __init__(self, url: str):
-        url, _, self.basket_id = url.partition('#')
-        super().__init__(url)
+        url, _, portfolio_id = url.partition('#')
+        super().__init__(url, portfolio_id)
 
     async def _json(self, path: str, params: dict | None = None, **kwa) -> Any:
         return await super()._json(
             path,
-            params=(params or {}) | {'basketId': self.basket_id},
+            params=(params or {}) | {'basketId': self.portfolio_id},
             **kwa,
         )
 

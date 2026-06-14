@@ -28,14 +28,15 @@ async def _read(url: str) -> bytes:
 
 @runtime_checkable
 class BaseSite(Protocol):
-    __slots__ = '_home_info_cache', 'last_response', 'url'
+    __slots__ = '_home_info_cache', 'last_response', 'portfolio_id', 'url'
 
     # Changed from DataFrame to LazyFrame for consistent lazy pipeline integration
     _aa_keys: set[str]
 
-    def __init__(self, url: str):
+    def __init__(self, url: str, portfolio_id: str = ''):
         assert url[-1] == '/', f'the url must end with `/` {url=}'
         self.url = url
+        self.portfolio_id = portfolio_id
 
     def __repr__(self):
         return f"{type(self).__name__}('{self.url}')"
@@ -43,7 +44,11 @@ class BaseSite(Protocol):
     def __eq__(self, value):
         if not isinstance(value, BaseSite):
             return NotImplemented
-        if value.url == self.url and type(value) is type(self):
+        if (
+            value.url == self.url
+            and self.portfolio_id == value.portfolio_id
+            and type(value) is type(self)
+        ):
             return True
         return False
 
@@ -85,9 +90,9 @@ class BaseSite(Protocol):
                 f"l18 value '{l18}' not found or invalid in dataset."
             ) from e
         except AttributeError:
-            from iranetf.dataset import read_dataset
+            from iranetf.dataset import scan_dataset
 
-            df = read_dataset(site=True).select(['l18', 'site']).collect()
+            df = scan_dataset().select(['l18', 'site']).collect()
             to_site = cls._l18_to_site_map = dict(
                 zip(df['l18'].to_list(), df['site'].to_list())
             )

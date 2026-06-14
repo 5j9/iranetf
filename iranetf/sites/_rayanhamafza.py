@@ -45,12 +45,9 @@ class FundData(TypedDict):
 
 
 class BaseRayanHamafza(BaseSite):
-    __slots__ = 'fund_id'
-
     def __init__(self, url: str):
-        url, _, fund_id = url.partition('#')
-        self.fund_id = fund_id or '1'
-        super().__init__(url)
+        url, _, portfolio_id = url.partition('#')
+        super().__init__(url, portfolio_id or '1')
 
     _api_path: str
     _navps_history_path: str
@@ -66,7 +63,7 @@ class BaseRayanHamafza(BaseSite):
     async def navps_history(self) -> pl.LazyFrame:
         # Pulls the in-memory payload lazily and updates expressions together
         lf: pl.LazyFrame = await self._json(
-            f'{self._navps_history_path}{self.fund_id}', df=True
+            f'{self._navps_history_path}{self.portfolio_id}', df=True
         )
 
         # Uses pl.nth() positional indices to abstract away casing/naming variances
@@ -84,7 +81,7 @@ class BaseRayanHamafza(BaseSite):
 
     async def nav_history(self) -> pl.LazyFrame:
         lf: pl.LazyFrame = await self._json(
-            f'{self._nav_history_path}{self.fund_id}', df=True
+            f'{self._nav_history_path}{self.portfolio_id}', df=True
         )
 
         return lf.select(
@@ -99,12 +96,12 @@ class BaseRayanHamafza(BaseSite):
 
     async def portfolio_industries(self) -> pl.LazyFrame:
         return await self._json(
-            f'{self._portfolio_industries_path}{self.fund_id}', df=True
+            f'{self._portfolio_industries_path}{self.portfolio_id}', df=True
         )
 
     async def asset_allocation(self) -> dict:
         d: dict = await self._json(
-            f'{self._asset_allocation_path}{self.fund_id}'
+            f'{self._asset_allocation_path}{self.portfolio_id}'
         )
         self._check_aa_keys(d)
         return {
@@ -112,7 +109,9 @@ class BaseRayanHamafza(BaseSite):
         }
 
     async def dividend_history(self) -> pl.LazyFrame:
-        j = await self._json(f'{self._dividend_history_path}{self.fund_id}')
+        j = await self._json(
+            f'{self._dividend_history_path}{self.portfolio_id}'
+        )
         data = (
             j if (key := self._dividend_history_data_key) is None else j[key]
         )
@@ -167,7 +166,7 @@ class RayanHamafza(BaseRayanHamafza):
     }
 
     async def live_navps(self) -> LiveNAVPS:
-        d: RHNavLight = await self._json(f'NavLight/{self.fund_id}')
+        d: RHNavLight = await self._json(f'NavLight/{self.portfolio_id}')
         return {
             'creation': d['PurchaseNav'],
             'redemption': d['SaleNav'],
@@ -244,7 +243,7 @@ class RayanHamafza2(BaseRayanHamafza):
 
     async def live_navps(self) -> LiveNAVPS:
         d: FundLiveInfo = await self._json(
-            f'public/fundLiveInfo/{self.fund_id}'
+            f'public/fundLiveInfo/{self.portfolio_id}'
         )
         return {
             'creation': d['purchaseNav'],

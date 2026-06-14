@@ -5,7 +5,6 @@ from contextlib import contextmanager as _contextmanager
 from json import JSONDecodeError
 from logging import Logger as _Logger
 from pathlib import Path as _Path
-from warnings import deprecated
 
 import polars as _pl
 from aiohttp import (
@@ -93,19 +92,12 @@ def scan_dataset() -> _pl.LazyFrame:
     )
 
 
-@deprecated('Use `scan_dataset()` instead.')
-def read_dataset(*args, **kwargs) -> _pl.LazyFrame:
-    return scan_dataset()
-
-
-def write_dataset(ds: _pl.LazyFrame | _pl.DataFrame):
+def sink_dataset(ds: _pl.LazyFrame):
     """
-    Collects the LazyFrame pipeline data and writes it back cleanly to disk.
+    Processes the LazyFrame pipeline and streams it directly to disk.
     """
-    df = ds.collect() if isinstance(ds, _pl.LazyFrame) else ds
-
-    # Fast, vectorized text translations in Polars
-    df = df.with_columns(
+    # 1. Fast, vectorized text translations handled lazily
+    ds = ds.with_columns(
         [
             _pl.col('l18').str.replace_all('ي', 'ی').str.replace_all('ك', 'ک'),
             _pl.col('name')
@@ -125,10 +117,10 @@ def write_dataset(ds: _pl.LazyFrame | _pl.DataFrame):
         'dps_interval',
     ]
 
-    # Extract only matching dataset columns and sort purely via vector chainss
-    df.select(columns_order).sort('l18').write_csv(
+    # 2. Select columns, sort, and stream directly to the CSV file
+    ds.select(columns_order).sort('l18').sink_csv(
         _DATASET_PATH,
-        include_bom=True,  # This replaces encoding='utf-8-sig' to protect Persian characters
+        include_bom=True,  # Protects Persian characters
     )
 
 
@@ -336,7 +328,7 @@ async def _tsetmc_dataset() -> _pl.LazyFrame:
     _logger.info('await tsetmc.dataset.update()')
     await update()
     lf = _pl.from_pandas(LazyDS.df, include_index=True).lazy()
-    return lf.drop(['l30', 'isin', 'cisin'])
+    return lf.drop('l30', 'isin', 'cisin')
 
 
 def _add_new_items_to_ds(
@@ -388,7 +380,7 @@ async def _update_existing_rows_using_fipiran(
             _pl.coalesce(['type_fip', 'type']).alias('type'),
             _pl.col('domain'),
         ]
-    ).drop(['url_fip', 'siteType_fip', 'type_fip'])
+    ).drop('url_fip', 'siteType_fip', 'type_fip')
 
     # Build fallbacks if the primary URL structures are missing
     ds_updated = ds_updated.with_columns(
@@ -402,7 +394,7 @@ async def _update_existing_rows_using_fipiran(
 
 async def update_dataset(*, update_existing=False) -> _pl.DataFrame:
     """Update dataset and return newly found that could not be added."""
-    ds = read_dataset(site=False).collect()
+    ds = scan_dataset().drop('site', 'inst').collect()
     fipiran_df = (await _fipiran_data(ds.lazy())).collect()
 
     ds = await _update_existing_rows_using_fipiran(
@@ -432,7 +424,7 @@ async def update_dataset(*, update_existing=False) -> _pl.DataFrame:
             _pl.coalesce([f'{col}_tsetmc', col]).alias(col)
         ).drop(f'{col}_tsetmc')
 
-    write_dataset(ds)
+    sink_dataset(ds.lazy())
     return new_items.filter(_pl.col('insCode').is_null())
 
 
@@ -474,7 +466,7 @@ async def _check_portfolio_counts(site: _BaseSite, dataset_ids: set[str]):
 
 
 async def check_dataset(live=False):
-    ds = read_dataset(site=False).collect()
+    ds = scan_dataset().drop('site', 'inst').collect()
 
     # Guardrail Match: All validation checks collapsed to true single boolean scalars
     assert ds['l18'].is_unique().all()
@@ -566,7 +558,7 @@ async def check_dataset(live=False):
             )
             .drop('new_st')
         )
-        write_dataset(ds)
+        sink_dataset(ds.lazy())
 
     no_site = ds.filter(_pl.col('site').is_null())
     if max(no_site.shape) > 0:

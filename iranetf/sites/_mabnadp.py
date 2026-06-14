@@ -18,8 +18,7 @@ from iranetf.sites._lib import (
 class MabnaDP2(BaseSite):
     def __init__(self, url: str):
         url, _, portfolio_id = url.partition('#')
-        super().__init__(url)
-        self.portfolio_id = portfolio_id or '1'
+        super().__init__(url, portfolio_id=portfolio_id or '1')
 
     async def _home_info(self):
         d = {}

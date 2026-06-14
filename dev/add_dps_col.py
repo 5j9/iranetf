@@ -1,26 +1,27 @@
 from asyncio import run
 
+import polars as pl
 from fipiran.funds import funds
 
-from iranetf.dataset import read_dataset, write_dataset
+from iranetf.dataset import scan_dataset, sink_dataset
 
 
 async def main():
-    ds = read_dataset(site=False)
-    ds.set_index('l18', inplace=True)
-    df = await funds()
-    df = df[
-        (df['dividendIntervalPeriod'] > 0)
-        & (df['typeOfInvest'] == 'Negotiable')
-    ]
-    ds = ds.join(
-        df[['smallSymbolName', 'dividendIntervalPeriod']].set_index(
-            'smallSymbolName'
-        )
+    ds = scan_dataset()
+    funds_lf = await funds()
+
+    df_filtered = funds_lf.filter(
+        (pl.col('dividendIntervalPeriod') > 0)
+        & (pl.col('typeOfInvest') == 'Negotiable')
+    ).select(
+        [
+            pl.col('smallSymbolName').alias('l18'),
+            pl.col('dividendIntervalPeriod').alias('dps_interval'),
+        ]
     )
-    ds.rename(columns={'dividendIntervalPeriod': 'dps_interval'}, inplace=True)
-    ds.reset_index(inplace=True)
-    write_dataset(ds)
+
+    ds = ds.join(df_filtered, on='l18', how='left')
+    sink_dataset(ds)
 
 
 run(main())

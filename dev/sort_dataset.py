@@ -1,3 +1,3 @@
-from iranetf.dataset import read_dataset, write_dataset
+from iranetf.dataset import scan_dataset, sink_dataset
 
-write_dataset(read_dataset(site=False))
+sink_dataset(scan_dataset())

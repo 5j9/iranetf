@@ -3,10 +3,10 @@ from collections import defaultdict
 
 from aiohttp import ClientConnectorCertificateError
 
-from iranetf.dataset import read_dataset
+from iranetf.dataset import scan_dataset
 from iranetf.sites import RayanHamafza
 
-ds = read_dataset()
+ds = scan_dataset()
 
 
 async def check_version(site):
@@ -19,7 +19,11 @@ versions = defaultdict(set)
 
 async def main():
     # RayanHamafza does not have version
-    sites = [s for s in ds.site if not isinstance(s, RayanHamafza)]
+    sites = [
+        s
+        for s in ds.select('site').collect().to_series()
+        if not isinstance(s, RayanHamafza)
+    ]
     coros = [check_version(s) for s in sites]
     for future in as_completed(coros):
         try:
