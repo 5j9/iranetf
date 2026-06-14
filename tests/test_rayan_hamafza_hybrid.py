@@ -22,7 +22,7 @@ async def test_rhh_from_url():
 
 @file('rhh_live.json')
 async def test_rhh_live_navps():
-    with patch.object(site, 'fund_id', 1):
+    with patch.object(site, 'portfolio_id', 1):
         d = await site.live_navps()
     validate_dict(d, LiveNAVPS)
 
