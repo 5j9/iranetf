@@ -1,6 +1,6 @@
 from asyncio import run
 
-from polars import col, concat, from_pandas
+from polars import col, concat
 from tsetmc import Flow
 from tsetmc.funds import commodity_etfs, etfs
 from tsetmc.instruments import Instrument
@@ -29,9 +29,9 @@ async def main():
     ds = scan_dataset()
 
     # Load all data as Polars LazyFrames
-    lf1 = from_pandas(await etfs(flow=Flow.BOURSE)).lazy()
-    lf2 = from_pandas(await etfs(flow=Flow.OTC)).lazy()
-    lf3 = from_pandas(await commodity_etfs()).lazy()
+    lf1 = await etfs(flow=Flow.BOURSE)
+    lf2 = await etfs(flow=Flow.OTC)
+    lf3 = await commodity_etfs()
 
     lf = concat([lf1, lf2, lf3])
 

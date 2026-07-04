@@ -17,7 +17,7 @@ dependencies = [
     "aiohttp[speedups]",
     "aiohutils>=0.26.0",
     "jdatetime >= 4.1.0",
-    'tsetmc>=3.0.2',
+    'tsetmc>=4.0.0',
     "fipiran>=3.0.0",
     "polars>=1.41.2",
 ]

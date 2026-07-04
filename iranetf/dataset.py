@@ -329,11 +329,11 @@ async def _fipiran_data(ds: _pl.LazyFrame) -> _pl.LazyFrame:
 
 
 async def _tsetmc_dataset() -> _pl.LazyFrame:
-    from tsetmc.dataset import LazyDS, update
+    from tsetmc.dataset import lazy_ds, update
 
     _logger.info('await tsetmc.dataset.update()')
     await update()
-    lf = _pl.from_pandas(LazyDS.df, include_index=True).lazy()
+    lf = lazy_ds.lf
     return lf.drop('l30', 'isin', 'cisin')
 
 
