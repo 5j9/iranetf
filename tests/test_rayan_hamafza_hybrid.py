@@ -45,5 +45,5 @@ async def test_asset_allocation():
 async def test_cache():
     with patch.object(RayanHamafza2, '_json', side_effect=site._json) as m:
         cache = await site.cache()
-    m.assert_called_once_with('public/mixAsset/2')
+    m.assert_called_once_with('public/mixAsset/1')
     assert 0.0 <= cache <= 0.6
