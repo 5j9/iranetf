@@ -566,7 +566,7 @@ async def check_dataset(live=False):
         sink_dataset(ds.lazy())
 
     no_site = ds.filter(_pl.col('site').is_null())
-    if max(no_site.shape) > 0:
+    if not no_site.is_empty():
         _logger.warning(
             f'some dataset entries have no associated site:\n{no_site["l18"].to_list()}'
         )
