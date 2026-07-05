@@ -475,7 +475,7 @@ async def check_dataset(live=False):
     ds = scan_dataset().drop('site', 'inst').collect()
 
     # Guardrail Match: All validation checks collapsed to true single boolean scalars
-    assert ds['l18'].is_unique().all()
+    assert ds['l18'].is_unique().all(), ds.filter(ds['l18'].is_duplicated())
     assert ds['name'].is_unique().all()
     assert ds['type'].is_in(list(_ETF_TYPES.values())).all()
     assert ds['insCode'].is_unique().all()
@@ -504,7 +504,6 @@ async def check_dataset(live=False):
         .drop('url_parts')
     )
 
-    # Replaces Pandas groupby lambda filtering blocks with native relational expressions
     grouped_check = (
         ds.group_by('regNo')
         .agg(_pl.col('base_url').n_unique().alias('cnt'))
