@@ -51,7 +51,7 @@ _DATASET_PATH = _Path(__file__).parent / 'dataset.csv'
 
 
 def _make_site(row: dict) -> _BaseSite:
-    type_str = row['siteType']
+    type_str = row['site_Type']
     site_class = getattr(_sites, type_str)
     return site_class(row['url'])
 
@@ -70,20 +70,22 @@ def scan_dataset() -> _pl.LazyFrame:
             'l18': _pl.String,
             'name': _pl.String,
             'type': _pl.String,
-            'insCode': _pl.String,
-            'regNo': _pl.String,
+            'ins_code': _pl.String,
+            'reg_no': _pl.String,
             'url': _pl.String,
-            'siteType': _pl.String,
+            'site_Type': _pl.String,
             'dps_interval': _pl.Int8,
         },
     ).with_columns(
-        _pl.struct(['siteType', 'url'])
+        _pl.struct(['site_Type', 'url'])
         .map_elements(
-            lambda r: _make_site(r) if r.get('siteType') is not None else None,
+            lambda r: (
+                _make_site(r) if r.get('site_Type') is not None else None
+            ),
             return_dtype=_pl.Object,
         )
         .alias('site'),
-        _pl.col('insCode')
+        _pl.col('ins_code')
         .map_elements(
             lambda c: _Instrument(c) if c is not None else None,
             return_dtype=_pl.Object,
@@ -110,10 +112,10 @@ def sink_dataset(ds: _pl.LazyFrame):
         'l18',
         'name',
         'type',
-        'insCode',
-        'regNo',
+        'ins_code',
+        'reg_no',
         'url',
-        'siteType',
+        'site_Type',
         'dps_interval',
     ]
 
@@ -197,8 +199,8 @@ def set_level(logger: _Logger, level: str | int):
 
 async def _url_type(domain: str) -> tuple:
     coros = [
-        _check_validity(SiteType(f'http://{domain}/'))
-        for SiteType in SITE_TYPES
+        _check_validity(site_Type(f'http://{domain}/'))
+        for site_Type in SITE_TYPES
     ]
 
     with set_level(_logger, 'CRITICAL'):
@@ -246,7 +248,7 @@ async def _add_url_and_type(
         {
             'domain': domains_to_be_checked,
             'url_new': url_list,
-            'siteType_new': site_type_list,
+            'site_Type_new': site_type_list,
         }
     )
 
@@ -255,37 +257,37 @@ async def _add_url_and_type(
         .with_columns(
             [
                 _pl.col('url_new').alias('url'),
-                _pl.col('siteType_new').alias('siteType'),
+                _pl.col('site_Type_new').alias('site_Type'),
             ]
         )
-        .drop(['url_new', 'siteType_new'])
+        .drop(['url_new', 'site_Type_new'])
     )
 
     return res_df.lazy()
 
 
 async def _add_ins_code(new_items: _pl.DataFrame) -> _pl.DataFrame:
-    names_without_code = new_items.filter(_pl.col('insCode').is_null())[
+    names_without_code = new_items.filter(_pl.col('ins_code').is_null())[
         'name'
     ].to_list()
     if not names_without_code:
         return new_items
 
-    _logger.info('searching names on tsetmc to find their insCode')
+    _logger.info('searching names on tsetmc to find their ins_code')
     results = await _gather(
         *[_tsetmc_search(name) for name in names_without_code]
     )
     ins_codes = [(None if len(r) != 1 else r[0]['insCode']) for r in results]
 
     codes_map = _pl.DataFrame(
-        {'name': names_without_code, 'insCode_new': ins_codes}
+        {'name': names_without_code, 'ins_code_new': ins_codes}
     )
     return (
         new_items.join(codes_map, on='name', how='left')
         .with_columns(
-            _pl.coalesce(['insCode_new', 'insCode']).alias('insCode')
+            _pl.coalesce(['ins_code_new', 'ins_code']).alias('ins_code')
         )
-        .drop('insCode_new')
+        .drop('ins_code_new')
     )
 
 
@@ -298,7 +300,7 @@ async def _fipiran_data(ds: _pl.LazyFrame) -> _pl.LazyFrame:
 
     ds_collected = ds.collect()
     reg_not_in_fipiran = ds_collected.filter(
-        ~_pl.col('regNo').is_in(fipiran_df['regNo'])
+        ~_pl.col('reg_no').is_in(fipiran_df['reg_no'])
     )
 
     if not reg_not_in_fipiran.is_empty():
@@ -312,12 +314,12 @@ async def _fipiran_data(ds: _pl.LazyFrame) -> _pl.LazyFrame:
         & _pl.col('isCompleted')
     ).select(
         [
-            _pl.col('regNo'),
+            _pl.col('reg_no'),
             _pl.col('smallSymbolName').alias('l18'),
             _pl.col('name'),
             _pl.col('fundType').alias('type'),
             _pl.col('websiteAddress').alias('domain'),
-            _pl.col('insCode'),
+            _pl.col('ins_code'),
         ]
     )
 
@@ -343,7 +345,7 @@ def _add_new_items_to_ds(
     if max(new_items.shape) == 0:
         return ds
 
-    new_with_code = new_items.filter(_pl.col('insCode').is_not_null()).drop(
+    new_with_code = new_items.filter(_pl.col('ins_code').is_not_null()).drop(
         'domain'
     )
     if max(new_with_code.shape) > 0:
@@ -372,8 +374,8 @@ async def _update_existing_rows_using_fipiran(
 
     # Join data streams using relational keys instead of legacy index overrides
     joined = ds.join(
-        fipiran_df.select(['regNo', 'domain', 'type', 'url', 'siteType']),
-        on='regNo',
+        fipiran_df.select(['reg_no', 'domain', 'type', 'url', 'site_Type']),
+        on='reg_no',
         how='left',
         suffix='_fip',
     )
@@ -382,11 +384,11 @@ async def _update_existing_rows_using_fipiran(
     ds_updated = joined.with_columns(
         [
             _pl.coalesce(['url', 'url_fip']).alias('url'),
-            _pl.coalesce(['siteType', 'siteType_fip']).alias('siteType'),
+            _pl.coalesce(['site_Type', 'site_Type_fip']).alias('site_Type'),
             _pl.coalesce(['type_fip', 'type']).alias('type'),
             _pl.col('domain'),
         ]
-    ).drop('url_fip', 'siteType_fip', 'type_fip')
+    ).drop('url_fip', 'site_Type_fip', 'type_fip')
 
     # Build fallbacks if the primary URL structures are missing
     ds_updated = ds_updated.with_columns(
@@ -406,7 +408,7 @@ async def update_dataset(*, update_existing=False) -> _pl.DataFrame:
     ds = await _update_existing_rows_using_fipiran(
         ds, fipiran_df, update_existing
     )
-    new_items = fipiran_df.filter(~_pl.col('regNo').is_in(ds['regNo']))
+    new_items = fipiran_df.filter(~_pl.col('reg_no').is_in(ds['reg_no']))
 
     tsetmc_df = (await _tsetmc_dataset()).collect()
     new_items = await _add_ins_code(new_items)
@@ -417,13 +419,13 @@ async def update_dataset(*, update_existing=False) -> _pl.DataFrame:
         tsetmc_df,
         how='left',
         suffix='_tsetmc',
-        left_on='insCode',
+        left_on='ins_code',
         right_on='ins_code',
     )
 
     # Coalesce tracking changes updates
     update_cols = [
-        c for c in tsetmc_df.columns if c in ds.columns and c != 'insCode'
+        c for c in tsetmc_df.columns if c in ds.columns and c != 'ins_code'
     ]
     for col in update_cols:
         ds = ds.with_columns(
@@ -431,7 +433,7 @@ async def update_dataset(*, update_existing=False) -> _pl.DataFrame:
         ).drop(f'{col}_tsetmc')
 
     sink_dataset(ds.lazy())
-    return new_items.filter(_pl.col('insCode').is_null())
+    return new_items.filter(_pl.col('ins_code').is_null())
 
 
 @_log_and_retry
@@ -478,10 +480,10 @@ async def check_dataset(live=False):
     assert ds['l18'].is_unique().all(), ds.filter(ds['l18'].is_duplicated())
     assert ds['name'].is_unique().all()
     assert ds['type'].is_in(list(_ETF_TYPES.values())).all()
-    assert ds['insCode'].is_unique().all()
+    assert ds['ins_code'].is_unique().all()
     assert ds['url'].is_unique().all()
-    assert (ds['siteType'].is_not_null()).all(), 'siteType contains NA'
-    assert (ds['regNo'].is_not_null()).all()
+    assert (ds['site_Type'].is_not_null()).all(), 'site_Type contains NA'
+    assert (ds['reg_no'].is_not_null()).all()
 
     # Split the URL string exactly once by the '#' character into a struct
     # containing 'field_0' and 'field_1'
@@ -505,7 +507,7 @@ async def check_dataset(live=False):
     )
 
     grouped_check = (
-        ds.group_by('regNo')
+        ds.group_by('reg_no')
         .agg(_pl.col('base_url').n_unique().alias('cnt'))
         .filter(_pl.col('cnt') > 1)
     )
@@ -522,7 +524,7 @@ async def check_dataset(live=False):
 
     # Safely apply object mappings to generate your site list properties
     ds = ds.with_columns(
-        _pl.struct(['siteType', 'url'])
+        _pl.struct(['site_Type', 'url'])
         .map_elements(lambda r: _make_site(r), return_dtype=_pl.Object)
         .alias('site')
     )
@@ -530,7 +532,7 @@ async def check_dataset(live=False):
     check_site_coros = [_new_site_type(s) for s in ds['site']]
     check_reg_no_coros = [
         _check_reg_no(site, reg)
-        for (site, reg) in zip(ds['site'], ds['regNo'])
+        for (site, reg) in zip(ds['site'], ds['reg_no'])
     ]
 
     unique_site_pids = ds.unique(subset=['base_url']).select(
@@ -559,7 +561,7 @@ async def check_dataset(live=False):
         ds = (
             ds.join(updates, on='l18', how='left')
             .with_columns(
-                _pl.coalesce(['new_st', 'siteType']).alias('siteType')
+                _pl.coalesce(['new_st', 'site_Type']).alias('site_Type')
             )
             .drop('new_st')
         )
