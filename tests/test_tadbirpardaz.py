@@ -26,6 +26,14 @@ async def test_navps_history():
     await assert_navps_history(tadbir)
 
 
+@file('empty_navps_history.json')
+async def test_empty_navps_history(test_config):
+    if not test_config['OFFLINE_MODE']:
+        raise skip('not offline')
+    site = TadbirPardaz.from_l18('قلک گلد')
+    await assert_navps_history(site)
+
+
 @file('icpfvc_navps_date_space.json')
 async def test_navps_date_ends_with_space():
     d = await TadbirPardaz('https://icpfvc.ir/').live_navps()

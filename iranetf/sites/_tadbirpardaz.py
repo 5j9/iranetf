@@ -265,15 +265,20 @@ class TadbirPardaz(BaseTadbirPardaz):
         statistical = [d['y'] for d in j[1]['List']]
         redemption = [d['y'] for d in j[2]['List']]
         date_list = [d['x'] for d in j[0]['List']]
-        lf = pl.LazyFrame(
+        return pl.LazyFrame(
             {
                 'date': date_list,
                 'creation': creation,
                 'redemption': redemption,
                 'statistical': statistical,
-            }
-        )
-        return lf.with_columns(pl.col('date').str.to_date('%m/%d/%Y'))
+            },
+            schema={
+                'date': pl.String,
+                'creation': pl.Int64,
+                'redemption': pl.Int64,
+                'statistical': pl.Int64,
+            },
+        ).with_columns(pl.col('date').str.to_date('%m/%d/%Y'))
 
     async def dividend_history(
         self,
