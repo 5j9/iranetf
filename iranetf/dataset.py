@@ -51,7 +51,7 @@ _DATASET_PATH = _Path(__file__).parent / 'dataset.csv'
 
 
 def _make_site(row: dict) -> _BaseSite:
-    type_str = row['site_Type']
+    type_str = row['site_type']
     site_class = getattr(_sites, type_str)
     return site_class(row['url'])
 
@@ -73,14 +73,14 @@ def scan_dataset() -> _pl.LazyFrame:
             'ins_code': _pl.String,
             'reg_no': _pl.String,
             'url': _pl.String,
-            'site_Type': _pl.String,
+            'site_type': _pl.String,
             'dps_interval': _pl.Int8,
         },
     ).with_columns(
-        _pl.struct(['site_Type', 'url'])
+        _pl.struct(['site_type', 'url'])
         .map_elements(
             lambda r: (
-                _make_site(r) if r.get('site_Type') is not None else None
+                _make_site(r) if r.get('site_type') is not None else None
             ),
             return_dtype=_pl.Object,
         )
@@ -115,7 +115,7 @@ def sink_dataset(ds: _pl.LazyFrame):
         'ins_code',
         'reg_no',
         'url',
-        'site_Type',
+        'site_type',
         'dps_interval',
     ]
 
@@ -199,8 +199,8 @@ def set_level(logger: _Logger, level: str | int):
 
 async def _url_type(domain: str) -> tuple:
     coros = [
-        _check_validity(site_Type(f'http://{domain}/'))
-        for site_Type in SITE_TYPES
+        _check_validity(site_type(f'http://{domain}/'))
+        for site_type in SITE_TYPES
     ]
 
     with set_level(_logger, 'CRITICAL'):
@@ -248,7 +248,7 @@ async def _add_url_and_type(
         {
             'domain': domains_to_be_checked,
             'url_new': url_list,
-            'site_Type_new': site_type_list,
+            'site_type_new': site_type_list,
         }
     )
 
@@ -257,10 +257,10 @@ async def _add_url_and_type(
         .with_columns(
             [
                 _pl.col('url_new').alias('url'),
-                _pl.col('site_Type_new').alias('site_Type'),
+                _pl.col('site_type_new').alias('site_type'),
             ]
         )
-        .drop(['url_new', 'site_Type_new'])
+        .drop(['url_new', 'site_type_new'])
     )
 
     return res_df.lazy()
@@ -374,7 +374,7 @@ async def _update_existing_rows_using_fipiran(
 
     # Join data streams using relational keys instead of legacy index overrides
     joined = ds.join(
-        fipiran_df.select(['reg_no', 'domain', 'type', 'url', 'site_Type']),
+        fipiran_df.select(['reg_no', 'domain', 'type', 'url', 'site_type']),
         on='reg_no',
         how='left',
         suffix='_fip',
@@ -384,11 +384,11 @@ async def _update_existing_rows_using_fipiran(
     ds_updated = joined.with_columns(
         [
             _pl.coalesce(['url', 'url_fip']).alias('url'),
-            _pl.coalesce(['site_Type', 'site_Type_fip']).alias('site_Type'),
+            _pl.coalesce(['site_type', 'site_type_fip']).alias('site_type'),
             _pl.coalesce(['type_fip', 'type']).alias('type'),
             _pl.col('domain'),
         ]
-    ).drop('url_fip', 'site_Type_fip', 'type_fip')
+    ).drop('url_fip', 'site_type', 'type_fip')
 
     # Build fallbacks if the primary URL structures are missing
     ds_updated = ds_updated.with_columns(
@@ -482,7 +482,7 @@ async def check_dataset(live=False):
     assert ds['type'].is_in(list(_ETF_TYPES.values())).all()
     assert ds['ins_code'].is_unique().all()
     assert ds['url'].is_unique().all()
-    assert (ds['site_Type'].is_not_null()).all(), 'site_Type contains NA'
+    assert (ds['site_type'].is_not_null()).all(), 'site_type contains nulls'
     assert (ds['reg_no'].is_not_null()).all()
 
     # Split the URL string exactly once by the '#' character into a struct
@@ -524,7 +524,7 @@ async def check_dataset(live=False):
 
     # Safely apply object mappings to generate your site list properties
     ds = ds.with_columns(
-        _pl.struct(['site_Type', 'url'])
+        _pl.struct(['site_type', 'url'])
         .map_elements(lambda r: _make_site(r), return_dtype=_pl.Object)
         .alias('site')
     )
@@ -561,7 +561,7 @@ async def check_dataset(live=False):
         ds = (
             ds.join(updates, on='l18', how='left')
             .with_columns(
-                _pl.coalesce(['new_st', 'site_Type']).alias('site_Type')
+                _pl.coalesce(['new_st', 'site_type']).alias('site_type')
             )
             .drop('new_st')
         )
