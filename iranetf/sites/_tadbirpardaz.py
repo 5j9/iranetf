@@ -274,9 +274,9 @@ class TadbirPardaz(BaseTadbirPardaz):
             },
             schema={
                 'date': pl.String,
-                'creation': pl.Int64,
-                'redemption': pl.Int64,
-                'statistical': pl.Int64,
+                'creation': pl.Float64,
+                'redemption': pl.Float64,
+                'statistical': pl.Float64,
             },
         ).with_columns(pl.col('date').str.to_date('%m/%d/%Y'))
 

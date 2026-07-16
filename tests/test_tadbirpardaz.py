@@ -206,3 +206,10 @@ async def test_empty_divident_hist():
     df = lf.collect()
 
     assert df.height == 0
+
+
+@file('navps_history_float.json')
+async def test_navps_history_float(test_config):
+    if not test_config['OFFLINE_MODE']:
+        return
+    await TadbirPardaz.from_l18('سها').navps_history()
