@@ -296,7 +296,11 @@ async def _fipiran_data(ds: _pl.LazyFrame) -> _pl.LazyFrame:
 
     _logger.info('await fipiran.funds.funds()')
     # Use global inference scope for any incoming external dynamic dataframes
-    fipiran_df = (await fipiran.funds.funds()).collect()
+    fipiran_df = (
+        (await fipiran.funds.funds())
+        .rename({'regNo': 'reg_no', 'insCode': 'ins_code'})
+        .collect()
+    )
 
     ds_collected = ds.collect()
     reg_not_in_fipiran = ds_collected.filter(
@@ -388,7 +392,7 @@ async def _update_existing_rows_using_fipiran(
             _pl.coalesce(['type_fip', 'type']).alias('type'),
             _pl.col('domain'),
         ]
-    ).drop('url_fip', 'site_type', 'type_fip')
+    ).drop('url_fip', 'site_type_fip', 'type_fip')
 
     # Build fallbacks if the primary URL structures are missing
     ds_updated = ds_updated.with_columns(
