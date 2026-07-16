@@ -105,13 +105,24 @@ async def test_alt_home_data_format():
     }
 
 
+kianfunds9 = MabnaDP2.from_l18('یوتیلیتی')
+
+
 @file('test_portfolios.json')
 async def test_portfolios():
-    site = MabnaDP2('https://kianfunds9.ir/')
-    portfolios = await site.portfolios()
+    portfolios = await kianfunds9.portfolios()
     for pid, pname in portfolios.items():
         if pid == '11':
             assert pname == 'یوتیلیتی'
             break
     else:
         raise RuntimeError('portfolio with id 11 was not found')
+
+
+@file_map(
+    ('assets-classification', 'multinav_assets-classification.json'),
+    (kianfunds9.url, 'kianfunds9.html'),
+)
+async def test_multinav_leverage():
+    lvg = await kianfunds9.leverage()
+    assert 0.5 <= lvg <= 100
