@@ -16,9 +16,9 @@ from iranetf.sites._lib import (
 
 # Uses api/v2/ path instead of api/v1/
 class MabnaDP2(BaseSite):
-    def __init__(self, url: str):
-        url, _, portfolio_id = url.partition('#')
-        super().__init__(url, portfolio_id=portfolio_id or '1')
+    def __init__(self, url: str, portfolio_id='1'):
+        assert portfolio_id
+        super().__init__(url, portfolio_id=portfolio_id)
 
     async def _home_info(self):
         d = {}

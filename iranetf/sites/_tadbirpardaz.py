@@ -357,10 +357,6 @@ class TadbirPardaz(BaseTadbirPardaz):
 
 
 class TadbirPardazMultiNAV(TadbirPardaz):
-    def __init__(self, url: str):
-        url, _, portfolio_id = url.partition('#')
-        super().__init__(url, portfolio_id)
-
     async def _json(self, path: str, params: dict | None = None, **kwa) -> Any:
         return await super()._json(
             path,

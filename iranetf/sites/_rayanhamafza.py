@@ -45,9 +45,9 @@ class FundData(TypedDict):
 
 
 class BaseRayanHamafza(BaseSite):
-    def __init__(self, url: str):
-        url, _, portfolio_id = url.partition('#')
-        super().__init__(url, portfolio_id or '1')
+    def __init__(self, url: str, portfolio_id: str = '1'):
+        assert portfolio_id
+        super().__init__(url, portfolio_id)
 
     _api_path: str
     _navps_history_path: str

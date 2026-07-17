@@ -117,7 +117,7 @@ class BaseSite(Protocol):
             if info['isLeveragedMode']:
                 return sites.LeveragedTadbirPardaz(url)
             if info['isETFMultiNavMode']:
-                return sites.TadbirPardazMultiNAV(url + '#2')
+                return sites.TadbirPardazMultiNAV(url, '2')
             return tp_site
 
         if rfind(b'<!-- Rayanhamafza Front-End Team -->') != -1:

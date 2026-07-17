@@ -53,7 +53,13 @@ _DATASET_PATH = _Path(__file__).parent / 'dataset.csv'
 def _make_site(row: dict) -> _BaseSite:
     type_str = row['site_type']
     site_class = getattr(_sites, type_str)
-    return site_class(row['url'])
+
+    pid = row['portfolio_id']
+    if pid:  # Filters out None, "", etc.
+        return site_class(url=row['url'], portfolio_id=pid)
+
+    # Use the site class default portfolio_id (e.g. '1' or '')
+    return site_class(url=row['url'])
 
 
 def scan_dataset() -> _pl.LazyFrame:
@@ -65,7 +71,6 @@ def scan_dataset() -> _pl.LazyFrame:
     return _pl.scan_csv(
         _DATASET_PATH,
         encoding='utf8',
-        null_values=[''],
         schema={
             'l18': _pl.String,
             'name': _pl.String,
@@ -73,11 +78,12 @@ def scan_dataset() -> _pl.LazyFrame:
             'ins_code': _pl.String,
             'reg_no': _pl.String,
             'url': _pl.String,
+            'portfolio_id': _pl.String,
             'site_type': _pl.String,
             'dps_interval': _pl.Int8,
         },
     ).with_columns(
-        _pl.struct(['site_type', 'url'])
+        _pl.struct(['site_type', 'url', 'portfolio_id'])
         .map_elements(
             lambda r: (
                 _make_site(r) if r.get('site_type') is not None else None
@@ -115,6 +121,7 @@ def sink_dataset(ds: _pl.LazyFrame):
         'ins_code',
         'reg_no',
         'url',
+        'portfolio_id',
         'site_type',
         'dps_interval',
     ]
@@ -463,6 +470,22 @@ async def _check_reg_no(site: _BaseSite, ds_reg_no: str):
     _logger.error(f'{site_reg_no=} != {ds_reg_no=}')
 
 
+def _check_urls(ds: _pl.DataFrame):
+    # Assert that URLs are clean and do not contain old-style metadata fragments
+    assert not ds['url'].str.contains('#').any(), (
+        "URLs must not contain '#' fragments"
+    )
+    duplicates = ds.filter(_pl.struct(['url', 'portfolio_id']).is_duplicated())
+    if not duplicates.is_empty():
+        _logger.error(
+            f'found duplicate (url, portolio_id):\n'
+            f'{duplicates.select(["l18", "url", "portfolio_id"])}'
+        )
+        raise AssertionError(
+            'Duplicate combinations of url and portfolio_id found!'
+        )
+
+
 @_log_and_retry
 async def _check_portfolio_counts(site: _BaseSite, dataset_ids: set[str]):
     site_portfolios = await site.portfolios()
@@ -478,41 +501,28 @@ async def _check_portfolio_counts(site: _BaseSite, dataset_ids: set[str]):
 
 
 async def check_dataset(live=False):
-    ds = scan_dataset().drop('site', 'inst').collect()
-
+    ds = (
+        scan_dataset()
+        .drop('site', 'inst')
+        .with_columns(
+            _pl.col('portfolio_id').fill_null('').alias('portfolio_id')
+        )
+        .collect()
+    )
+    _check_urls(ds)
     # Guardrail Match: All validation checks collapsed to true single boolean scalars
     assert ds['l18'].is_unique().all(), ds.filter(ds['l18'].is_duplicated())
     assert ds['name'].is_unique().all()
     assert ds['type'].is_in(list(_ETF_TYPES.values())).all()
     assert ds['ins_code'].is_unique().all()
-    assert ds['url'].is_unique().all()
+
     assert (ds['site_type'].is_not_null()).all(), 'site_type contains nulls'
     assert (ds['reg_no'].is_not_null()).all()
 
-    # Split the URL string exactly once by the '#' character into a struct
-    # containing 'field_0' and 'field_1'
-    ds = (
-        ds.with_columns(
-            _pl.col('url').str.split_exact('#', 1).alias('url_parts')
-        )
-        .with_columns(
-            [
-                # field_0 is everything before the '#'
-                _pl.col('url_parts').struct.field('field_0').alias('base_url'),
-                # field_1 is everything after. If there was no '#', field_1 is null,
-                # so we fill it with ''
-                _pl.col('url_parts')
-                .struct.field('field_1')
-                .fill_null('')
-                .alias('portfolio_id'),
-            ]
-        )
-        .drop('url_parts')
-    )
-
+    # Check that each unique registry number (reg_no) map to only 1 unique URL
     grouped_check = (
         ds.group_by('reg_no')
-        .agg(_pl.col('base_url').n_unique().alias('cnt'))
+        .agg(_pl.col('url').n_unique().alias('cnt'))
         .filter(_pl.col('cnt') > 1)
     )
     assert grouped_check.is_empty()
@@ -520,15 +530,15 @@ async def check_dataset(live=False):
     if not live:
         return
 
-    # Build list aggregations natively
-    agg_pids = ds.group_by('base_url').agg(
+    agg_pids = ds.group_by('url').agg(
         _pl.col('portfolio_id').alias('portfolio_ids')
     )
-    ds = ds.join(agg_pids, on='base_url', how='left')
+    ds = ds.join(agg_pids, on='url', how='left')
 
     # Safely apply object mappings to generate your site list properties
+    # Pass 'portfolio_id' into the struct mapping so _make_site runs correctly
     ds = ds.with_columns(
-        _pl.struct(['site_type', 'url'])
+        _pl.struct(['site_type', 'url', 'portfolio_id'])
         .map_elements(lambda r: _make_site(r), return_dtype=_pl.Object)
         .alias('site')
     )
@@ -539,7 +549,7 @@ async def check_dataset(live=False):
         for (site, reg) in zip(ds['site'], ds['reg_no'])
     ]
 
-    unique_site_pids = ds.unique(subset=['base_url']).select(
+    unique_site_pids = ds.unique(subset=['url']).select(
         ['site', 'portfolio_ids']
     )
     collect_symbol_counts_coros = [
