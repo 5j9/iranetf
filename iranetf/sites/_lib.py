@@ -30,7 +30,6 @@ async def _read(url: str) -> bytes:
 class BaseSite(Protocol):
     __slots__ = '_home_info_cache', 'last_response', 'portfolio_id', 'url'
 
-    # Changed from DataFrame to LazyFrame for consistent lazy pipeline integration
     _aa_keys: set[str]
 
     def __init__(self, url: str, portfolio_id: str = ''):
