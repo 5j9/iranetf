@@ -525,7 +525,7 @@ async def check_dataset(live=False):
         .agg(_pl.col('url').n_unique().alias('cnt'))
         .filter(_pl.col('cnt') > 1)
     )
-    assert grouped_check.is_empty()
+    assert grouped_check.is_empty(), grouped_check
 
     if not live:
         return
