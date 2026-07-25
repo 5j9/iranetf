@@ -54,9 +54,12 @@ async def test_multinav():
 
 async def test_multinav_hist_path():
     khodran = BaseSite.from_l18('خودران')
-    with patch(
-        'iranetf.sites._lib._get', side_effect=NotImplementedError
-    ) as get_mock, raises(NotImplementedError):
+    with (
+        patch(
+            'iranetf.sites._lib._get', side_effect=NotImplementedError
+        ) as get_mock,
+        raises(NotImplementedError),
+    ):
         await khodran.navps_history()
     get_mock.assert_called_once_with(
         'https://mofidsectorfund.com/Chart/TotalNAV',
@@ -67,9 +70,12 @@ async def test_multinav_hist_path():
 
 async def test_multinav_live_navps_path():
     khodran = BaseSite.from_l18('خودران')
-    with patch(
-        'iranetf.sites._lib._get', side_effect=NotImplementedError
-    ) as get_mock, raises(NotImplementedError):
+    with (
+        patch(
+            'iranetf.sites._lib._get', side_effect=NotImplementedError
+        ) as get_mock,
+        raises(NotImplementedError),
+    ):
         await khodran.live_navps()
     get_mock.assert_called_once_with(
         'https://mofidsectorfund.com/Fund/GetETFNAV',

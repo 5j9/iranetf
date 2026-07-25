@@ -35,8 +35,10 @@ Homepage = "https://github.com/5j9/iranetf"
 [tool.ruff]
 line-length = 79
 format.quote-style = 'single'
+
 [tool.ruff.lint]
 isort.combine-as-imports = true
+
 extend-select = [
     'W605', # invalid-escape-sequence
     'FA',   # flake8-future-annotations
@@ -51,6 +53,9 @@ ignore = [
     'RUF003', # ambiguous-unicode-character-comment
     'RUF012', # mutable-class-default
     'RUF059', # Unpacked variable never used
+    'PLW1510', # subprocess-run-without-check
+    'SIM102', # collapsible-if
+    'SIM115', # Use a context manager for opening files
 ]
 logger-objects = ['iranetf.logger']
 
