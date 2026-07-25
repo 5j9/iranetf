@@ -174,8 +174,8 @@ def _log_and_retry(func):
             except (OSError, _ClientError) as e:
                 _logger.error(f'{func.__name__}: {e!r} on {arg}')
                 return
-            except Exception as e:
-                _logger.exception(f'{func.__name__}: {e!r} on {arg}')
+            except Exception:
+                _logger.exception(f'{func.__name__}: {arg=}')
                 return
 
     return wrapper

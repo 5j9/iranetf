@@ -35,15 +35,16 @@ Homepage = "https://github.com/5j9/iranetf"
 [tool.ruff]
 line-length = 79
 format.quote-style = 'single'
-lint.isort.combine-as-imports = true
-lint.extend-select = [
+[tool.ruff.lint]
+isort.combine-as-imports = true
+extend-select = [
     'W605', # invalid-escape-sequence
     'FA',   # flake8-future-annotations
     'I',    # isort
     'UP',   # pyupgrade
     'RUF',  # Ruff-specific rules (RUF)
 ]
-lint.ignore = [
+ignore = [
     'E721',   # Do not compare types, use `isinstance()`
     'RUF001', # ambiguous-unicode-character-string
     'RUF002', # ambiguous-unicode-character-docstring
@@ -51,6 +52,7 @@ lint.ignore = [
     'RUF012', # mutable-class-default
     'RUF059', # Unpacked variable never used
 ]
+logger-objects = ['iranetf.logger']
 
 [tool.pytest]
 addopts = ["--quiet", "--tb=short"]
