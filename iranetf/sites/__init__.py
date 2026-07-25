@@ -1,3 +1,5 @@
+from logging import getLogger
+
 from iranetf.sites._lib import BaseSite, LiveNAVPS
 from iranetf.sites._mabnadp import MabnaDP2
 from iranetf.sites._rayanhamafza import (
@@ -33,4 +35,8 @@ __all__ = [
     'TPLiveNAVPS',
     'TadbirPardaz',
     'TadbirPardazMultiNAV',
+    'logger',
 ]
+
+
+logger = getLogger(__name__)

@@ -15,7 +15,7 @@ async def api(path: str) -> dict:
 
 
 class Rahavard365:
-    __slots__ = 'asset_id'
+    __slots__ = ('asset_id',)
 
     def __init__(self, asset_id: int | str):
         self.asset_id = asset_id

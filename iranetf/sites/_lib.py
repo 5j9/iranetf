@@ -3,13 +3,12 @@ from __future__ import annotations as _
 from abc import abstractmethod
 from datetime import datetime
 from json import loads
-from logging import warning
 from typing import Any, Protocol, Self, TypedDict, runtime_checkable
 
 import polars as pl
 from jdatetime import date as jdate
 
-from iranetf import RegNoError, _get
+from iranetf import RegNoError, _get, logger
 
 
 class LiveNAVPS(TypedDict):
@@ -100,7 +99,7 @@ class BaseSite(Protocol):
     def _check_aa_keys(self, d: dict):
         if d.keys() <= self._aa_keys:
             return
-        warning(
+        logger.warning(
             f'Unknown asset allocation keys on {self!r}: {d.keys() - self._aa_keys}'
         )
 
