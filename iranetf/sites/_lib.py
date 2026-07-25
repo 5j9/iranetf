@@ -106,7 +106,7 @@ class BaseSite(Protocol):
 
     @staticmethod
     async def from_url(url: str):
-        import iranetf.sites as sites
+        from iranetf import sites
 
         content = await _read(url)
         rfind = content.rfind
