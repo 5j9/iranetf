@@ -58,7 +58,7 @@ class BaseRayanHamafza(BaseSite):
     _dividend_history_data_key: str | None
 
     async def _json(self, path, **kwa) -> Any:
-        return await super()._json(f'{self._api_path}/{path}', **kwa)
+        return await super()._json(f'{self._api_path}{path}', **kwa)
 
     async def navps_history(self) -> pl.LazyFrame:
         # Pulls the in-memory payload lazily and updates expressions together
@@ -235,7 +235,7 @@ class RayanHamafza2(BaseRayanHamafza):
     _api_path = 'api/v1/'
     _navps_history_path = 'public/navPerShare/'
     _nav_history_path = 'public/dailyNav/'
-    _portfolio_industries_path = '/public/industries/'
+    _portfolio_industries_path = 'public/industries/'
     _aa_keys = {i[0].lower() + i[1:] for i in RayanHamafza._aa_keys}
     _asset_allocation_path = 'public/mixAsset/'
     _dividend_history_path = 'public/fundProfits/'
