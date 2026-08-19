@@ -63,11 +63,7 @@ def _make_site(row: dict) -> _BaseSite:
 
 
 def scan_dataset() -> _pl.LazyFrame:
-    """Load dataset.csv as a LazyFrame with site and inst structures pre-configured.
-
-    Transformations are evaluated lazily; Polars will optimize away these columns
-    if they are not selected downstream.
-    """
+    """Load dataset.csv as a LazyFrame with site and inst structures pre-configured."""
     return _pl.scan_csv(
         _DATASET_PATH,
         encoding='utf8',
@@ -81,6 +77,7 @@ def scan_dataset() -> _pl.LazyFrame:
             'portfolio_id': _pl.String,
             'site_type': _pl.String,
             'dps_interval': _pl.Int8,
+            'group_id': _pl.String,
         },
     ).with_columns(
         _pl.struct(['site_type', 'url', 'portfolio_id'])
@@ -124,6 +121,7 @@ def sink_dataset(ds: _pl.LazyFrame):
         'portfolio_id',
         'site_type',
         'dps_interval',
+        'group_id',
     ]
 
     # 2. Select columns, sort, and stream directly to the CSV file
