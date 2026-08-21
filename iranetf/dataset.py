@@ -77,7 +77,7 @@ def scan_dataset() -> _pl.LazyFrame:
             'portfolio_id': _pl.String,
             'site_type': _pl.String,
             'dps_interval': _pl.Int8,
-            'group_id': _pl.String,
+            'group_id': _pl.Int8,
         },
     ).with_columns(
         _pl.struct(['site_type', 'url', 'portfolio_id'])
@@ -303,7 +303,9 @@ async def _fipiran_data(ds: _pl.LazyFrame) -> _pl.LazyFrame:
     # Use global inference scope for any incoming external dynamic dataframes
     fipiran_df = (
         (await fipiran.funds.funds())
-        .rename({'regNo': 'reg_no', 'insCode': 'ins_code'})
+        .rename(
+            {'regNo': 'reg_no', 'insCode': 'ins_code', 'groupId': 'group_id'}
+        )
         .collect()
     )
 
@@ -322,14 +324,13 @@ async def _fipiran_data(ds: _pl.LazyFrame) -> _pl.LazyFrame:
         & ~(_pl.col('fundType').is_in([11, 12, 13, 14, 16]))
         & _pl.col('isCompleted')
     ).select(
-        [
-            _pl.col('reg_no'),
-            _pl.col('smallSymbolName').alias('l18'),
-            _pl.col('name'),
-            _pl.col('fundType').alias('type'),
-            _pl.col('websiteAddress').alias('domain'),
-            _pl.col('ins_code'),
-        ]
+        'reg_no',
+        _pl.col('smallSymbolName').alias('l18'),
+        'name',
+        _pl.col('fundType').alias('type'),
+        _pl.col('websiteAddress').alias('domain'),
+        'ins_code',
+        'group_id',
     )
 
     # Map mapping transformations via high performance native replacement steps
@@ -383,8 +384,10 @@ async def _update_existing_rows_using_fipiran(
 
     # Join data streams using relational keys instead of legacy index overrides
     joined = ds.join(
-        fipiran_df.select(['reg_no', 'domain', 'type', 'url', 'site_type']),
-        on='reg_no',
+        fipiran_df.select(
+            'reg_no', 'domain', 'type', 'url', 'site_type', 'group_id'
+        ),
+        on=['reg_no', 'group_id'],
         how='left',
         suffix='_fip',
     )
@@ -424,13 +427,7 @@ async def update_dataset(*, update_existing=False) -> _pl.DataFrame:
     ds = _add_new_items_to_ds(new_items, ds)
 
     # Perform a left join update to bring over updated data tracks from TSETMC
-    ds = ds.join(
-        tsetmc_df,
-        how='left',
-        suffix='_tsetmc',
-        left_on='ins_code',
-        right_on='ins_code',
-    )
+    ds = ds.join(tsetmc_df, how='left', suffix='_tsetmc', on='ins_code')
 
     # Coalesce tracking changes updates
     update_cols = [
@@ -477,7 +474,7 @@ def _check_urls(ds: _pl.DataFrame):
     if not duplicates.is_empty():
         _logger.error(
             f'found duplicate (url, portolio_id):\n'
-            f'{duplicates.select(["l18", "url", "portfolio_id"])}'
+            f'{duplicates.select("l18", "url", "portfolio_id")}'
         )
         raise AssertionError(
             'Duplicate combinations of url and portfolio_id found!'
@@ -548,7 +545,7 @@ async def check_dataset(live=False):
     ]
 
     unique_site_pids = ds.unique(subset=['url']).select(
-        ['site', 'portfolio_ids']
+        'site', 'portfolio_ids'
     )
     collect_symbol_counts_coros = [
         _check_portfolio_counts(s, set(dataset_ids))
