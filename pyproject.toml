@@ -18,7 +18,7 @@ dependencies = [
     "aiohutils>=0.26.0",
     "jdatetime >= 4.1.0",
     'tsetmc>=5.0.0',
-    "fipiran>=3.0.0",
+    "fipiran>=4.0.0",
     "polars>=1.41.2",
 ]
 [dependency-groups]
@@ -47,8 +47,11 @@ extend-select = [
     'RUF',  # Ruff-specific rules (RUF)
 ]
 ignore = [
+    'B023', # function-uses-loop-variable
     'BLE001', # blind-except
+    'DTZ', # flake8-datetimez
     'E721', # Do not compare types, use `isinstance()`
+    'PLE2502', # bidirectional-unicode
     'PLW1510', # subprocess-run-without-check
     'RUF001', # ambiguous-unicode-character-string
     'RUF002', # ambiguous-unicode-character-docstring
@@ -60,6 +63,7 @@ ignore = [
     'SIM115', # Use a context manager for opening files
 ]
 logger-objects = ['iranetf.logger']
+unfixable = ["F401"]  # unused-import
 
 [tool.pytest]
 addopts = ["--quiet", "--tb=short"]
