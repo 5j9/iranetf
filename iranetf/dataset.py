@@ -487,7 +487,7 @@ async def _check_portfolio_counts(site: _BaseSite, dataset_ids: set[str]):
     site_ids = site_portfolios.keys()
     url = site.url
 
-    if dataset_ids == {''}:
+    if dataset_ids == {None}:
         dataset_ids = {'1'}
 
     if site_ids == dataset_ids:
@@ -496,14 +496,7 @@ async def _check_portfolio_counts(site: _BaseSite, dataset_ids: set[str]):
 
 
 async def check_dataset(live=False):
-    ds = (
-        scan_dataset()
-        .drop('site', 'inst')
-        .with_columns(
-            _pl.col('portfolio_id').fill_null('').alias('portfolio_id')
-        )
-        .collect()
-    )
+    ds = scan_dataset().drop('site', 'inst').collect()
     _check_urls(ds)
     # Guardrail Match: All validation checks collapsed to true single boolean scalars
     assert ds['l18'].is_unique().all(), ds.filter(ds['l18'].is_duplicated())
