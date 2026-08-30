@@ -382,33 +382,67 @@ async def _update_existing_rows_using_fipiran(
     fipiran_lazy = await _add_url_and_type(fipiran_df.lazy(), known_domains)
     fipiran_df = fipiran_lazy.collect()
 
-    # Join data streams using relational keys instead of legacy index overrides
+    # Columns to update via fallback logic
+    update_columns = ['type', 'url', 'site_type']
+
+    # 1. Primary match: (reg_no, group_id) - includes domain from fipiran_df
     joined = ds.join(
-        fipiran_df.select(
-            'reg_no', 'domain', 'type', 'url', 'site_type', 'group_id'
-        ),
+        fipiran_df.select('reg_no', 'group_id', 'domain', *update_columns),
         on=['reg_no', 'group_id'],
         how='left',
         suffix='_fip',
     )
 
-    # Coalesce values to overwrite fields safely without adding extra rows
-    ds_updated = joined.with_columns(
-        [
-            _pl.coalesce(['url', 'url_fip']).alias('url'),
-            _pl.coalesce(['site_type', 'site_type_fip']).alias('site_type'),
-            _pl.coalesce(['type_fip', 'type']).alias('type'),
-            _pl.col('domain'),
-        ]
-    ).drop('url_fip', 'site_type_fip', 'type_fip')
+    # 2. Extract globally unique reg_nos across both DataFrames
+    ds_unique = ds.filter(_pl.col('reg_no').is_unique()).select('reg_no')
+    fip_unique = fipiran_df.filter(_pl.col('reg_no').is_unique())
 
-    # Build fallbacks if the primary URL structures are missing
+    # Inner join unique sets (including group_id, domain as fallback)
+    fipiran_unique = fip_unique.join(
+        ds_unique, on='reg_no', how='inner'
+    ).select(
+        'reg_no',
+        _pl.col('group_id').alias('group_id_unique'),
+        _pl.col('domain').alias('domain_unique'),
+        *[_pl.col(c).alias(f'{c}_unique') for c in update_columns],
+    )
+
+    # 3. Fallback match: reg_no only
+    joined = joined.join(fipiran_unique, on='reg_no', how='left')
+
+    # 4. Priority Coalesce with explicit per-column precedence
+    coalesce_exprs = [
+        # url: DS wins → Fipiran (reg_no, group_id) → Fipiran (reg_no)
+        _pl.coalesce(['url', 'url_fip', 'url_unique']).alias('url'),
+        # site_type: DS wins → Fipiran (reg_no, group_id) → Fipiran (reg_no)
+        _pl.coalesce(['site_type', 'site_type_fip', 'site_type_unique']).alias(
+            'site_type'
+        ),
+        # type: Fipiran (reg_no, group_id) → Fipiran (reg_no) → DS
+        _pl.coalesce(['type_fip', 'type_unique', 'type']).alias('type'),
+        # domain: Fipiran (reg_no, group_id) → Fipiran (reg_no)
+        _pl.coalesce(['domain', 'domain_unique']).alias('domain'),
+        # group_id: use Fipiran value when reg_no is unique in both datasets
+        # (the primary (reg_no, group_id) match already failed for different group_ids)
+        _pl.coalesce(['group_id_unique', 'group_id']).alias('group_id'),
+    ]
+
+    drop_cols = (
+        [f'{col}_fip' for col in update_columns]
+        + [f'{col}_unique' for col in update_columns]
+        + ['domain_unique', 'group_id_unique']
+    )
+
+    ds_updated = joined.with_columns(coalesce_exprs).drop(drop_cols)
+
+    # 5. Build URL fallback using domain when URL is missing
     ds_updated = ds_updated.with_columns(
         _pl.when(_pl.col('url').is_null() & _pl.col('domain').is_not_null())
         .then(_pl.lit('http://') + _pl.col('domain') + _pl.lit('/'))
         .otherwise(_pl.col('url'))
         .alias('url')
     )
+
     return ds_updated
 
 
