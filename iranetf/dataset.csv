@@ -1,5 +1,6 @@
 ﻿l18,name,type,ins_code,reg_no,url,portfolio_id,site_type,dps_interval,group_id
 آبنوس,سهام نگر کیمیا,Stock,40912525017440979,12270,https://kimiasahm.ir/,,TadbirPardaz,,1
+آبی,ص.س.درآمد ثابت آبی هامون-د,Fixed,29833953891226346,12551,https://hamounfund.ir/,1,MabnaDP2,,
 آتش,صندوق س.کالای کهکشان فیروزه,Commodity,56987424987755487,12358,https://atash.fundz.ir/,2,TadbirPardazMultiNAV,,
 آتیمس,آرمان آتیه درخشان مس,Stock,22839330962768817,11378,https://armanmesetf.ir/,,RayanHamafza2,,0
 آتیه ملت,آتیه ملت,Fixed,47492157735162813,10895,https://atiehmellat.ir/,,TadbirPardaz,,1
@@ -31,6 +32,7 @@
 ابتکار,پرتو ابتکار هدف,Stock,65473703162196532,12357,https://ebtekarhadaf.ir/,,RayanHamafza2,,0
 اتوآگاه,بخشی صنایع آگاه2,Sector,6328167131743522,12093,https://agahsectorfund.ir/,2,RayanHamafza2,,
 اتوداریوش,بخشی اتو داریوش,Sector,71779402170497603,12147,https://sector.dariush.fund/,2,RayanHamafza2,,
+اتوکار,بخشی صنایع کارآمد,Sector,21731820344041381,12570,https://karamadsectorfund.ir/,2,TadbirPardazMultiNAV,,
 ارزش,ارزش آفرین بیدار,Stock,43443105991896600,11712,https://arzesh.ebb.ir/,,RayanHamafza2,,0
 ارزش مسکن,املاک و مستغلات مدیریت ارزش مسکن,REIT,71945594172117613,12027,https://reit1.cvpf.ir/,,TadbirPardaz,12,1
 ارمغان,ارمغان ایرانیان,Fixed,31366347648583654,10920,https://armaghanfund.ir/,,RayanHamafza2,1,0
@@ -68,6 +70,7 @@
 بذر,بذر امید آفرین,Stock,37222720235819361,11197,https://bazreomidfund.ir/,,TadbirPardaz,,1
 برلیان,در سهام برلیان,Stock,4216536645718658,11985,https://berelianfund.ir/,,MabnaDP2,,0
 بزرگ,سرزمین بزرگ بازار,Stock,13286519531933238,12470,https://bozorgfund.ir/,,MabnaDP2,,0
+بلد,در اوراق بهادار با درآمد ثابت برلیان شهر,Fixed,69155867302158609,12550,https://berelianshahr.ir/,1,MabnaDP2,,
 بلوط,شکوه بامداد زاگرس,Fixed,4769396408895066,11996,https://shokouhfund.ir/,,RayanHamafza2,1,0
 بمان,بازده مانا,Fixed,52551569846042389,12209,https://baazdehmanafund.ir/,,RayanHamafza2,,0
 بنکر,بخشی پتروشیمی اندیشه صبا۲,Sector,65736765815044639,12163,https://sabasectorfund.sabaamc.ir/,2,RayanHamafza2,,
@@ -78,6 +81,7 @@
 تاراز,آوای تاراز زاگرس,Stock,24651394045981418,11922,https://tarazfund.ir/,,RayanHamafza2,,0
 تخت گاز,بخشی صنایع معیار,Sector,30507739597192201,12232,https://meyarsectorfund.ir/,2,TadbirPardazMultiNAV,,
 تداوم,تداوم اطمینان تمدن,Fixed,39453972158399542,11367,https://tadavomtamadon.ir/,,TadbirPardaz,,1
+تراست,بخشی صنایع پیشرفت صبا,Sector,4142914008323611,12571,https://sabatrustfund.ir/,2,TadbirPardazMultiNAV,,
 ترمه,ترمه ایساتیس پویا,Stock,42705920381780437,12018,https://termeh.isatispm.com/,,RayanHamafza2,,0
 ترنج ثابت,ترنج سودمند,Fixed,50264175787486822,11995,https://toranj.fund/,,RayanHamafza2,1,0
 تصمیم,در اوراق بهادار با درآمد ثابت تصمیم,Fixed,53419976284977130,11569,https://tasmim-sabet.ir/,,RayanHamafza2,,0
@@ -121,6 +125,7 @@
 دریا,دریای آبی فیروزه,Stock,11285885633824855,12039,https://daryaetf.ir/,,TadbirPardaz,,1
 درین,درین بها بازار,Fixed,21077182490095731,12086,https://dorinfund.com/,,RayanHamafza2,,0
 دفینه,مبتنی بر کالای سینا,Commodity,13117618204212939,12552,https://sinacommodity.ir/,1,RayanHamafza2,,0
+دلتا,صندوق س صنایع تمدن1-بخشی,Sector,60410592153141114,11316,https://tamadonsectorfund.ir/,1,RayanHamafza2,,
 دوایکس,سهامی اهرمی شاخصی کیان,Leveraged,58108537439201620,12433,https://kianfunds10.ir/,,MabnaDP2,,0
 دی سهام,دی سهام,Stock,49782064767608295,10869,https://www.dayfund.ir/,,RayanHamafza2,,0
 دیار,مشترک دیار,Stock,6279426571085158,12416,https://diarfund.ir/,2,MabnaDP2,,0
@@ -144,6 +149,7 @@
 زرفام,زرفام آشنا,Commodity,33144542989832366,11967,https://goldfund.ir/,1,RayanHamafza2,,
 زروان,صندوق س.پشتوانه طلای ویستا,Commodity,28255729477187163,12359,https://goldvista.ir/,,TadbirPardaz,,1
 زرگر,در اوراق بهادار مبتنی بر طلای زرگر کارآمد,Commodity,16817885126368964,12458,https://kalakaramad.com/,,RayanHamafza2,,0
+زریران,مبتنی بر کالای داریوش,Commodity,7171962866271439,12537,https://gold.dariush.fund/,1,RayanHamafza2,,
 زرین,زرین کوروش,Stock,50139638026536387,11774,https://zarinfunds.com/,,RayanHamafza2,,0
 زمرد,پشتوانه طلای زمرد بیدار,Commodity,64795751499397128,12390,https://zomorod.ebidar.ir/,,RayanHamafza2,,0
 زمرد کوروش,زمرد کوروش,Fixed,57191287546444240,12334,https://zomorodkourosh.com/,,RayanHamafza2,,0
@@ -164,6 +170,7 @@
 سپیدما,سپید دماوند,Fixed,2161110547458064,11820,https://sepiddamavandfund.ir/,,RayanHamafza2,,0
 سپینود,سهامی به آفرید سپینود,Stock,3927545069816217,12248,https://behafarid.sepinudcapital.ir/,,TadbirPardaz,,1
 سیان,کالای دیبای معیار1,Commodity,31765923007618205,12332,https://liangoldfund.ir/,3,TadbirPardazMultiNAV,,
+سیلوا,صندوق س.کالای پاداش1,Commodity,7887331100268907,12465,https://golda.ir/,2,RayanHamafza2,,
 سیلور,بازده نقره نوا,Commodity,18156575395080321,12501,https://baazdehnoghrehnavafund.ir/,,RayanHamafza2,,0
 سیمان,قابل معامله بخشی کیان3,Sector,19262304347711355,12234,https://kianfunds9.ir/,16,MabnaDP2,,
 سیمانا,صندوق س صنایع دایا2,Sector,46918165794045813,12181,https://daya.charismafunds.ir/,3,TadbirPardazMultiNAV,,
@@ -300,7 +307,7 @@
 کوانتوم,کوانتوم بهاوند,Stock,18377845653697190,12478,https://quantomfund.ir/,,TadbirPardaz,,1
 کیان,در اوراق بهادار با درآمد ثابت کیان,Fixed,53251602435454519,11459,https://kianfunds1.ir/,,RayanHamafza2,,0
 گارانتی,تضمین اصل سرمایه گیتی دماوند,Guarantee,971068957336171,12135,https://gitidamavandfund.ir/,,MabnaDP2,,0
-گلدا,در اوراق بهادار مبتنی بر طلای پاداش,Commodity,48968268685622891,12465,https://www.golda.ir/,,RayanHamafza2,,0
+گلدا,در اوراق بهادار مبتنی بر طلای پاداش,Commodity,48968268685622891,12465,https://www.golda.ir/,1,RayanHamafza2,,0
 گلدیس,پتشوانه طلای گلدیس نوین,Commodity,68376789401977331,10771,https://goldisfund.ir/,,RayanHamafza2,,0
 گنج,کیمیا زرین کاردان,Commodity,58514988269776425,10615,https://iran-kfunds5.ir/,,TadbirPardaz,,1
 گنجین,گنجینه یکم آوید,Fixed,57728534324022361,11499,https://ganjinehavid.ir/,,TadbirPardaz,,1
