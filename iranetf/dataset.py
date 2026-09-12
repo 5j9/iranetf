@@ -231,15 +231,15 @@ async def _url_type(domain: str) -> tuple:
 
 
 async def _add_url_and_type(
-    fipiran_lf: _LazyFrame, known_domains: list[str] | None
+    fipiran_lf: _LazyFrame, ds_domains: list[str] | None
 ):
     fipiran_df = fipiran_lf.collect()
 
     # Filter domains using vector syntax
     domains_filter = fipiran_df['domain'].is_not_null()
-    if known_domains is not None:
+    if ds_domains is not None:
         domains_filter = domains_filter & (
-            ~fipiran_df['domain'].is_in(known_domains)
+            ~fipiran_df['domain'].is_in(ds_domains)
         )
 
     domains_to_be_checked = fipiran_df.filter(domains_filter)[
@@ -379,16 +379,16 @@ async def _update_existing_rows_using_fipiran(
     ds: _DataFrame, fipiran_df: _DataFrame, update_existing: bool
 ) -> _DataFrame:
 
-    known_domains = None
+    ds_domains = None
     if not update_existing:
-        known_domains = (
+        ds_domains = (
             ds.filter(_col('url').is_not_null())['url']
             .str.extract(r'//([^/]+)/')
             .drop_nulls()
             .to_list()
         )
 
-    fipiran_lazy = await _add_url_and_type(fipiran_df.lazy(), known_domains)
+    fipiran_lazy = await _add_url_and_type(fipiran_df.lazy(), ds_domains)
     fipiran_df = fipiran_lazy.collect()
 
     # Columns to update via fallback logic
