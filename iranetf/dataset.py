@@ -499,7 +499,7 @@ async def _check_reg_no(site: _BaseSite, ds_reg_no: str):
     _logger.error(f'{site_reg_no=} != {ds_reg_no=}')
 
 
-def _check_urls(ds: _pl.DataFrame):
+def _assert_url_invariants(ds: _pl.DataFrame):
     # Assert that URLs are clean and do not contain old-style metadata fragments
     assert not ds['url'].str.contains('#').any(), (
         "URLs must not contain '#' fragments"
@@ -531,7 +531,6 @@ async def _check_portfolio_counts(site: _BaseSite, dataset_ids: set[str]):
 
 async def check_dataset(live=False):
     ds = scan_dataset().drop('site', 'inst').collect()
-    _check_urls(ds)
     _assert_static_invariants(ds)
 
     if not live:
@@ -546,6 +545,8 @@ async def check_dataset(live=False):
 
 
 def _assert_static_invariants(ds):
+    _assert_url_invariants(ds)
+
     assert ds['l18'].is_unique().all(), ds.filter(ds['l18'].is_duplicated())
     assert ds['name'].is_unique().all()
     assert ds['type'].is_in(list(_ETF_TYPES.values())).all()
