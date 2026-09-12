@@ -539,14 +539,13 @@ async def _check_portfolio_counts(site: _BaseSite, dataset_ids: set[str]):
 
 
 async def check_dataset(live=False):
-    ds = scan_dataset().drop('site', 'inst').collect()
+    ds = scan_dataset().drop('inst').collect()
     _assert_static_invariants(ds)
 
     if not live:
         return
 
     ds = _attach_portfolio_ids(ds)
-    ds = _attach_site_objects(ds)
 
     new_site_types = await _run_live_checks(ds)
     ds = _apply_site_type_updates(ds, new_site_types)
@@ -582,15 +581,6 @@ def _attach_portfolio_ids(ds):
         _col('portfolio_id').alias('portfolio_ids')
     )
     return ds.join(agg_pids, on='url', how='left')
-
-
-def _attach_site_objects(ds):
-    # Pass 'portfolio_id' into the struct mapping so _make_site runs correctly
-    return ds.with_columns(
-        _struct(['site_type', 'url', 'portfolio_id'])
-        .map_elements(lambda r: _make_site(r), return_dtype=_Object)
-        .alias('site')
-    )
 
 
 async def _run_live_checks(ds):
