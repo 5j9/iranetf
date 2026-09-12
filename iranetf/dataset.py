@@ -532,7 +532,20 @@ async def _check_portfolio_counts(site: _BaseSite, dataset_ids: set[str]):
 async def check_dataset(live=False):
     ds = scan_dataset().drop('site', 'inst').collect()
     _check_urls(ds)
-    # Guardrail Match: All validation checks collapsed to true single boolean scalars
+    _assert_static_invariants(ds)
+
+    if not live:
+        return
+
+    ds = _attach_portfolio_ids(ds)
+    ds = _attach_site_objects(ds)
+
+    new_site_types = await _run_live_checks(ds)
+    ds = _apply_site_type_updates(ds, new_site_types)
+    _warn_about_missing_sites(ds)
+
+
+def _assert_static_invariants(ds):
     assert ds['l18'].is_unique().all(), ds.filter(ds['l18'].is_duplicated())
     assert ds['name'].is_unique().all()
     assert ds['type'].is_in(list(_ETF_TYPES.values())).all()
@@ -541,7 +554,11 @@ async def check_dataset(live=False):
     assert (ds['site_type'].is_not_null()).all(), 'site_type contains nulls'
     assert (ds['reg_no'].is_not_null()).all()
 
-    # Check that each unique registry number (reg_no) map to only 1 unique URL
+    _assert_reg_no_to_single_url(ds)
+
+
+def _assert_reg_no_to_single_url(ds):
+    """Assert that each reg_no maps to only one URL."""
     grouped_check = (
         ds.group_by('reg_no')
         .agg(_pl.col('url').n_unique().alias('cnt'))
@@ -549,22 +566,24 @@ async def check_dataset(live=False):
     )
     assert grouped_check.is_empty(), grouped_check
 
-    if not live:
-        return
 
+def _attach_portfolio_ids(ds):
     agg_pids = ds.group_by('url').agg(
         _pl.col('portfolio_id').alias('portfolio_ids')
     )
-    ds = ds.join(agg_pids, on='url', how='left')
+    return ds.join(agg_pids, on='url', how='left')
 
-    # Safely apply object mappings to generate your site list properties
+
+def _attach_site_objects(ds):
     # Pass 'portfolio_id' into the struct mapping so _make_site runs correctly
-    ds = ds.with_columns(
+    return ds.with_columns(
         _pl.struct(['site_type', 'url', 'portfolio_id'])
         .map_elements(lambda r: _make_site(r), return_dtype=_pl.Object)
         .alias('site')
     )
 
+
+async def _run_live_checks(ds):
     check_site_coros = [_new_site_type(s) for s in ds['site']]
     check_reg_no_coros = [
         _check_reg_no(site, reg)
@@ -591,20 +610,28 @@ async def check_dataset(live=False):
     finally:
         iranetf.ssl = orig_ssl
 
-    # Dynamically update the specific row contents without altering unassigned blocks
-    if any(st is not None for st in new_site_types):
-        updates = _pl.DataFrame({'l18': ds['l18'], 'new_st': new_site_types})
-        ds = (
-            ds.join(updates, on='l18', how='left')
-            .with_columns(
-                _pl.coalesce(['new_st', 'site_type']).alias('site_type')
-            )
-            .drop('new_st')
-        )
-        sink_dataset(ds.lazy())
+    return new_site_types
 
+
+def _apply_site_type_updates(ds, new_site_types):
+    """Dynamically update rows where a fresh site_type was discovered."""
+    if not any(st is not None for st in new_site_types):
+        return ds
+
+    updates = _pl.DataFrame({'l18': ds['l18'], 'new_st': new_site_types})
+    ds = (
+        ds.join(updates, on='l18', how='left')
+        .with_columns(_pl.coalesce(['new_st', 'site_type']).alias('site_type'))
+        .drop('new_st')
+    )
+    sink_dataset(ds.lazy())
+    return ds
+
+
+def _warn_about_missing_sites(ds):
     no_site = ds.filter(_pl.col('site').is_null())
     if not no_site.is_empty():
         _logger.warning(
-            f'some dataset entries have no associated site:\n{no_site["l18"].to_list()}'
+            f'some dataset entries have no associated site:\n'
+            f'{no_site["l18"].to_list()}'
         )
