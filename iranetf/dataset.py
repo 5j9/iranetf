@@ -6,7 +6,6 @@ from json import JSONDecodeError
 from logging import Logger as _Logger
 from pathlib import Path as _Path
 
-import polars as _pl
 from aiohttp import (
     ClientConnectorDNSError as _ClientConnectorDNSError,
     ClientConnectorError as _ClientConnectorError,
@@ -15,6 +14,20 @@ from aiohttp import (
     ServerDisconnectedError as _ServerDisconnectedError,
 )
 from aiohutils import logger as _aiohutils_logger
+from polars import (
+    DataFrame as _DataFrame,
+    Int8 as _Int8,
+    LazyFrame as _LazyFrame,
+    Object as _Object,
+    String as _String,
+    coalesce as _coalesce,
+    col as _col,
+    concat as _concat,
+    lit as _lit,
+    scan_csv as _scan_csv,
+    struct as _struct,
+    when as _when,
+)
 from tsetmc.instruments import (
     Instrument as _Instrument,
     search as _tsetmc_search,
@@ -62,52 +75,50 @@ def _make_site(row: dict) -> _BaseSite:
     return site_class(url=row['url'])
 
 
-def scan_dataset() -> _pl.LazyFrame:
+def scan_dataset() -> _LazyFrame:
     """Load dataset.csv as a LazyFrame with site and inst structures pre-configured."""
-    return _pl.scan_csv(
+    return _scan_csv(
         _DATASET_PATH,
         encoding='utf8',
         schema={
-            'l18': _pl.String,
-            'name': _pl.String,
-            'type': _pl.String,
-            'ins_code': _pl.String,
-            'reg_no': _pl.String,
-            'url': _pl.String,
-            'portfolio_id': _pl.String,
-            'site_type': _pl.String,
-            'dps_interval': _pl.Int8,
-            'group_id': _pl.Int8,
+            'l18': _String,
+            'name': _String,
+            'type': _String,
+            'ins_code': _String,
+            'reg_no': _String,
+            'url': _String,
+            'portfolio_id': _String,
+            'site_type': _String,
+            'dps_interval': _Int8,
+            'group_id': _Int8,
         },
     ).with_columns(
-        _pl.struct(['site_type', 'url', 'portfolio_id'])
+        _struct(['site_type', 'url', 'portfolio_id'])
         .map_elements(
             lambda r: (
                 _make_site(r) if r.get('site_type') is not None else None
             ),
-            return_dtype=_pl.Object,
+            return_dtype=_Object,
         )
         .alias('site'),
-        _pl.col('ins_code')
+        _col('ins_code')
         .map_elements(
             lambda c: _Instrument(c) if c is not None else None,
-            return_dtype=_pl.Object,
+            return_dtype=_Object,
         )
         .alias('inst'),
     )
 
 
-def sink_dataset(ds: _pl.LazyFrame):
+def sink_dataset(ds: _LazyFrame):
     """
     Processes the LazyFrame pipeline and streams it directly to disk.
     """
     # 1. Fast, vectorized text translations handled lazily
     ds = ds.with_columns(
         [
-            _pl.col('l18').str.replace_all('ي', 'ی').str.replace_all('ك', 'ک'),
-            _pl.col('name')
-            .str.replace_all('ي', 'ی')
-            .str.replace_all('ك', 'ک'),
+            _col('l18').str.replace_all('ي', 'ی').str.replace_all('ك', 'ک'),
+            _col('name').str.replace_all('ي', 'ی').str.replace_all('ك', 'ک'),
         ]
     )
 
@@ -220,7 +231,7 @@ async def _url_type(domain: str) -> tuple:
 
 
 async def _add_url_and_type(
-    fipiran_lf: _pl.LazyFrame, known_domains: list[str] | None
+    fipiran_lf: _LazyFrame, known_domains: list[str] | None
 ):
     fipiran_df = fipiran_lf.collect()
 
@@ -249,7 +260,7 @@ async def _add_url_and_type(
     url_list, site_type_list = zip(*list_of_tuples)
 
     # Map back changes using a side table join instead of index-dependent .loc modifications
-    updates_df = _pl.DataFrame(
+    updates_df = _DataFrame(
         {
             'domain': domains_to_be_checked,
             'url_new': url_list,
@@ -261,8 +272,8 @@ async def _add_url_and_type(
         fipiran_df.join(updates_df, on='domain', how='left')
         .with_columns(
             [
-                _pl.col('url_new').alias('url'),
-                _pl.col('site_type_new').alias('site_type'),
+                _col('url_new').alias('url'),
+                _col('site_type_new').alias('site_type'),
             ]
         )
         .drop(['url_new', 'site_type_new'])
@@ -271,8 +282,8 @@ async def _add_url_and_type(
     return res_df.lazy()
 
 
-async def _add_ins_code(new_items: _pl.DataFrame) -> _pl.DataFrame:
-    names_without_code = new_items.filter(_pl.col('ins_code').is_null())[
+async def _add_ins_code(new_items: _DataFrame) -> _DataFrame:
+    names_without_code = new_items.filter(_col('ins_code').is_null())[
         'name'
     ].to_list()
     if not names_without_code:
@@ -284,19 +295,19 @@ async def _add_ins_code(new_items: _pl.DataFrame) -> _pl.DataFrame:
     )
     ins_codes = [(None if len(r) != 1 else r[0]['insCode']) for r in results]
 
-    codes_map = _pl.DataFrame(
+    codes_map = _DataFrame(
         {'name': names_without_code, 'ins_code_new': ins_codes}
     )
     return (
         new_items.join(codes_map, on='name', how='left')
         .with_columns(
-            _pl.coalesce(['ins_code_new', 'ins_code']).alias('ins_code')
+            _coalesce(['ins_code_new', 'ins_code']).alias('ins_code')
         )
         .drop('ins_code_new')
     )
 
 
-async def _fipiran_data(ds: _pl.LazyFrame) -> _pl.LazyFrame:
+async def _fipiran_data(ds: _LazyFrame) -> _LazyFrame:
     import fipiran.funds
 
     _logger.info('await fipiran.funds.funds()')
@@ -311,7 +322,7 @@ async def _fipiran_data(ds: _pl.LazyFrame) -> _pl.LazyFrame:
 
     ds_collected = ds.collect()
     reg_not_in_fipiran = ds_collected.filter(
-        ~_pl.col('reg_no').is_in(fipiran_df['reg_no'])
+        ~_col('reg_no').is_in(fipiran_df['reg_no'])
     )
 
     if not reg_not_in_fipiran.is_empty():
@@ -320,27 +331,27 @@ async def _fipiran_data(ds: _pl.LazyFrame) -> _pl.LazyFrame:
         )
 
     df = fipiran_df.filter(
-        (_pl.col('typeOfInvest') == 'Negotiable')
-        & ~(_pl.col('fundType').is_in([11, 12, 13, 14, 16]))
-        & _pl.col('isCompleted')
+        (_col('typeOfInvest') == 'Negotiable')
+        & ~(_col('fundType').is_in([11, 12, 13, 14, 16]))
+        & _col('isCompleted')
     ).select(
         'reg_no',
-        _pl.col('smallSymbolName').alias('l18'),
+        _col('smallSymbolName').alias('l18'),
         'name',
-        _pl.col('fundType').alias('type'),
-        _pl.col('websiteAddress').alias('domain'),
+        _col('fundType').alias('type'),
+        _col('websiteAddress').alias('domain'),
         'ins_code',
         'group_id',
     )
 
     # Map mapping transformations via high performance native replacement steps
     df = df.with_columns(
-        _pl.col('type').replace(_ETF_TYPES, default=_pl.col('type'))
+        _col('type').replace(_ETF_TYPES, default=_col('type'))
     )
     return df.lazy()
 
 
-async def _tsetmc_dataset() -> _pl.LazyFrame:
+async def _tsetmc_dataset() -> _LazyFrame:
     from tsetmc.dataset import lazy_ds, update
 
     _logger.info('await tsetmc.dataset.update()')
@@ -349,31 +360,29 @@ async def _tsetmc_dataset() -> _pl.LazyFrame:
     return lf.drop('l30', 'isin', 'cisin')
 
 
-def _add_new_items_to_ds(
-    new_items: _pl.DataFrame, ds: _pl.DataFrame
-) -> _pl.DataFrame:
+def _add_new_items_to_ds(new_items: _DataFrame, ds: _DataFrame) -> _DataFrame:
     if max(new_items.shape) == 0:
         return ds
 
-    new_with_code = new_items.filter(_pl.col('ins_code').is_not_null()).drop(
+    new_with_code = new_items.filter(_col('ins_code').is_not_null()).drop(
         'domain'
     )
     if max(new_with_code.shape) > 0:
         # Align column structures dynamically and concatenate
-        return _pl.concat([ds, new_with_code], how='diagonal_relaxed')
+        return _concat([ds, new_with_code], how='diagonal_relaxed')
 
     _logger.info('new_with_code is empty!')
     return ds
 
 
 async def _update_existing_rows_using_fipiran(
-    ds: _pl.DataFrame, fipiran_df: _pl.DataFrame, update_existing: bool
-) -> _pl.DataFrame:
+    ds: _DataFrame, fipiran_df: _DataFrame, update_existing: bool
+) -> _DataFrame:
 
     known_domains = None
     if not update_existing:
         known_domains = (
-            ds.filter(_pl.col('url').is_not_null())['url']
+            ds.filter(_col('url').is_not_null())['url']
             .str.extract(r'//([^/]+)/')
             .drop_nulls()
             .to_list()
@@ -394,17 +403,17 @@ async def _update_existing_rows_using_fipiran(
     )
 
     # 2. Extract globally unique reg_nos across both DataFrames
-    ds_unique = ds.filter(_pl.col('reg_no').is_unique()).select('reg_no')
-    fip_unique = fipiran_df.filter(_pl.col('reg_no').is_unique())
+    ds_unique = ds.filter(_col('reg_no').is_unique()).select('reg_no')
+    fip_unique = fipiran_df.filter(_col('reg_no').is_unique())
 
     # Inner join unique sets (including group_id, domain as fallback)
     fipiran_unique = fip_unique.join(
         ds_unique, on='reg_no', how='inner'
     ).select(
         'reg_no',
-        _pl.col('group_id').alias('group_id_unique'),
-        _pl.col('domain').alias('domain_unique'),
-        *[_pl.col(c).alias(f'{c}_unique') for c in update_columns],
+        _col('group_id').alias('group_id_unique'),
+        _col('domain').alias('domain_unique'),
+        *[_col(c).alias(f'{c}_unique') for c in update_columns],
     )
 
     # 3. Fallback match: reg_no only
@@ -413,18 +422,18 @@ async def _update_existing_rows_using_fipiran(
     # 4. Priority Coalesce with explicit per-column precedence
     coalesce_exprs = [
         # url: DS wins → Fipiran (reg_no, group_id) → Fipiran (reg_no)
-        _pl.coalesce(['url', 'url_fip', 'url_unique']).alias('url'),
+        _coalesce(['url', 'url_fip', 'url_unique']).alias('url'),
         # site_type: DS wins → Fipiran (reg_no, group_id) → Fipiran (reg_no)
-        _pl.coalesce(['site_type', 'site_type_fip', 'site_type_unique']).alias(
+        _coalesce(['site_type', 'site_type_fip', 'site_type_unique']).alias(
             'site_type'
         ),
         # type: Fipiran (reg_no, group_id) → Fipiran (reg_no) → DS
-        _pl.coalesce(['type_fip', 'type_unique', 'type']).alias('type'),
+        _coalesce(['type_fip', 'type_unique', 'type']).alias('type'),
         # domain: Fipiran (reg_no, group_id) → Fipiran (reg_no)
-        _pl.coalesce(['domain', 'domain_unique']).alias('domain'),
+        _coalesce(['domain', 'domain_unique']).alias('domain'),
         # group_id: use Fipiran value when reg_no is unique in both datasets
         # (the primary (reg_no, group_id) match already failed for different group_ids)
-        _pl.coalesce(['group_id_unique', 'group_id']).alias('group_id'),
+        _coalesce(['group_id_unique', 'group_id']).alias('group_id'),
     ]
 
     drop_cols = (
@@ -437,16 +446,16 @@ async def _update_existing_rows_using_fipiran(
 
     # 5. Build URL fallback using domain when URL is missing
     ds_updated = ds_updated.with_columns(
-        _pl.when(_pl.col('url').is_null() & _pl.col('domain').is_not_null())
-        .then(_pl.lit('http://') + _pl.col('domain') + _pl.lit('/'))
-        .otherwise(_pl.col('url'))
+        _when(_col('url').is_null() & _col('domain').is_not_null())
+        .then(_lit('http://') + _col('domain') + _lit('/'))
+        .otherwise(_col('url'))
         .alias('url')
     )
 
     return ds_updated
 
 
-async def update_dataset(*, update_existing=False) -> _pl.DataFrame:
+async def update_dataset(*, update_existing=False) -> _DataFrame:
     """Update dataset and return newly found that could not be added."""
     ds = scan_dataset().drop('site', 'inst').collect()
     fipiran_df = (await _fipiran_data(ds.lazy())).collect()
@@ -454,7 +463,7 @@ async def update_dataset(*, update_existing=False) -> _pl.DataFrame:
     ds = await _update_existing_rows_using_fipiran(
         ds, fipiran_df, update_existing
     )
-    new_items = fipiran_df.filter(~_pl.col('reg_no').is_in(ds['reg_no']))
+    new_items = fipiran_df.filter(~_col('reg_no').is_in(ds['reg_no']))
 
     tsetmc_df = (await _tsetmc_dataset()).collect()
     new_items = await _add_ins_code(new_items)
@@ -469,11 +478,11 @@ async def update_dataset(*, update_existing=False) -> _pl.DataFrame:
     ]
     for col in update_cols:
         ds = ds.with_columns(
-            _pl.coalesce([f'{col}_tsetmc', col]).alias(col)
+            _coalesce([f'{col}_tsetmc', col]).alias(col)
         ).drop(f'{col}_tsetmc')
 
     sink_dataset(ds.lazy())
-    return new_items.filter(_pl.col('ins_code').is_null())
+    return new_items.filter(_col('ins_code').is_null())
 
 
 @_log_and_retry
@@ -499,12 +508,12 @@ async def _check_reg_no(site: _BaseSite, ds_reg_no: str):
     _logger.error(f'{site_reg_no=} != {ds_reg_no=}')
 
 
-def _assert_url_invariants(ds: _pl.DataFrame):
+def _assert_url_invariants(ds: _DataFrame):
     # Assert that URLs are clean and do not contain old-style metadata fragments
     assert not ds['url'].str.contains('#').any(), (
         "URLs must not contain '#' fragments"
     )
-    duplicates = ds.filter(_pl.struct(['url', 'portfolio_id']).is_duplicated())
+    duplicates = ds.filter(_struct(['url', 'portfolio_id']).is_duplicated())
     if not duplicates.is_empty():
         _logger.error(
             f'found duplicate (url, portolio_id):\n'
@@ -562,15 +571,15 @@ def _assert_reg_no_to_single_url(ds):
     """Assert that each reg_no maps to only one URL."""
     grouped_check = (
         ds.group_by('reg_no')
-        .agg(_pl.col('url').n_unique().alias('cnt'))
-        .filter(_pl.col('cnt') > 1)
+        .agg(_col('url').n_unique().alias('cnt'))
+        .filter(_col('cnt') > 1)
     )
     assert grouped_check.is_empty(), grouped_check
 
 
 def _attach_portfolio_ids(ds):
     agg_pids = ds.group_by('url').agg(
-        _pl.col('portfolio_id').alias('portfolio_ids')
+        _col('portfolio_id').alias('portfolio_ids')
     )
     return ds.join(agg_pids, on='url', how='left')
 
@@ -578,8 +587,8 @@ def _attach_portfolio_ids(ds):
 def _attach_site_objects(ds):
     # Pass 'portfolio_id' into the struct mapping so _make_site runs correctly
     return ds.with_columns(
-        _pl.struct(['site_type', 'url', 'portfolio_id'])
-        .map_elements(lambda r: _make_site(r), return_dtype=_pl.Object)
+        _struct(['site_type', 'url', 'portfolio_id'])
+        .map_elements(lambda r: _make_site(r), return_dtype=_Object)
         .alias('site')
     )
 
@@ -619,10 +628,10 @@ def _apply_site_type_updates(ds, new_site_types):
     if not any(st is not None for st in new_site_types):
         return ds
 
-    updates = _pl.DataFrame({'l18': ds['l18'], 'new_st': new_site_types})
+    updates = _DataFrame({'l18': ds['l18'], 'new_st': new_site_types})
     ds = (
         ds.join(updates, on='l18', how='left')
-        .with_columns(_pl.coalesce(['new_st', 'site_type']).alias('site_type'))
+        .with_columns(_coalesce(['new_st', 'site_type']).alias('site_type'))
         .drop('new_st')
     )
     sink_dataset(ds.lazy())
@@ -630,7 +639,7 @@ def _apply_site_type_updates(ds, new_site_types):
 
 
 def _warn_about_missing_sites(ds):
-    no_site = ds.filter(_pl.col('site').is_null())
+    no_site = ds.filter(_col('site').is_null())
     if not no_site.is_empty():
         _logger.warning(
             f'some dataset entries have no associated site:\n'
