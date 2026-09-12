@@ -5,6 +5,7 @@ from contextlib import contextmanager as _contextmanager
 from json import JSONDecodeError
 from logging import Logger as _Logger
 from pathlib import Path as _Path
+from re import compile as _re_compile
 
 from aiohttp import (
     ClientConnectorDNSError as _ClientConnectorDNSError,
@@ -230,53 +231,120 @@ async def _url_type(domain: str) -> tuple:
     return None, None
 
 
-async def _add_url_and_type(
-    fipiran_lf: _LazyFrame, ds_domains: list[str] | None
-):
-    fipiran_df = fipiran_lf.collect()
+_URL_HOST_RE = _re_compile(r'//([^/]+)/')
 
-    # Filter domains using vector syntax
-    domains_filter = fipiran_df['domain'].is_not_null()
-    if ds_domains is not None:
-        domains_filter = domains_filter & (
-            ~fipiran_df['domain'].is_in(ds_domains)
-        )
 
-    domains_to_be_checked = fipiran_df.filter(domains_filter)[
-        'domain'
-    ].to_list()
+async def _check_ds_then_fipiran(
+    ds_url: str | None, fip_domain: str | None, update_existing: bool
+) -> tuple[str | None, str | None]:
+    """Check DS URL first (if available), falling back sequentially to FIPIRAN domain."""
+    ds_domain = None
+    if ds_url is not None:
+        match = _URL_HOST_RE.search(ds_url)
+        if match:
+            ds_domain = match.group(1)
 
-    _logger.info(
-        f'checking site types of {len(domains_to_be_checked)} domains'
+    same_domain = (
+        ds_domain is not None
+        and fip_domain is not None
+        and ds_domain.lower() == fip_domain.lower()
     )
-    if not domains_to_be_checked:
-        return fipiran_df.lazy()
+
+    # 1. Check existing DS URL if present
+    if ds_url is not None:
+        if update_existing or not same_domain:
+            res = await _url_type(ds_domain) if ds_domain else (None, None)
+            if res[0] is not None:
+                return res
+
+    # 2. Check FIPIRAN domain as fallback or primary if DS URL absent.
+    #    Skip if the FIPIRAN domain is the same as the DS domain (already
+    #    covered by step 1 regardless of update_existing).
+    if fip_domain is not None and not same_domain:
+        res = await _url_type(fip_domain)
+        if res[0] is not None:
+            return res
+
+    return None, None
+
+
+def _add_ds_url(
+    fipiran_df: _DataFrame,
+    ds: _DataFrame,
+) -> _DataFrame:
+    """Return FIPIRAN DataFrame with corresponding ds_url attached based on identity rules."""
+    ds_aliased = ds.select(
+        'reg_no',
+        'group_id',
+        _col('url').alias('ds_url_primary'),
+    )
+
+    # 1. Primary Match: (reg_no, group_id)
+    joined = fipiran_df.join(
+        ds_aliased,
+        on=['reg_no', 'group_id'],
+        how='left',
+    )
+
+    # 2. Fallback Match: unique reg_no in both datasets
+    ds_unique = ds.filter(_col('reg_no').is_unique()).select(
+        'reg_no', _col('url').alias('ds_url_fallback')
+    )
+    fip_unique_reg_nos = fipiran_df.filter(_col('reg_no').is_unique()).select(
+        'reg_no'
+    )
+
+    fallback_map = fip_unique_reg_nos.join(ds_unique, on='reg_no', how='inner')
+
+    joined = joined.join(fallback_map, on='reg_no', how='left')
+
+    return joined.with_columns(
+        _coalesce(['ds_url_primary', 'ds_url_fallback']).alias('ds_url')
+    ).drop(['ds_url_primary', 'ds_url_fallback'])
+
+
+async def _add_url_and_type(
+    fipiran_df: _DataFrame, ds: _DataFrame, update_existing: bool
+) -> _LazyFrame:
+    """Validate URLs/domains per-row and map back results to FIPIRAN DataFrame."""
+    fipiran_with_ds = _add_ds_url(fipiran_df, ds)
+
+    # Assign an explicit unique index to map results 1-to-1 without domain collisions
+    indexed_df = fipiran_with_ds.with_row_index('__row_id')
+    rows = indexed_df.select('__row_id', 'ds_url', 'domain').to_dicts()
+
+    _logger.info(f'checking site types of {len(rows)} FIPIRAN rows')
 
     with set_level(_aiohutils_logger, 'ERROR'):
-        list_of_tuples = await _gather(
-            *[_url_type(d) for d in domains_to_be_checked]
+        results = await _gather(
+            *[
+                _check_ds_then_fipiran(
+                    r['ds_url'], r['domain'], update_existing
+                )
+                for r in rows
+            ]
         )
 
-    url_list, site_type_list = zip(*list_of_tuples)
+    row_ids = [r['__row_id'] for r in rows]
+    urls, site_types = zip(*results) if results else ([], [])
 
-    # Map back changes using a side table join instead of index-dependent .loc modifications
     updates_df = _DataFrame(
         {
-            'domain': domains_to_be_checked,
-            'url_new': url_list,
-            'site_type_new': site_type_list,
+            '__row_id': row_ids,
+            'url_new': urls,
+            'site_type_new': site_types,
         }
     )
 
     res_df = (
-        fipiran_df.join(updates_df, on='domain', how='left')
+        indexed_df.join(updates_df, on='__row_id', how='left')
         .with_columns(
             [
                 _col('url_new').alias('url'),
                 _col('site_type_new').alias('site_type'),
             ]
         )
-        .drop(['url_new', 'site_type_new'])
+        .drop(['__row_id', 'url_new', 'site_type_new'])
     )
 
     return res_df.lazy()
@@ -379,19 +447,9 @@ async def _update_existing_rows_using_fipiran(
     ds: _DataFrame, fipiran_df: _DataFrame, update_existing: bool
 ) -> _DataFrame:
 
-    ds_domains = None
-    if not update_existing:
-        ds_domains = (
-            ds.filter(_col('url').is_not_null())['url']
-            .str.extract(r'//([^/]+)/')
-            .drop_nulls()
-            .to_list()
-        )
-
-    fipiran_lazy = await _add_url_and_type(fipiran_df.lazy(), ds_domains)
+    fipiran_lazy = await _add_url_and_type(fipiran_df, ds, update_existing)
     fipiran_df = fipiran_lazy.collect()
 
-    # Columns to update via fallback logic
     update_columns = ['type', 'url', 'site_type']
 
     # 1. Primary match: (reg_no, group_id) - includes domain from fipiran_df
@@ -419,12 +477,12 @@ async def _update_existing_rows_using_fipiran(
     # 3. Fallback match: reg_no only
     joined = joined.join(fipiran_unique, on='reg_no', how='left')
 
-    # 4. Priority Coalesce with explicit per-column precedence
+    # 4. Priority Coalesce with explicit per-column precedence preserving working DS URLs
     coalesce_exprs = [
-        # url: DS wins → Fipiran (reg_no, group_id) → Fipiran (reg_no)
-        _coalesce(['url', 'url_fip', 'url_unique']).alias('url'),
-        # site_type: DS wins → Fipiran (reg_no, group_id) → Fipiran (reg_no)
-        _coalesce(['site_type', 'site_type_fip', 'site_type_unique']).alias(
+        # url: Fipiran validated result wins -> existing DS URL
+        _coalesce(['url_fip', 'url_unique', 'url']).alias('url'),
+        # site_type: Fipiran validated result wins -> existing DS site_type
+        _coalesce(['site_type_fip', 'site_type_unique', 'site_type']).alias(
             'site_type'
         ),
         # type: Fipiran (reg_no, group_id) → Fipiran (reg_no) → DS
@@ -432,7 +490,6 @@ async def _update_existing_rows_using_fipiran(
         # domain: Fipiran (reg_no, group_id) → Fipiran (reg_no)
         _coalesce(['domain', 'domain_unique']).alias('domain'),
         # group_id: use Fipiran value when reg_no is unique in both datasets
-        # (the primary (reg_no, group_id) match already failed for different group_ids)
         _coalesce(['group_id_unique', 'group_id']).alias('group_id'),
     ]
 
