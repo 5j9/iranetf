@@ -1,6 +1,11 @@
 from __future__ import annotations as _
 
-from asyncio import gather as _gather, sleep as _sleep
+from asyncio import (
+    as_completed as _as_completed,
+    create_task as _create_task,
+    gather as _gather,
+    sleep as _sleep,
+)
 from contextlib import contextmanager as _contextmanager
 from json import JSONDecodeError
 from logging import Logger as _Logger
@@ -216,18 +221,29 @@ def set_level(logger: _Logger, level: str | int):
 
 async def _url_type(domain: str) -> tuple[str | None, str | None]:
     with set_level(_logger, 'CRITICAL'):
-        for coro in (
-            _check_validity(site_type(f'{protocol}://{domain}/'))
-            for protocol in ('https', 'http')
-            for site_type in SITE_TYPES
-        ):
-            try:
-                result = await coro
-            except OSError:
-                continue
+        for protocol in ('https', 'http'):
+            tasks = [
+                _create_task(
+                    _check_validity(site_type(f'{protocol}://{domain}/'))
+                )
+                for site_type in SITE_TYPES
+            ]
 
-            if result is not None:
-                return result
+            try:
+                for task in _as_completed(tasks):
+                    try:
+                        result = await task
+                    except OSError:
+                        continue
+
+                    if result is not None:
+                        return result
+
+            finally:
+                for task in tasks:
+                    if not task.done():
+                        task.cancel()
+                await _gather(*tasks, return_exceptions=True)
 
     _logger.warning(f'failed for {domain}')
     return None, None
