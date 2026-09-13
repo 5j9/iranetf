@@ -214,18 +214,20 @@ def set_level(logger: _Logger, level: str | int):
         logger.setLevel(old)
 
 
-async def _url_type(domain: str) -> tuple:
-    coros = [
-        _check_validity(site_type(f'http://{domain}/'))
-        for site_type in SITE_TYPES
-    ]
-
+async def _url_type(domain: str) -> tuple[str | None, str | None]:
     with set_level(_logger, 'CRITICAL'):
-        results = await _gather(*coros)
+        for coro in (
+            _check_validity(site_type(f'{protocol}://{domain}/'))
+            for protocol in ('https', 'http')
+            for site_type in SITE_TYPES
+        ):
+            try:
+                result = await coro
+            except OSError:
+                continue
 
-    for result in results:
-        if result is not None:
-            return result
+            if result is not None:
+                return result
 
     _logger.warning(f'failed for {domain}')
     return None, None
