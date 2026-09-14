@@ -36,6 +36,11 @@ from iranetf.sites import (
     TadbirPardaz as _TadbirPardaz,
 )
 
+liquidated_reg_no = (
+    '11626',  # آسامید
+    '11803',  # رماس
+)
+
 
 async def _fipiran_data(ds: _LazyFrame) -> _LazyFrame:
     import fipiran.funds
@@ -47,6 +52,7 @@ async def _fipiran_data(ds: _LazyFrame) -> _LazyFrame:
         .rename(
             {'regNo': 'reg_no', 'insCode': 'ins_code', 'groupId': 'group_id'}
         )
+        .filter(~_col('reg_no').is_in(liquidated_reg_no))
         .collect()
     )
 
