@@ -6,7 +6,7 @@ import polars as pl
 import pytest
 
 # Adjust to your actual module path.
-from iranetf.dataset import (
+from iranetf.dataset.update import (
     _add_ds_url,
     _check_ds_then_fipiran,
 )
@@ -49,7 +49,7 @@ def mock_url_type(monkeypatch):
         return result if result is not None else (None, None)
 
     monkeypatch.setattr(
-        'iranetf.dataset._url_type', fake_url_type, raising=True
+        'iranetf.dataset.update._url_type', fake_url_type, raising=True
     )
     return ns
 

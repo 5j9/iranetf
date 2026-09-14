@@ -4,7 +4,7 @@ import polars as pl
 
 import iranetf
 from dev import logger
-from iranetf.dataset import update_dataset
+from iranetf.dataset.update import update_dataset
 
 
 async def main() -> pl.DataFrame:
