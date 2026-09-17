@@ -1,6 +1,6 @@
 ﻿l18,name,type,ins_code,reg_no,url,portfolio_id,site_type,dps_interval,group_id
 آبنوس,سهام نگر کیمیا,Stock,40912525017440979,12270,https://kimiasahm.ir/,,TadbirPardaz,,1
-آبی,ص.س.درآمد ثابت آبی هامون-د,Fixed,29833953891226346,12551,https://hamounfund.ir/,1,MabnaDP2,,
+آبی,ص.س.درآمد ثابت آبی هامون-د,Fixed,29833953891226346,12551,https://hamounfund.ir/,1,MabnaDP2,,0
 آتش,صندوق س.کالای کهکشان فیروزه,Commodity,56987424987755487,12358,https://atash.fundz.ir/,2,TadbirPardazMultiNAV,,
 آتیمس,آرمان آتیه درخشان مس,Stock,22839330962768817,11378,https://armanmesetf.ir/,,RayanHamafza2,,0
 آتیه ملت,آتیه ملت,Fixed,47492157735162813,10895,https://atiehmellat.ir/,,TadbirPardaz,,1
@@ -20,7 +20,7 @@
 آلتون,طلای آسمان آلتون,Commodity,28374437855144739,12006,https://altonfund.ir/,,TadbirPardaz,,1
 آلکان,بخشی راهبر صنایع مهرگان,Sector,10535841469368706,12460,https://sector.mehreganfunds.ir/,2,TadbirPardazMultiNAV,,
 آلیاژ,صندوق س صنایع آگاه3-بخشی,Sector,52497713622747990,12093,https://agahsectorfund.ir/,3,RayanHamafza2,,
-آمیتیس,سهامی درخشان آمیتیس,Stock,41350070322027412,12311,https://fund2-amitispm.ir/,,TadbirPardaz,,1
+آمیتیس,سهامی درخشان آمیتیس,Stock,41350070322027412,12311,https://fund2-amitispm.ir/,,MabnaDP2,,1
 آوا,آوای معیار,Stock,18007109712724189,11729,https://avayemeyar.ir/,,RayanHamafza2,,0
 آوان,آوان ژرف آگاه,Stock,14886507586508567,11853,https://zomorodfund.ir/,,RayanHamafza2,,0
 آوند,ثابت آوند مفید,Fixed,31039212000825988,11993,https://avandetf.ir/,,TadbirPardaz,,0
