@@ -71,14 +71,14 @@ class BaseSite(Protocol):
 
     async def navps_history(self) -> pl.LazyFrame: ...
 
-    async def cache(self) -> float: ...
+    async def cash(self) -> float: ...
 
     _l18_to_site_map: dict
 
     @classmethod
     def from_l18(cls, l18: str) -> Self:
         """
-        Loads the dataset into an in-memory dictionary lookup cache on first call,
+        Loads the dataset into an in-memory dictionary lookup cash on first call,
         leaving no lingering dataset objects on the class namespace.
         """
         try:
@@ -132,7 +132,7 @@ class BaseSite(Protocol):
         raise ValueError(f'Could not determine site type for {url}.')
 
     async def leverage(self) -> float:
-        return 1.0 - await self.cache()
+        return 1.0 - await self.cash()
 
     async def _home(self) -> str:
         return (await _read(self.url)).decode()

@@ -100,7 +100,7 @@ class MabnaDP2(BaseSite):
         self._check_aa_keys(d)
         return d
 
-    async def cache(self) -> float:
+    async def cash(self) -> float:
         aa = await self.asset_allocation()
         g = aa.get
         return sum(g(k, 0.0) for k in ('اوراق', 'وجه نقد', 'سپرده بانکی'))
@@ -130,10 +130,10 @@ class MabnaDP2(BaseSite):
         }
 
     async def leverage(self) -> float:
-        data, cache = await gather(self.home_data(), self.cache())
+        data, cash = await gather(self.home_data(), self.cash())
         genera_data = data['__REACT_REDUX_STATE__']['general']['data']
         if not genera_data['isLeverage']:
-            return 1.0 - cache
+            return 1.0 - cash
         data: dict = data['__REACT_QUERY_STATE__']['queries'][9]['state'][
             'data'
         ]
@@ -142,7 +142,7 @@ class MabnaDP2(BaseSite):
             1.0
             + first['commonUnitRedemptionValueAmount']
             / first['preferredUnitRedemptionValueAmount']
-        ) * (1.0 - cache)
+        ) * (1.0 - cash)
 
     async def portfolios(self) -> dict[str, str]:
         portfolios = await self._json('portfolios')

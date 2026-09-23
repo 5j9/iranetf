@@ -122,7 +122,7 @@ class BaseTadbirPardaz(BaseSite):
 
         return d
 
-    async def cache(self) -> float:
+    async def cash(self) -> float:
         aa = await self.asset_allocation()
         g = aa.get
         return (
@@ -451,9 +451,9 @@ class LeveragedTadbirPardaz(BaseTadbirPardaz):
         return result  # type: ignore
 
     async def leverage(self) -> float:
-        navps, cache = await gather(self.live_navps(), self.cache())
+        navps, cash = await gather(self.live_navps(), self.cash())
         return (
             1.0
             + navps['BaseUnitsTotalNetAssetValue']
             / navps['SuperUnitsTotalNetAssetValue']
-        ) * (1.0 - cache)
+        ) * (1.0 - cash)

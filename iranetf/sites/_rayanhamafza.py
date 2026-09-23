@@ -134,7 +134,7 @@ class BaseRayanHamafza(BaseSite):
             .alias('date')
         )
 
-    async def cache(self) -> float:
+    async def cash(self) -> float:
         aa = await self.asset_allocation()
         return (
             aa['DepositTodayPercent']
@@ -253,7 +253,7 @@ class RayanHamafza2(BaseRayanHamafza):
             ).togregorian(),
         }
 
-    async def cache(self) -> float:
+    async def cash(self) -> float:
         aa = await self.asset_allocation()
         return (
             aa['depositTodayPercent']

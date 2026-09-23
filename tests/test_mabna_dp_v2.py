@@ -39,9 +39,9 @@ async def test_asset_allocation():
 
 
 @file('lmdp_aa.json')
-async def test_cache():
-    cache = await site.cache()
-    assert 0.0 <= cache <= 0.6
+async def test_cash():
+    cash = await site.cash()
+    assert 0.0 <= cash <= 0.6
 
 
 @file('home.html')

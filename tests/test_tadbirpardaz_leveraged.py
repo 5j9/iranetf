@@ -50,9 +50,9 @@ async def test_asset_allocation():
 
 
 @file('ahrom_aa.json')
-async def test_cache():
-    cache = await ahrom.cache()
-    assert 0.0 <= cache <= 0.6
+async def test_cash():
+    cash = await ahrom.cash()
+    assert 0.0 <= cash <= 0.6
 
 
 @files('ahrom_live.json', 'ahrom_aa.json')

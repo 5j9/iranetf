@@ -62,9 +62,9 @@ async def test_asset_allocation():
 
 
 @file('petro_agah_aa.json')
-async def test_cache():
-    cache = await petro_agah.cache()
-    assert 0.0 <= cache <= 0.6
+async def test_cash():
+    cash = await petro_agah.cash()
+    assert 0.0 <= cash <= 0.6
 
 
 @files('petro_agah_aa.json')

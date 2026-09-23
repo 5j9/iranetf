@@ -42,8 +42,8 @@ async def test_asset_allocation():
 
 
 @file('rhh_asset_allocation.json')
-async def test_cache():
+async def test_cash():
     with patch.object(RayanHamafza2, '_json', side_effect=site._json) as m:
-        cache = await site.cache()
+        cash = await site.cash()
     m.assert_called_once_with('public/mixAsset/1')
-    assert 0.0 <= cache <= 0.6
+    assert 0.0 <= cash <= 0.6
