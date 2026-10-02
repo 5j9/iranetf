@@ -249,7 +249,7 @@ async def _add_url_and_type(
 
 async def _update_existing_rows_using_fipiran(
     ds: _DataFrame, fipiran_df: _DataFrame, update_existing: bool
-) -> _DataFrame:
+) -> tuple[_DataFrame, _DataFrame]:
 
     fipiran_lazy = await _add_url_and_type(fipiran_df, ds, update_existing)
     fipiran_df = fipiran_lazy.collect()
@@ -313,7 +313,7 @@ async def _update_existing_rows_using_fipiran(
         .alias('url')
     )
 
-    return ds_updated
+    return ds_updated, fipiran_df
 
 
 async def _tsetmc_dataset() -> _LazyFrame:
@@ -354,9 +354,7 @@ def _add_new_items_to_ds(new_items: _DataFrame, ds: _DataFrame) -> _DataFrame:
     if max(new_items.shape) == 0:
         return ds
 
-    new_with_code = new_items.filter(_col('ins_code').is_not_null()).drop(
-        'domain'
-    )
+    new_with_code = new_items.filter(_col('ins_code').is_not_null())
     if max(new_with_code.shape) > 0:
         # Align column structures dynamically and concatenate
         return _concat([ds, new_with_code], how='diagonal_relaxed')
@@ -370,7 +368,7 @@ async def update_dataset(*, update_existing=False) -> _DataFrame:
     ds = _scan_dataset().drop('site', 'inst').collect()
     fipiran_df = (await _fipiran_data(ds.lazy())).collect()
 
-    ds = await _update_existing_rows_using_fipiran(
+    ds, fipiran_df = await _update_existing_rows_using_fipiran(
         ds, fipiran_df, update_existing
     )
     new_items = fipiran_df.filter(~_col('reg_no').is_in(ds['reg_no']))
