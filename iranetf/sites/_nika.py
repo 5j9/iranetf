@@ -215,7 +215,7 @@ class Nika(BaseSite):
         hi = await self.home_info()
         default_fund = find_value(hi, 'defaultFund')
         assert default_fund is not None
-        return {'': default_fund['faName']}
+        return {'1': default_fund['faName']}
 
 
 if __name__ == '__main__':
