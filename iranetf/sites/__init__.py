@@ -2,6 +2,7 @@ from logging import getLogger
 
 from iranetf.sites._lib import BaseSite, LiveNAVPS
 from iranetf.sites._mabnadp import MabnaDP2
+from iranetf.sites._nika import Nika
 from iranetf.sites._rayanhamafza import (
     BaseRayanHamafza,
     FundData,
@@ -30,6 +31,7 @@ __all__ = [
     'LeveragedTadbirPardazLiveNAVPS',
     'LiveNAVPS',
     'MabnaDP2',
+    'Nika',
     'RayanHamafza',
     'RayanHamafza2',
     'TPLiveNAVPS',

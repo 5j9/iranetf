@@ -6,6 +6,7 @@ from json import loads
 from typing import Any, Protocol, Self, TypedDict, runtime_checkable
 
 import polars as pl
+from aiohttp import ClientResponse
 from jdatetime import date as jdate
 
 from iranetf import RegNoError, _get, logger
@@ -27,7 +28,10 @@ async def _read(url: str) -> bytes:
 
 @runtime_checkable
 class BaseSite(Protocol):
-    __slots__ = '_home_info_cache', 'last_response', 'portfolio_id', 'url'
+    __slots__ = ('_home_info_cache', 'last_response', 'portfolio_id', 'url')
+    url: str
+    portfolio_id: str
+    last_response: ClientResponse
 
     _aa_keys: set[str]
 
@@ -35,6 +39,9 @@ class BaseSite(Protocol):
         assert url[-1] == '/', f'the url must end with `/` {url=}'
         self.url = url
         self.portfolio_id = portfolio_id
+
+    async def _api(self) -> str:
+        return self.url
 
     def __repr__(self):
         return f"{type(self).__name__}('{self.url}')"
@@ -58,7 +65,7 @@ class BaseSite(Protocol):
         cookies: dict | None = None,
         df: bool = False,
     ) -> Any:
-        r = await _get(self.url + path, params, cookies)
+        r = await _get(await self._api() + path, params, cookies)
         self.last_response = r
         content = await r.read()
         j = loads(content)
@@ -129,6 +136,9 @@ class BaseSite(Protocol):
             assert rfind(rb'/api/v2') != -1, 'Unknown MabnaDP site type.'
             return sites.MabnaDP2(url)
 
+        if b'/nikaLogo.svg"' in content:
+            return sites.Nika(url)
+
         raise ValueError(f'Could not determine site type for {url}.')
 
     async def leverage(self) -> float:
@@ -139,6 +149,8 @@ class BaseSite(Protocol):
 
     @abstractmethod
     async def _home_info(self) -> dict[str, Any]: ...
+
+    _home_info_cache: dict[str, Any]
 
     async def home_info(self) -> dict[str, Any]:
         try:
