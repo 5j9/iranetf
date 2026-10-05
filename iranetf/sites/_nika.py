@@ -1,4 +1,4 @@
-from asyncio import gather, run
+from asyncio import run
 from datetime import date, timedelta
 from json import JSONDecodeError, loads
 from operator import itemgetter
@@ -10,7 +10,6 @@ from polars import LazyFrame, col
 from iranetf.sites._lib import (
     BaseSite,
     LiveNAVPS,
-    _get,
     reg_no_from_home_info,
 )
 
