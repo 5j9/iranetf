@@ -163,7 +163,6 @@ class BaseSite(Protocol):
 
     async def portfolios(self) -> dict[str, str]:
         """Return a dict mapping portfolio id to portfolio name."""
-        ...
 
 
 async def reg_no_from_home_info(self: BaseSite) -> str:

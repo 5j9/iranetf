@@ -212,45 +212,6 @@ class Nika(BaseSite):
             / 100.0
         )
 
-    async def home_data(self) -> dict:
-        html = await (await _get(self.url)).text()
-        return {
-            '__REACT_QUERY_STATE__': loads(
-                loads(
-                    html.rpartition('window.__REACT_QUERY_STATE__ = ')[
-                        2
-                    ].partition(';\n')[0]
-                )
-            ),
-            '__REACT_REDUX_STATE__': loads(
-                loads(
-                    html.rpartition('window.__REACT_REDUX_STATE__ = ')[
-                        2
-                    ].partition(';\n')[0]
-                )
-            ),
-            '__ENV__': loads(
-                loads(
-                    html.rpartition('window.__ENV__ = ')[2].partition('\n')[0]
-                )
-            ),
-        }
-
-    async def leverage(self) -> float:
-        data, cache = await gather(self.home_data(), self.cash())
-        genera_data = data['__REACT_REDUX_STATE__']['general']['data']
-        if not genera_data['isLeverage']:
-            return 1.0 - cache
-        data: dict = data['__REACT_QUERY_STATE__']['queries'][9]['state'][
-            'data'
-        ]
-        first = data[next(iter(data))]
-        return (
-            1.0
-            + first['commonUnitRedemptionValueAmount']
-            / first['preferredUnitRedemptionValueAmount']
-        ) * (1.0 - cache)
-
     async def portfolios(self) -> dict[str, str]:
         portfolios = await self._json('portfolios')
         return {p['id']: p['name'] for p in portfolios['data']}
