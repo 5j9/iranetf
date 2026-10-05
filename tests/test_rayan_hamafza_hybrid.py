@@ -38,7 +38,7 @@ async def test_asset_allocation():
     aa = await site.asset_allocation()
     assert aa.keys() <= site._aa_keys
     assert isinstance(aa.pop('jalaliDate'), str)
-    assert isclose(sum(aa.values()), 1.0)
+    assert isclose(sum(aa.values()), 100.0)
 
 
 @file('rhh_asset_allocation.json')

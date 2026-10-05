@@ -87,7 +87,7 @@ class BaseTadbirPardaz(BaseSite):
 
     async def asset_allocation(self) -> dict:
         j: dict = await self._json('Chart/AssetCompositions')
-        d = {i['x']: i['y'] / 100 for i in j['List']}
+        d = {i['x']: i['y'] for i in j['List']}
         self._check_aa_keys(d)
         return d
 
@@ -129,7 +129,7 @@ class BaseTadbirPardaz(BaseSite):
             g('نقد و بانک (سپرده)', 0.0)
             + g('نقد و بانک (جاری)', 0.0)
             + g('اوراق مشارکت', 0.0)
-        )
+        ) / 100.0
 
     async def nav_history(
         self, *, from_: date = date(1970, 1, 1), to: date, basket_id=0

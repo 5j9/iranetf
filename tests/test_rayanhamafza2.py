@@ -58,7 +58,7 @@ async def test_asset_allocation():
     aa = await petro_agah.asset_allocation()
     assert aa.keys() <= petro_agah._aa_keys
     assert isinstance(aa.pop('jalaliDate'), str)
-    assert isclose(sum(aa.values()), 1.0)
+    assert isclose(sum(aa.values()), 100.0)
 
 
 @file('petro_agah_aa.json')

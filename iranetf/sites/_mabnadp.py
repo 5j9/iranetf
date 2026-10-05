@@ -100,14 +100,16 @@ class MabnaDP2(BaseSite):
         assets: list[dict] = (await self._json('assets-classification'))[
             'data'
         ]['assets']
-        d = {i['title']: i['percentage'] / 100 for i in assets}
+        d = {i['title']: i['percentage'] for i in assets}
         self._check_aa_keys(d)
         return d
 
     async def cash(self) -> float:
         aa = await self.asset_allocation()
         g = aa.get
-        return sum(g(k, 0.0) for k in ('اوراق', 'وجه نقد', 'سپرده بانکی'))
+        return (
+            sum(g(k, 0.0) for k in ('اوراق', 'وجه نقد', 'سپرده بانکی')) / 100.0
+        )
 
     async def home_data(self) -> dict:
         html = await (await _get(self.url)).text()

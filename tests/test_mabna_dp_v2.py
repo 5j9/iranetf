@@ -35,7 +35,7 @@ async def test_navps_history():
 async def test_asset_allocation():
     aa = await site.asset_allocation()
     assert aa.keys() <= site._aa_keys, aa.keys() - site._aa_keys
-    assert isclose(sum(aa.values()), 1.0, abs_tol=0.0000000001)
+    assert isclose(sum(aa.values()), 100, abs_tol=0.0000000001)
 
 
 @file('lmdp_aa.json')

@@ -104,9 +104,7 @@ class BaseRayanHamafza(BaseSite):
             f'{self._asset_allocation_path}{self.portfolio_id}'
         )
         self._check_aa_keys(d)
-        return {
-            k: v / 100 if not isinstance(v, str) else v for k, v in d.items()
-        }
+        return d
 
     async def dividend_history(self) -> pl.LazyFrame:
         j = await self._json(
@@ -259,7 +257,7 @@ class RayanHamafza2(BaseRayanHamafza):
             aa['depositTodayPercent']
             + aa['cashTodayPercent']
             + aa['bondTodayPercent']
-        )
+        ) / 100.0
 
     async def site_info(self) -> SiteInfo:
         site_info = await self._json('public/siteInfo')

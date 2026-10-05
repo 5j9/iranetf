@@ -34,6 +34,7 @@ async def test_assets_history():
         'redemptionNetAssetValue',
         'fundType',
         'totalInvestor',
+        'remainingUnitsCount',
         'diffCancelNavAndExhibitiveNAV',
         'diffCancelNavAndExhibitiveNAVPercent',
     ]
@@ -45,5 +46,8 @@ async def test_assets_history():
     ('daily-asset-percentage', 'daily_asset_percentage.json'),
 )
 async def test_asset_allocation():
+    aa = await aram.asset_allocation()
+    pct_sum = sum(v for (k, v) in aa.items() if k.endswith('Percent'))
+    assert pct_sum >= 95
     cash = await aram.cash()
-    assert 0.0 < cash < 0.6
+    assert 0.0 < cash < 0.3

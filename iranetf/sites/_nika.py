@@ -1,6 +1,7 @@
 from asyncio import gather, run
 from datetime import date, timedelta
 from json import JSONDecodeError, loads
+from operator import itemgetter
 from re import DOTALL, MULTILINE, compile as rc
 from typing import Any
 
@@ -195,17 +196,21 @@ class Nika(BaseSite):
 
     async def asset_allocation(self) -> dict[str, Any]:
         today = date.today()
-        j = await self.daily_asset_percentage(
+        j: list[dict[str, Any]] = await self.daily_asset_percentage(
             from_date=today - timedelta(30), to_date=today
         )
-        last_record = j[1]
+        # last_record is j[0], but let's make sure in case the API changes
+        last_record = max(j, key=itemgetter('onDate'))
         self._check_aa_keys(last_record)
         return last_record
 
     async def cash(self) -> float:
         aa = await self.asset_allocation()
         g = aa.get
-        return sum(g(k, 0.0) for k in ('bondPercent', 'cashAndBankPercent'))
+        return (
+            sum(g(k, 0.0) for k in ('bondPercent', 'cashAndBankPercent'))
+            / 100.0
+        )
 
     async def home_data(self) -> dict:
         html = await (await _get(self.url)).text()
