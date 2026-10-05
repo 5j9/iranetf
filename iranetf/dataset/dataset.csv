@@ -134,8 +134,8 @@
 رایبد,صندوق س رایبد-ثابت,Fixed,25728853053886443,12494,https://raybodfixedincome.ir/,,RayanHamafza2,,0
 رایکا,نوع دوم رایکا,Fixed,66105959479616770,12024,https://raykaetf.com/,,RayanHamafza2,,0
 رخش,ثروت البرز,Stock,63886404454477678,12250,https://servatalborz.ir/,,MabnaDP2,,0
-رز ترنج,در اوراق بهادار مبتنی بر طلای رز,Commodity,20244389840999638,12452,https://toranjkala.fund/,,RayanHamafza2,,0
-رزگلد,در اوراق بهادار مبتنی بر طلای آرمان آتی,Commodity,17244733069907210,12476,https://rosegoldfund.ir/,,TadbirPardazMultiNAV,,1
+رز ترنج,در اوراق بهادار مبتنی بر طلای رز,Commodity,20244389840999638,12452,https://toranjkala.fund/,1,RayanHamafza2,,0
+رزگلد,در اوراق بهادار مبتنی بر طلای آرمان آتی,Commodity,17244733069907210,12476,https://rosegoldfund.ir/,,TadbirPardazMultiNAV,,2
 رسانا,بخشی گستره فیروزه1,Sector,8961366473557410,12286,https://gostareh.fundz.ir/,2,TadbirPardazMultiNAV,,
 رشد,رشد پایدار آبان,Fixed,48287767791629523,11667,https://rpfund.ir/,,TadbirPardaz,,1
 رشدی کیان,آوای سهام کیان,Stock,4170494561477386,11477,https://kianfunds2.ir/,,RayanHamafza2,,0
@@ -146,7 +146,7 @@
 زر,پشتوانه سکه طلای زرافشان امید ایرانیان,Commodity,33254899395816171,11530,https://omidgoldfund.ir/,,RayanHamafza2,,0
 زرفام,زرفام آشنا,Commodity,33144542989832366,11967,https://goldfund.ir/,1,RayanHamafza2,,
 زروان,صندوق س.پشتوانه طلای ویستا,Commodity,28255729477187163,12359,https://goldvista.ir/,,TadbirPardaz,,1
-زرگر,در اوراق بهادار مبتنی بر طلای زرگر کارآمد,Commodity,16817885126368964,12458,https://kalakaramad.com/,,RayanHamafza2,,0
+زرگر,در اوراق بهادار مبتنی بر طلای زرگر کارآمد,Commodity,16817885126368964,12458,https://kalakaramad.com/,1,RayanHamafza2,,0
 زریران,مبتنی بر کالای داریوش,Commodity,7171962866271439,12537,https://gold.dariush.fund/,1,RayanHamafza2,,
 زرین,زرین کوروش,Stock,50139638026536387,11774,https://zarinfunds.com/,,RayanHamafza2,,0
 زمرد,پشتوانه طلای زمرد بیدار,Commodity,64795751499397128,12390,https://zomorod.ebidar.ir/,,RayanHamafza2,,0
@@ -161,6 +161,7 @@
 سرو,سرو سودمند مدبران,Stock,64942549055019553,11649,https://sarv.fund/,,RayanHamafza2,,0
 سلام,سلام فارابی,Stock,70541934393301867,11951,https://salam.irfarabi.ir/,,TadbirPardaz,,1
 سمان,بخشی ثروت پویا,Sector,40473515538481093,12169,https://pssfund.ir/,2,TadbirPardazMultiNAV,,
+سمنتوداریوش,بخشی داریوش5,Sector,68705173735383474,12147,https://sector.dariush.fund/,5,RayanHamafza2,,
 سها,مشترک مبین سرمایه,Stock,39710474979238367,11384,https://fund.mobinsb.ir/,,TadbirPardaz,,1
 سهامدار,بازده سهام,Stock,71266020070603888,12404,https://baazdehsaham.ir/,,MabnaDP2,,0
 سورنافود,بخشی صنایع سورنا2,Sector,40126421241992147,12179,https://surenasectorfund.ir/,3,TadbirPardazMultiNAV,,
@@ -207,7 +208,7 @@
 فیروزا,ارمغان فیروزه آسیا,Fixed,10795723506538053,11518,https://firouzehfixetf.ir/,,TadbirPardaz,,1
 فیروزه,شاخص سی شرکت بزرگ فیروزه,Index,66036975502302203,11308,https://iranetf.ir/,,TadbirPardaz,,1
 قلک گلد,صندوق س. کالای قلک,Commodity,20611778787745873,12560,https://ghcfund.ir/,2,TadbirPardazMultiNAV,,0
-قیراط,پشتوانه طلای دماوند,Commodity,6237807001018762,12378,https://damavandgoldfund.ir/,,TadbirPardazMultiNAV,,1
+قیراط,پشتوانه طلای دماوند,Commodity,6237807001018762,12378,https://damavandgoldfund.ir/,,TadbirPardazMultiNAV,,2
 لبخند,لبخند فارابی,Fixed,31569200988534548,12002,https://labkhand.irfarabi.ir/,,TadbirPardaz,,1
 لذیذ,قابل معامله بخشی صنایع سینا,Sector,7376158544119907,12459,https://sinasectorfund.ir/,,RayanHamafza2,,0
 لیان,صندوق سرمایه گذاری دیبای معیار,Commodity,6362118829011821,12332,https://liangoldfund.ir/,2,TadbirPardazMultiNAV,,
@@ -236,6 +237,7 @@
 نشان,در اوراق بهادار با درآمد ثابت نشان هامرز,Fixed,1241998328504490,11959,https://neshan.hummersam.ir/,,TadbirPardaz,,1
 نفتوداریوش,بخشی داریوش4,Sector,15437111449299444,12147,https://sector.dariush.fund/,4,RayanHamafza2,,
 نفیس,در اوراق بهادار مبتنی بر طلای صبا,Commodity,4626686276232042,12012,https://kala.sabaamc.ir/,,RayanHamafza2,,0
+نقرآمد,در اوراق بهادار مبتنی بر نقره نقرآمد کارآمد,Commodity,41941748231072053,12458,https://kalakaramad.com/,2,RayanHamafza2,,0
 نقرابی,صندوق س.کالای کهکشان فیروزه1,Commodity,8620139816622134,12358,https://atash.fundz.ir/,3,TadbirPardazMultiNAV,,
 نقراط,در اوراق بهادار مبتنی بر طلای زرین آگاه2,Commodity,65365726391403130,11899,https://zarinagahfund.ir/,3,TadbirPardazMultiNAV,,
 نقران,صندوق س.کالای کهربا1,Commodity,41483334879559487,11856,https://kahroba.charismafunds.ir/,2,RayanHamafza2,,
@@ -315,6 +317,7 @@
 گنجینه,گنجینه داریوش,Fixed,47101579271117172,11673,https://ganjineh.dariush.fund/,,RayanHamafza2,,0
 گوهر,در اوراق بهادار مبتنی بر سکه طلای کیان,Commodity,12390706505809150,11556,https://kianfunds3.ir/,,MabnaDP2,,0
 یارا,در اوراق بهادار با درآمد ثابت آریا,Fixed,45284811973404357,11916,https://fund1.ariaamc.ir/,,RayanHamafza2,,0
+یاس,صندوق س.کالای ترنج1,Commodity,16240668736729756,12452,https://toranjkala.fund/,2,RayanHamafza2,,0
 یاقوت,یاقوت آگاه,Fixed,1438514795814416,11698,https://yaghootfund.ir/,,RayanHamafza2,,0
 یلدا,مشترک سبحان,Stock,34472339105893593,11149,https://sobhanfund.ir/,,TadbirPardaz,,1
 یوتیلیتی,قابل معامله بخشی کیان2,Sector,8040378907652400,12234,https://kianfunds9.ir/,11,MabnaDP2,,
