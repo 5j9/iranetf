@@ -51,3 +51,8 @@ async def test_asset_allocation():
     assert pct_sum >= 95
     cash = await aram.cash()
     assert 0.0 < cash < 0.3
+
+
+@file('aram.html')
+async def test_portfolios():
+    assert await aram.portfolios() == {'': 'صندوق سرمایه\u200cگذاری آرام'}

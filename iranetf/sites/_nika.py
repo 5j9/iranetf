@@ -213,8 +213,10 @@ class Nika(BaseSite):
         )
 
     async def portfolios(self) -> dict[str, str]:
-        portfolios = await self._json('portfolios')
-        return {p['id']: p['name'] for p in portfolios['data']}
+        hi = await self.home_info()
+        default_fund = find_value(hi, 'defaultFund')
+        assert default_fund is not None
+        return {'': default_fund['faName']}
 
 
 if __name__ == '__main__':
