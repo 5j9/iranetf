@@ -81,9 +81,7 @@ async def _fipiran_data(ds: _LazyFrame) -> _LazyFrame:
     )
 
     # Map mapping transformations via high performance native replacement steps
-    df = df.with_columns(
-        _col('type').replace(_ETF_TYPES, default=_col('type'))
-    )
+    df = df.with_columns(_col('type').replace(_ETF_TYPES))
     return df.lazy()
 
 
