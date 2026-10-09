@@ -55,4 +55,4 @@ async def test_asset_allocation():
 
 @file('aram.html')
 async def test_portfolios():
-    assert await aram.portfolios() == {'': 'صندوق سرمایه\u200cگذاری آرام'}
+    assert await aram.portfolios() == {'1': 'صندوق سرمایه\u200cگذاری آرام'}
