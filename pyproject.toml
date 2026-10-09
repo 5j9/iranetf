@@ -22,7 +22,7 @@ dependencies = [
     "polars>=1.41.2",
 ]
 [dependency-groups]
-dev = ["applog>=0.1.1", "pytest-aiohutils>=0.23.0", 'rich']
+dev = ["applog>=0.1.1", "pytest-aiohutils>=0.23.1", 'rich']
 
 [project.readme]
 file = "README.md"
@@ -66,12 +66,12 @@ logger-objects = ['iranetf.logger']
 unfixable = ["F401"]  # unused-import
 
 [tool.pytest]
-addopts = ["--quiet", "--tb=short"]
+addopts = ["--quiet", "--tb=short", "--report-chars=N"]
 asyncio_mode = 'auto'
 asyncio_default_fixture_loop_scope = 'session'
 asyncio_default_test_loop_scope = 'session'
-truncation_limit_lines = '0'
-truncation_limit_chars = '0'
+truncation_limit_lines = 0
+truncation_limit_chars = 0
 [tool.pyright]
 reportUnnecessaryTypeIgnoreComment = true
 typeCheckingMode = 'standard'
