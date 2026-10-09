@@ -335,3 +335,99 @@ def test_add_ds_url_null_urls_and_domains_not_applicable():
     out = _add_ds_url(fip, ds)
     # A null DS url still gets picked up as the ds_url value (no filtering).
     assert out['ds_url'].to_list() == [None]
+
+
+# ---------------------------------------------------------------------------
+# Duplication regression tests
+# ---------------------------------------------------------------------------
+
+
+def test_add_ds_url_duplicate_ds_keys_fan_out():
+    """
+    Regression: if DS contains two rows for the same (reg_no, group_id),
+    the primary left-join in _add_ds_url fans out the FIPIRAN frame.
+
+    _add_ds_url must return exactly one row per input fipiran row.
+    """
+    fip = _fipiran_df(reg_no=['R1'], group_id=[1])
+    # Two DS rows with identical (reg_no, group_id) but different urls.
+    ds = _ds_df(
+        reg_no=['R1', 'R1'],
+        group_id=[1, 1],
+        url=['http://a.example/', 'http://b.example/'],
+    )
+    out = _add_ds_url(fip, ds)
+    assert out.height == fip.height, (
+        f'_add_ds_url fanned out: input {fip.height} rows -> '
+        f'output {out.height} rows'
+    )
+
+
+def test_add_ds_url_duplicate_ds_keys_multirow_fip():
+    """
+    Same as above, but with multiple fipiran rows so a per-row fan-out is
+    visible as a larger-than-2x growth.
+    """
+    fip = _fipiran_df(reg_no=['R1', 'R2'], group_id=[1, 2])
+    ds = _ds_df(
+        reg_no=['R1', 'R1', 'R2', 'R2'],
+        group_id=[1, 1, 2, 2],
+        url=[
+            'http://a.example/',
+            'http://b.example/',
+            'http://c.example/',
+            'http://d.example/',
+        ],
+    )
+    out = _add_ds_url(fip, ds)
+    assert out.height == fip.height
+
+
+from iranetf.dataset.update import _update_existing_rows_using_fipiran
+
+
+async def test_update_existing_rows_duplicate_fipiran_keys_fan_out(
+    mock_url_type,
+):
+    # Any domain hit by the code path returns "no site found".
+    mock_url_type.table.update(
+        {
+            'old.example': None,
+            'new1.example': None,
+            'new2.example': None,
+        }
+    )
+
+    ds = pl.DataFrame(
+        {
+            'reg_no': ['R1'],
+            'group_id': [1],
+            'url': ['http://old.example/'],
+            'site_type': ['OldSite'],
+            'type': [0],
+            'domain': ['old.example'],
+        }
+    )
+    fipiran_df = pl.DataFrame(
+        {
+            'reg_no': ['R1', 'R1'],
+            'group_id': [1, 1],
+            'url': ['http://new1.example/', 'http://new2.example/'],
+            'site_type': ['SiteA', 'SiteB'],
+            'type': [1, 2],
+            'domain': ['new1.example', 'new2.example'],
+        }
+    )
+
+    ds_updated, fipiran_out = await _update_existing_rows_using_fipiran(
+        ds, fipiran_df, update_existing=False
+    )
+
+    assert ds_updated.height == ds.height
+    # Now that it's mocked, we can also assert exactly which domains were
+    # probed - useful to lock in behavior.
+    assert set(mock_url_type.calls) == {
+        'old.example',
+        'new1.example',
+        'new2.example',
+    }

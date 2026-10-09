@@ -81,7 +81,7 @@ async def _fipiran_data(ds: _LazyFrame) -> _LazyFrame:
     )
 
     # Map mapping transformations via high performance native replacement steps
-    df = df.with_columns(_col('type').replace(_ETF_TYPES))
+    df = df.with_columns(_col('type').replace_strict(_ETF_TYPES))
     return df.lazy()
 
 
@@ -94,7 +94,7 @@ def _add_ds_url(
         'reg_no',
         'group_id',
         _col('url').alias('ds_url_primary'),
-    )
+    ).unique(subset=['reg_no', 'group_id'], keep='first')
 
     # 1. Primary Match: (reg_no, group_id)
     joined = fipiran_df.join(
@@ -254,9 +254,25 @@ async def _update_existing_rows_using_fipiran(
 
     update_columns = ['type', 'url', 'site_type']
 
+    # Collapse FIPIRAN to at most one row per (reg_no, group_id); otherwise
+    # the primary join below would fan out ds.
+    fipiran_primary = fipiran_df.select(
+        'reg_no', 'group_id', 'domain', *update_columns
+    )
+    if (
+        fipiran_primary.height
+        != fipiran_primary.unique(subset=['reg_no', 'group_id']).height
+    ):
+        _logger.warning(
+            'fipiran_df has duplicate (reg_no, group_id) rows; keeping first'
+        )
+    fipiran_primary = fipiran_primary.unique(
+        subset=['reg_no', 'group_id'], keep='first'
+    )
+
     # 1. Primary match: (reg_no, group_id) - includes domain from fipiran_df
     joined = ds.join(
-        fipiran_df.select('reg_no', 'group_id', 'domain', *update_columns),
+        fipiran_primary,
         on=['reg_no', 'group_id'],
         how='left',
         suffix='_fip',
