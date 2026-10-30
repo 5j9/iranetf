@@ -22,7 +22,7 @@ dependencies = [
     "polars>=1.41.2",
 ]
 [dependency-groups]
-dev = ["applog>=0.1.1", "pytest-aiohutils>=0.23.1", 'rich']
+dev = ["applog>=0.1.1", "pytest-aiohutils>=0.23.2", 'rich']
 
 [project.readme]
 file = "README.md"
@@ -72,21 +72,12 @@ asyncio_default_fixture_loop_scope = 'session'
 asyncio_default_test_loop_scope = 'session'
 truncation_limit_lines = 0
 truncation_limit_chars = 0
-[tool.pyright]
-reportUnnecessaryTypeIgnoreComment = true
-typeCheckingMode = 'standard'
-reportInvalidStringEscapeSequence = false
-reportConstantRedefinition = 'error'
-reportDeprecated = 'warning'
-reportPropertyTypeMismatch = 'error'
-reportTypeCommentUsage = 'warning'
-reportUnnecessaryCast = 'warning'
-reportUnnecessaryComparison = 'warning'
-reportUnnecessaryContains = 'warning'
-reportUnnecessaryIsInstance = 'warning'
-venvPath = "."
-venv = ".venv"
-
 [tool.uv.build-backend]
 module-name = "iranetf"
 module-root = ""
+
+[tool.pyrefly]
+infer-with-first-use = false
+min-severity = "info"
+[tool.pyrefly.errors]
+incompatible-comparison = "warn"

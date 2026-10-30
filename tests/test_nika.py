@@ -1,4 +1,3 @@
-from pytest import raises
 from pytest_aiohutils import file, file_map
 
 from iranetf.sites import Nika
