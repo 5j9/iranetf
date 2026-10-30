@@ -1,9 +1,8 @@
 from __future__ import annotations as _
 
-from abc import abstractmethod
 from datetime import datetime
 from json import loads
-from typing import Any, Protocol, Self, TypedDict, runtime_checkable
+from typing import Any, ClassVar, Protocol, Self, TypedDict, runtime_checkable
 
 import polars as pl
 from aiohttp import ClientResponse
@@ -33,7 +32,7 @@ class BaseSite(Protocol):
     portfolio_id: str
     last_response: ClientResponse
 
-    _aa_keys: set[str]
+    _aa_keys: ClassVar[set[str]]
 
     def __init__(self, url: str, portfolio_id: str = ''):
         assert url[-1] == '/', f'the url must end with `/` {url=}'
@@ -47,15 +46,14 @@ class BaseSite(Protocol):
         return f"{type(self).__name__}('{self.url}')"
 
     def __eq__(self, value):
-        if not isinstance(value, BaseSite):
+        try:
+            return (
+                value.url == self.url
+                and value.portfolio_id == self.portfolio_id
+                and type(self) is type(value)
+            )
+        except AttributeError:
             return NotImplemented
-        if (
-            value.url == self.url
-            and self.portfolio_id == value.portfolio_id
-            and type(value) is type(self)
-        ):
-            return True
-        return False
 
     async def _json(
         self,
@@ -147,7 +145,6 @@ class BaseSite(Protocol):
     async def _home(self) -> str:
         return (await _read(self.url)).decode()
 
-    @abstractmethod
     async def _home_info(self) -> dict[str, Any]: ...
 
     _home_info_cache: dict[str, Any]
