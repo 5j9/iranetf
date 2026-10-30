@@ -1,5 +1,5 @@
 from asyncio import run
-from datetime import date, timedelta
+from datetime import date, datetime, timedelta
 from json import JSONDecodeError, loads
 from operator import itemgetter
 from re import DOTALL, MULTILINE, compile as rc
@@ -110,7 +110,16 @@ class Nika(BaseSite):
     reg_no = reg_no_from_home_info
 
     async def live_navps(self) -> LiveNAVPS:
-        raise NotImplementedError('Nika sites do provide live NAVPS data')
+        hi = await self.home_info()
+        investment_data = find_value(hi, 'investmentData')
+        assert investment_data is not None
+        return {
+            'creation': investment_data['etfIssuanceNav'],
+            'redemption': investment_data['etfRedemptionNav'],
+            'date': datetime.fromisoformat(
+                f'{investment_data["etfDate"]} {investment_data["time"]}'
+            ),
+        }
 
     async def navps_history(self) -> LazyFrame:
         data = find_list(

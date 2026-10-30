@@ -2,14 +2,14 @@ from pytest import raises
 from pytest_aiohutils import file, file_map
 
 from iranetf.sites import Nika
-from tests import assert_date_column, assert_navps_history
+from tests import assert_date_column, assert_navps_history, validate_live_navps
 
 aram = Nika('https://aram.mofidfund.com/')
 
 
+@file('aram.html')
 async def test_live_navps():
-    with raises(NotImplementedError):
-        await aram.live_navps()
+    await validate_live_navps(aram)
 
 
 @file('aram.html')
