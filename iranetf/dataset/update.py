@@ -28,13 +28,7 @@ from iranetf.dataset import (
     scan_dataset as _scan_dataset,
     sink_dataset as _sink_dataset,
 )
-from iranetf.sites import (
-    BaseSite as _BaseSite,
-    LeveragedTadbirPardaz as _LeveragedTadbirPardaz,
-    MabnaDP2 as _MabnaDP2,
-    RayanHamafza2 as _RayanHamafza2,
-    TadbirPardaz as _TadbirPardaz,
-)
+from iranetf.sites import BaseSite as _BaseSite
 
 liquidated_reg_no = (
     '11626',  # آسامید
@@ -121,11 +115,11 @@ def _add_ds_url(
 
 
 _URL_HOST_RE = _compile(r'//([^/]+)/')
-SITE_TYPES = (_RayanHamafza2, _TadbirPardaz, _LeveragedTadbirPardaz, _MabnaDP2)
 
 
 @_log_and_retry
-async def _check_validity(site: _BaseSite) -> tuple[str, str] | None:
+async def _check_validity(url: str) -> tuple[str, str] | None:
+    site = await _BaseSite.from_url(url)
     try:
         await site.live_navps()
     except _JSONDecodeError:
@@ -137,12 +131,7 @@ async def _check_validity(site: _BaseSite) -> tuple[str, str] | None:
 async def _url_type(domain: str) -> tuple[str | None, str | None]:
     with _set_level(_logger, 'CRITICAL'):
         for protocol in ('https', 'http'):
-            tasks = [
-                _create_task(
-                    _check_validity(site_type(f'{protocol}://{domain}/'))
-                )
-                for site_type in SITE_TYPES
-            ]
+            tasks = [_create_task(_check_validity(f'{protocol}://{domain}/'))]
 
             try:
                 for task in _as_completed(tasks):
