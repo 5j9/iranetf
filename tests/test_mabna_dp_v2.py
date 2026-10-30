@@ -97,7 +97,7 @@ async def test_assets_history():
 @file('test_alt_home_data_format_mabnadp2.html')
 async def test_alt_home_data_format():
     site = await MabnaDP2.from_url('https://kianfunds6.ir/')
-    data = await site.home_data()  # type: ignore
+    data = await site.home_data()
     assert data.keys() == {
         '__REACT_QUERY_STATE__',
         '__REACT_REDUX_STATE__',
