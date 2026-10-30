@@ -23,9 +23,14 @@ class MabnaDP2(BaseSite):
     async def _home_info(self):
         d = {}
         html = await self._home()
-        m = search(r'(\d+)\s*نزد سازمان بورس', html)
-        if m:
-            d['seo_reg_no'] = m[1]
+        m = search(
+            r'(\d+)\s*\u0646\u0632\u062f \u0633\u0627\u0632\u0645\u0627\u0646 \u0628\u0648\u0631\u0633'
+            r'|'
+            r'\u0634\u0645\u0627\u0631\u0647 \u062b\u0628\u062a \u0646\u0632\u062f \u0633\u0627\u0632\u0645\u0627\u0646 \u0628\u0648\u0631\u0633 \u0648 \u0627\u0648\u0631\u0627\u0642 \u0628\u0647\u0627\u062f\u0627\u0631\s*(\d+)',
+            html,
+        )
+        if m is not None:
+            d['seo_reg_no'] = m[1] or m[2]
         return d
 
     reg_no = reg_no_from_home_info
