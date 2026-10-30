@@ -11,10 +11,10 @@ from jdatetime import date as jdate
 from iranetf import RegNoError, _get, logger
 
 
-class LiveNAVPS(TypedDict):
+class LiveNAVPS(TypedDict, extra_items=Any):
     creation: int
     redemption: int
-    date: datetime
+    datetime: datetime
 
 
 def comma_int(s: str) -> int:

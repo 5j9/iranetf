@@ -116,7 +116,7 @@ class Nika(BaseSite):
         return {
             'creation': investment_data['etfIssuanceNav'],
             'redemption': investment_data['etfRedemptionNav'],
-            'date': datetime.fromisoformat(
+            'datetime': datetime.fromisoformat(
                 f'{investment_data["etfDate"]} {investment_data["time"]}'
             ),
         }

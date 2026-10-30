@@ -168,7 +168,7 @@ class RayanHamafza(BaseRayanHamafza):
         return {
             'creation': d['PurchaseNav'],
             'redemption': d['SaleNav'],
-            'date': jdatetime.strptime(
+            'datetime': jdatetime.strptime(
                 f'{d["Date"]} {d["Time"]}', '%Y/%m/%d %H:%M:%S'
             ).togregorian(),
         }
@@ -246,7 +246,7 @@ class RayanHamafza2(BaseRayanHamafza):
         return {
             'creation': d['purchaseNav'],
             'redemption': d['saleNav'],
-            'date': jdatetime.strptime(
+            'datetime': jdatetime.strptime(
                 f'{d["date"]} {d["time"]}', '%Y/%m/%d %H:%M:%S'
             ).togregorian(),
         }

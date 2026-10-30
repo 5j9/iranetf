@@ -2,7 +2,7 @@ from asyncio import gather
 from datetime import date
 from json import loads
 from re import findall, search, split
-from typing import Any
+from typing import Any, get_type_hints
 
 import polars as pl
 from jdatetime import date as jdate, datetime as jdatetime
@@ -47,7 +47,7 @@ def _comma_float(s: str) -> float:
     return float(s.replace(',', ''))
 
 
-class TPLiveNAVPS(LiveNAVPS):
+class TPLiveNAVPS(LiveNAVPS, total=False):
     dailyTotalNetAssetValue: int
     dailyTotalUnit: int
     finalCancelNAV: int
@@ -58,8 +58,6 @@ class TPLiveNAVPS(LiveNAVPS):
     nominal: int
     totalNetAssetValue: int
     totalUnit: int
-    creation: int
-    redemption: int
 
 
 class BaseTadbirPardaz(BaseSite):
@@ -235,25 +233,31 @@ class BaseTadbirPardaz(BaseSite):
         return {'1': self.url}
 
 
+TP_LIVE_NAVPS_INT_KEYS = {
+    k for (k, t) in get_type_hints(TPLiveNAVPS).items() if t is int
+}
+
+
 class TadbirPardaz(BaseTadbirPardaz):
     async def live_navps(self) -> TPLiveNAVPS:
         d_raw: str = await self._json('Fund/GetETFNAV')
         d: dict = loads(d_raw)
-
-        d['creation'] = d.pop('subNav')
-        d['redemption'] = d.pop('cancelNav')
-        d['nominal'] = d.pop('esmiNav')
-
-        for k, t in TPLiveNAVPS.__annotations__.items():
-            if t is int and k in d:
-                d[k] = comma_int(d[k])
 
         date_str = d.pop('publishDate')
         try:
             parsed_date = jdatetime.strptime(date_str, '%Y/%m/%d %H:%M:%S')
         except ValueError:
             parsed_date = jdatetime.strptime(date_str, '%Y/%m/%d ')
-        d['date'] = parsed_date.togregorian()
+
+        d |= {
+            'creation': d.pop('subNav'),
+            'redemption': d.pop('cancelNav'),
+            'nominal': d.pop('esmiNav'),
+            'datetime': parsed_date.togregorian(),
+        }
+
+        for k in TP_LIVE_NAVPS_INT_KEYS & d.keys():
+            d[k] = comma_int(d[k])
 
         return d  # type: ignore
 
@@ -365,7 +369,7 @@ class TadbirPardazMultiNAV(TadbirPardaz):
         )
 
 
-class LeveragedTadbirPardazLiveNAVPS(LiveNAVPS):
+class LeveragedTadbirPardazLiveNAVPS(LiveNAVPS, total=False):
     BaseUnitsCancelNAV: float
     BaseUnitsTotalNetAssetValue: float
     BaseUnitsTotalSubscription: int
@@ -446,7 +450,7 @@ class LeveragedTadbirPardaz(BaseTadbirPardaz):
             parsed_date = jdatetime.strptime(date_str, '%Y/%m/%d %H:%M:%S')
         except ValueError:
             parsed_date = jdatetime.strptime(date_str, '%Y/%m/%d ')
-        result['date'] = parsed_date.togregorian()
+        result['datetime'] = parsed_date.togregorian()
 
         return result  # type: ignore
 
