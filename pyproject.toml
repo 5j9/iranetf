@@ -63,7 +63,6 @@ ignore = [
     'SIM115', # Use a context manager for opening files
 ]
 logger-objects = ['iranetf.logger']
-unfixable = ["F401"]  # unused-import
 
 [tool.pytest]
 addopts = ["--quiet", "--tb=short", "--report-chars=N"]
