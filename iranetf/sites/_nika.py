@@ -94,7 +94,7 @@ class Nika(BaseSite):
             pass
         home_info = await self.home_info()
         api = self._api_cache = (
-            f'https://{find_value(home_info, "apiPath")}/voak/oak/v1/api/public/'
+            f'https://{find_value(home_info, "apiPath")}/{find_value(home_info, "oakPath")}/'
         )
         return api
 
