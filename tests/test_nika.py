@@ -1,57 +1,40 @@
+import pytest
 from pytest_aiohutils import file, file_map
 
 from iranetf.sites import Nika
-from tests import assert_date_column, assert_navps_history, validate_live_navps
+from tests import assert_navps_history, validate_live_navps
 
-aram = Nika('https://aram.mofidfund.com/')
+_site = Nika.from_l18('آرام')
 
 
-@file('aram.html')
-async def test_live_navps():
+@pytest.fixture
+def aram():  # avoids home_info cache issues by creating new site objects
+    return Nika(_site.url, _site.portfolio_id)
+
+
+@file('aram_live_navps.json')
+async def test_live_navps(aram):
     await validate_live_navps(aram)
 
 
-@file('aram.html')
-async def test_navps_history():
+@file('aram-nav.json')
+async def test_navps_history(aram):
     await assert_navps_history(aram)
 
 
-@file('aram.html')
-async def test_assets_history():
-    ah = await aram.assets_history()
-    df = ah.collect()
-    assert df.columns == [
-        'date',
-        'creation',
-        'redemption',
-        'statistical',
-        'totalUnit',
-        'totalIssuanceUnit',
-        'totalRedemptionUnit',
-        'issuanceUnitToday',
-        'redemptionUnitToday',
-        'redemptionNetAssetValue',
-        'fundType',
-        'totalInvestor',
-        'remainingUnitsCount',
-        'diffCancelNavAndExhibitiveNAV',
-        'diffCancelNavAndExhibitiveNAVPercent',
-    ]
-    assert_date_column(df)
-
-
 @file_map(
-    (aram.url, 'aram.html'),
-    ('daily-asset-percentage', 'daily_asset_percentage.json'),
+    (_site.url, 'aram.html'),
+    ('instrument-type-percentage', 'instrument-type-percentage.json'),
 )
-async def test_asset_allocation():
+async def test_asset_allocation(aram):
     aa = await aram.asset_allocation()
-    pct_sum = sum(v for (k, v) in aa.items() if k.endswith('Percent'))
+    pct_sum = sum(v for v in aa.values())
     assert pct_sum >= 95
+
     cash = await aram.cash()
     assert 0.0 < cash < 0.3
 
 
 @file('aram.html')
-async def test_portfolios():
-    assert await aram.portfolios() == {'1': 'صندوق سرمایه\u200cگذاری آرام'}
+async def test_portfolios(aram):
+    assert await aram.portfolios() == {'11': 'صندوق سرمایه\u200cگذاری آرام'}

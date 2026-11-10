@@ -39,7 +39,7 @@ class BaseSite(Protocol):
         self.url = url
         self.portfolio_id = portfolio_id
 
-    async def _api(self) -> str:
+    async def _api(self, api_name: str | None = None) -> str:
         return self.url
 
     def __repr__(self):
@@ -62,8 +62,9 @@ class BaseSite(Protocol):
         params: dict | None = None,
         cookies: dict | None = None,
         df: bool = False,
+        api_name: str | None = None,
     ) -> Any:
-        r = await _get(await self._api() + path, params, cookies)
+        r = await _get(await self._api(api_name) + path, params, cookies)
         self.last_response = r
         content = await r.read()
         j = loads(content)

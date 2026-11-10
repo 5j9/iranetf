@@ -1,11 +1,10 @@
 from asyncio import run
-from datetime import date, datetime, timedelta
+from datetime import date, datetime
 from json import JSONDecodeError, loads
-from operator import itemgetter
 from re import DOTALL, MULTILINE, compile as rc
 from typing import Any
 
-from polars import LazyFrame, col
+from polars import Int64, LazyFrame, col
 
 from iranetf.sites._lib import (
     BaseSite,
@@ -81,22 +80,27 @@ def to_nextjs_flight(html: str) -> dict:
 
 
 class Nika(BaseSite):
-    __slots__ = ('_api_cache', '_pam_code_cache')
-    _api_cache: str
+    __slots__ = ('_hive_api', '_oak_api', '_pam_code_cache')
+    _oak_api: str
+    _hive_api: str
 
     def __init__(self, url: str, portfolio_id: str = ''):
         super().__init__(url, portfolio_id)
 
-    async def _api(self) -> str:
+    async def _api(self, api_name: str | None = None) -> str:
+        cache_key = f'_{api_name}_api'
         try:
-            return self._api_cache
+            return getattr(self, cache_key)
         except AttributeError:
             pass
+
+        if api_name is None:  # only Literal['oak', 'hive'] are expected
+            api_name = 'oak'
+
         home_info = await self.home_info()
-        api = self._api_cache = (
-            f'https://{find_value(home_info, "apiPath")}/{find_value(home_info, "oakPath")}/'
-        )
-        return api
+        url = f'https://{find_value(home_info, "apiPath")}/{find_value(home_info, f"{api_name}Path")}/'
+        setattr(self, cache_key, url)
+        return url
 
     async def _home_info(self):
         d = {}
@@ -110,43 +114,53 @@ class Nika(BaseSite):
     reg_no = reg_no_from_home_info
 
     async def live_navps(self) -> LiveNAVPS:
-        hi = await self.home_info()
-        investment_data = find_value(hi, 'investmentData')
-        assert investment_data is not None
+        pid = self.portfolio_id
+        j = await self._json(
+            f'{pid}/{pid}/Nav/GetNavStatistics',
+            api_name='hive',
+        )
         return {
-            'creation': investment_data['etfIssuanceNav'],
-            'redemption': investment_data['etfRedemptionNav'],
-            'datetime': datetime.fromisoformat(
-                f'{investment_data["etfDate"]} {investment_data["time"]}'
-            ),
+            **j,
+            'creation': int(j['etfIssuanceNav']),
+            'redemption': int(j['etfRedemptionNav']),
+            'datetime': datetime.fromisoformat(f'{j["etfDate"]} {j["time"]}'),
         }
 
-    async def navps_history(self) -> LazyFrame:
-        data = find_list(
-            await self.home_info(),
-            'data',
-            {'issuanceNav', 'date', 'redemptionNav', 'nominalNav'},
-        )
-        return (
-            LazyFrame(data)
-            .rename(
-                {
-                    'redemptionNav': 'redemption',
-                    'nominalNav': 'statistical',
-                    'issuanceNav': 'creation',
-                }
-            )
-            .with_columns(col('date').str.to_date())
-        )
+    async def navps_history(
+        self,
+        from_date: datetime | None = None,
+        to_date: datetime | None = None,
+    ) -> LazyFrame:
+        if from_date is None:
+            from_date = datetime.min
+        if to_date is None:
+            to_date = datetime.max
 
-    async def assets_history(self) -> LazyFrame:
-        items = find_list(
-            await self.home_info(),
-            'items',
-            {'date', 'totalUnit', 'totalIssuanceUnit', 'totalRedemptionUnit'},
-        )
+        pid = self.portfolio_id
+        page_size = 5000
+        page_number = 0
+        all_items: list[dict] = []
+
+        while True:
+            j = await self._json(
+                f'{pid}/{pid}/Nav',
+                api_name='hive',
+                params={
+                    'FromDate': from_date.strftime('%m/%d/%Y'),
+                    'ToDate': to_date.strftime('%m/%d/%Y'),
+                    'PageNumber': page_number,
+                    'PageSize': page_size,
+                },
+            )
+
+            items = j.get('items') or []
+            all_items += items
+
+            if not j.get('hasNextPage', False) or not items:
+                break
+            page_number += 1
         return (
-            LazyFrame(items)
+            LazyFrame(all_items)
             .rename(
                 {
                     'redemptionNav': 'redemption',
@@ -154,41 +168,32 @@ class Nika(BaseSite):
                     'issuanceNav': 'creation',
                 }
             )
-            .with_columns(col('date').str.to_date())
+            .with_columns(
+                col('date').str.to_date(),
+                col('totalUnit').cast(Int64),
+                col('totalIssuanceUnit').cast(Int64),
+                col('totalRedemptionUnit').cast(Int64),
+                col('issuanceUnitToday').cast(Int64),
+                col('redemptionUnitToday').cast(Int64),
+                col('remainingUnitsCount').cast(Int64),
+            )
         )
 
-    _aa_keys = {
-        'onDate',
-        'top5Stock',
-        'otherStock',
-        'bond',
-        'cd',
-        'cashAndBank',
-        'mutualFund',
-        'goldAndBar',
-        'otherAssets',
-        'reportDate',
-        'top5StockPercent',
-        'otherStockPercent',
-        'bondPercent',
-        'cdPercent',  # Certificate of Deposit?
-        'cashAndBankPercent',
-        'mutualFundPercent',
-        'otherAssetsPercent',
-        'goldAndBarPercent',
-    }
-
     @property
-    async def _pam_code(self):
+    async def _pam_code(self) -> str:
         try:
             return self._pam_code_cache
         except AttributeError:
             pass
-        home_info = await self.home_info()
-        result = self._pam_code_cache = find_value(
-            home_info['nextjs_flight'], 'pamCode'
+        available_funds = await self._available_funds()
+        for record in available_funds:
+            if record['basketId'] == self.portfolio_id:
+                pam_code = self._pam_code_cache = record['pamCode']
+                return pam_code
+
+        raise ValueError(
+            f'no pamCode found for {self.portfolio_id=} {available_funds=}'
         )
-        return result
 
     async def daily_asset_percentage(
         self, from_date: date, to_date: date
@@ -200,31 +205,63 @@ class Nika(BaseSite):
                 'fromDate': from_date.isoformat(),
                 'toDate': to_date.isoformat(),
             },
+            api_name='oak',
         )
 
-    async def asset_allocation(self) -> dict[str, Any]:
-        today = date.today()
-        j: list[dict[str, Any]] = await self.daily_asset_percentage(
-            from_date=today - timedelta(30), to_date=today
+    async def portfolio_industries(self) -> LazyFrame:
+        return await self._json(
+            'portfolio-composition/industry-percentage',
+            df=True,
+            params={'pamCode': await self._pam_code},
+            api_name='oak',
         )
-        # last_record is j[0], but let's make sure in case the API changes
-        last_record = max(j, key=itemgetter('onDate'))
-        self._check_aa_keys(last_record)
-        return last_record
+
+    _aa_keys = {
+        'STOCK_AND_RIGHT_ADVANCE',
+        'BOND',
+        'CASH_AND_BANK',
+        'FUND',
+        'ACCOUNT_RECEIVABLE',
+        'OTHER_ASSET',
+        'GOLD_AND_BAR',
+    }
+
+    async def asset_allocation(self) -> dict[str, Any]:
+        j = await self._json(
+            'portfolio-composition/instrument-type-percentage',
+            params={'pamCode': await self._pam_code},
+            api_name='oak',
+        )
+        data = {record['assetGroupIdCode']: record['percent'] for record in j}
+        self._check_aa_keys(data)
+        return data
 
     async def cash(self) -> float:
         aa = await self.asset_allocation()
         g = aa.get
         return (
-            sum(g(k, 0.0) for k in ('bondPercent', 'cashAndBankPercent'))
+            sum(
+                g(k, 0.0)
+                for k in ('CASH_AND_BANK', 'BOND', 'ACCOUNT_RECEIVABLE')
+            )
             / 100.0
         )
 
-    async def portfolios(self) -> dict[str, str]:
+    async def _available_funds(self):
         hi = await self.home_info()
         default_fund = find_value(hi, 'defaultFund')
         assert default_fund is not None
-        return {'1': default_fund['faName']}
+        available_funds = find_value(hi, 'availableFunds')
+        assert available_funds is not None
+        available_funds = available_funds.copy()
+        available_funds[0] = default_fund
+        return available_funds
+
+    async def portfolios(self) -> dict[str, str]:
+        default_fund = await self._available_funds()
+        return {
+            record['basketId']: record['faName'] for record in default_fund
+        }
 
 
 if __name__ == '__main__':

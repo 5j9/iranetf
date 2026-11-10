@@ -40,45 +40,45 @@ async def test_navps_date_ends_with_space():
     validate_dict(d, TPLiveNAVPS)
 
 
+jaamtala = BaseSite.from_l18('جام طلا')
+synergy = BaseSite.from_l18('سینرژی')
+
+
 @files('still.json', 'khodran.json')
 async def test_multinav():
-    still = BaseSite.from_l18('استیل')
-    khodran = BaseSite.from_l18('خودران')
-    assert isinstance(khodran, TadbirPardazMultiNAV)
-    assert still.url == khodran.url
-    still_nav = await still.live_navps()
-    khodran_nav = await khodran.live_navps()
-    assert still_nav.keys() == khodran_nav.keys()
-    assert still_nav != khodran_nav
+    assert isinstance(jaamtala, TadbirPardazMultiNAV)
+    assert synergy.url == jaamtala.url
+    s_nav = await synergy.live_navps()
+    j_nav = await jaamtala.live_navps()
+    assert s_nav.keys() == j_nav.keys()
+    assert s_nav != j_nav
 
 
 async def test_multinav_hist_path():
-    khodran = BaseSite.from_l18('خودران')
     with (
         patch(
             'iranetf.sites._lib._get', side_effect=NotImplementedError
         ) as get_mock,
         raises(NotImplementedError),
     ):
-        await khodran.navps_history()
+        await jaamtala.navps_history()
     get_mock.assert_called_once_with(
-        'https://mofidsectorfund.com/Chart/TotalNAV',
+        f'{jaamtala.url}Chart/TotalNAV',
         {'type': 'getnavtotal', 'basketId': '3'},
         None,
     )
 
 
 async def test_multinav_live_navps_path():
-    khodran = BaseSite.from_l18('خودران')
     with (
         patch(
             'iranetf.sites._lib._get', side_effect=NotImplementedError
         ) as get_mock,
         raises(NotImplementedError),
     ):
-        await khodran.live_navps()
+        await jaamtala.live_navps()
     get_mock.assert_called_once_with(
-        'https://mofidsectorfund.com/Fund/GetETFNAV',
+        f'{jaamtala.url}Fund/GetETFNAV',
         {'basketId': '3'},
         None,
     )
@@ -160,12 +160,12 @@ async def test_version():
     assert (await tadbir.version()) == EXPECTED_TP_VER
 
 
-steel: TadbirPardaz = BaseSite.from_l18('استیل')  # type: ignore
+resana: TadbirPardaz = TadbirPardaz.from_l18('رسانا')
 
 
 @file('mofidsectorfund.html')
 async def test_info():
-    assert await steel.home_info() == {
+    assert await resana.home_info() == {
         'basketIDs': {
             '1': 'صندوق سرمایه‌گذاری بخشی صنایع مفید',
             '2': 'استیل',
@@ -185,13 +185,13 @@ async def test_info():
 
 @file('mofidsectorfund.html')
 async def test_portfolios():
-    ps = await steel.portfolios()
+    ps = await resana.portfolios()
     assert ps['2'] == 'استیل'
 
 
 @file('mofidsectorfund.html')
 async def test_reg_no():
-    assert await steel.reg_no() == '12150'
+    assert await resana.reg_no() == '12150'
 
 
 @file('derakhshan_aa.json')
