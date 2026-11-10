@@ -79,7 +79,7 @@ class BaseSite(Protocol):
 
     async def cash(self) -> float: ...
 
-    _l18_to_site_map: dict
+    _l18_to_site_map: dict[str, Self]
 
     @classmethod
     def from_l18(cls, l18: str) -> Self:
