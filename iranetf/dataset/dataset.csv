@@ -7,6 +7,7 @@
 آذرین,بخشی فلزات کیمیا,Sector,43358402418932595,12172,https://kimiasectorfund.ir/,2,TadbirPardazMultiNAV,,2
 آرام,شاخصی آرام مفید,Index,14230681955555738,11939,https://aram.mofidfund.com/,11,Nika,,0
 آرامش,در اوراق بهادار با درآمد ثابت آرامش,Fixed,7104496710718469,12268,https://arameshfund.ir/,,TadbirPardaz,,1
+آرژان,کالایی آسمان ۱,Commodity,57643967123480136,12006,https://altonfund.ir/,3,TadbirPardazMultiNAV,,
 آس,مشترک گنجینه ارمغان الماس,Stock,10063040211859748,11463,https://armaghanalmasfund.ir/,,TadbirPardaz,,1
 آسا,آرمان کارآفرین,Fixed,26393127587277568,10845,https://akfund.ir/,,RayanHamafza2,1,1
 آساس,آسمان آرمانی سهام,Stock,66682662312253625,11195,https://asasfund.ir/,,TadbirPardaz,,1
@@ -18,13 +19,12 @@
 آفرین,رشد آفرین سرمایه,Mixed,37028614515926436,12184,https://roshdafarinfund.ir/,,MabnaDP2,,0
 آلا,اعتماد ارغوان,Fixed,19828734979381742,12128,https://etemadarghavan.sanaamc.com/,,RayanHamafza2,,1
 آلتون,طلای آسمان آلتون,Commodity,28374437855144739,12006,https://altonfund.ir/,2,TadbirPardazMultiNAV,,1
-آرژان,کالایی آسمان ۱,Commodity,57643967123480136,12006,https://altonfund.ir/,3,TadbirPardazMultiNAV,,
 آلکان,بخشی راهبر صنایع مهرگان,Sector,10535841469368706,12460,https://sector.mehreganfunds.ir/,2,TadbirPardazMultiNAV,,2
 آلیاژ,صندوق س صنایع آگاه3-بخشی,Sector,52497713622747990,12093,https://agahsectorfund.ir/,3,RayanHamafza2,,
 آمیتیس,سهامی درخشان آمیتیس,Stock,41350070322027412,12311,https://fund2-amitispm.ir/,,MabnaDP2,,0
 آوا,آوای معیار,Stock,18007109712724189,11729,https://avayemeyar.ir/,,RayanHamafza2,,1
 آوان,آوان ژرف آگاه,Stock,14886507586508567,11853,https://avanfund.ir/,,RayanHamafza2,,1
-آوند,ثابت آوند مفید,Fixed,31039212000825988,11993,https://avand.mofidfund.com/,,Nika,,0
+آوند,ثابت آوند مفید,Fixed,31039212000825988,11993,https://avand.mofidfund.com/,10,Nika,,0
 آوید,مشترک امین آوید,Stock,68536788290212877,11173,https://aminavidfund.ir/,,TadbirPardaz,,1
 آکام,ثابت آکام,Fixed,490987973229371,12117,https://akamvista.ir/,,RayanHamafza2,1,1
 آکورد,آرمان آتی کوثر,Fixed,30282299500988269,11409,https://aaketf.ir/,,RayanHamafza2,,1
@@ -39,7 +39,7 @@
 ارکیده,در اوراق بهادار با درآمد ثابت ارکیده,Fixed,12629673694762396,12297,https://orkideh.fund/,,RayanHamafza2,,1
 استیل,بخشی صنایع مفید,Sector,24907784641855842,12150,https://sector.mofidfund.com/,14,Nika,,
 اصیل,مشترک البرز,Fixed,8021561335311415,11148,https://alborz-funds.com/,,RayanHamafza2,,1
-اطلس,توسعه اطلس مفید,Stock,11427939669935844,11215,https://atlas.mofidfund.com/,,Nika,,0
+اطلس,توسعه اطلس مفید,Stock,11427939669935844,11215,https://atlas.mofidfund.com/,9,Nika,,0
 اطمینان,در اوراق بهادار با درآمد ثابت اطمینان هیوا,Fixed,50243708970398750,12273,https://etminan.hiwapm.ir/,,TadbirPardaz,,1
 اعتبار,نوع دوم اعتبار,Fixed,35163287528816137,12031,https://etebaretf2.com/,,RayanHamafza2,,1
 اعتبارسهام,اعتبار سهام ایرانیان,Stock,55761294311886451,11706,https://www.etebarsahamfund.com/,,RayanHamafza2,,1
@@ -202,8 +202,9 @@
 عرش,عرش میلاد شهر,Stock,13327012090180555,12323,https://arshfund.ir/,,TadbirPardaz,,1
 عقیق,مشترک عقیق,Stock,45452221088910484,10830,https://aghighfund.com/,,RayanHamafza2,,1
 عمارت دی,املاک و مستغلات دی,REIT,41480981133648877,12495,https://dayrsf.ir/,1,RayanHamafza2,,1
-عیار,طلای عیار مفید,Commodity,34144395039913458,11586,https://ayar.mofidfund.com/,,Nika,,0
+عیار,طلای عیار مفید,Commodity,34144395039913458,11586,https://ayar.mofidfund.com/,12,Nika,,0
 فاخر,ثروت افزون فاخر,Fixed,56344907495802692,12146,https://fakherfund.ir/,,RayanHamafza2,,1
+فارس متال,بخشی خبره صنعت خلیج فارس۲,Sector,24130026414356277,12287,https://fars.pgibc.ir/,3,TadbirPardazMultiNAV,3,
 فارما کیان,قابل معامله بخشی کیان,Sector,40422084765096890,12234,https://kianfunds9.ir/,1,MabnaDP2,,
 فارمانی,بخشی آرمان آتی,Sector,31787507070992420,12345,https://pharmanifund.ir/,2,TadbirPardazMultiNAV,,2
 فرا الگوریتم,بخشی فرا الگوریتم,Sector,31389079379596565,12407,https://fara-fund.ir/,2,TadbirPardazMultiNAV,,2
@@ -268,7 +269,7 @@
 هم وزن,قابل معامله شاخصی کیان,Index,47041908051542008,11924,https://kianfunds6.ir/,2,MabnaDP2,,0
 همای,همای آگاه,Fixed,15494954332657697,11767,https://homayeagah.ir/,,RayanHamafza2,1,1
 همتا,مانا ثروت پویا,Stock,33923981945674722,12362,https://psmfund.ir/,,TadbirPardaz,,1
-همسنگ,شاخصی هم وزن همسنگ مفید,Index,36002472163498476,12488,https://hamsang.mofidfund.com/,,Nika,,0
+همسنگ,شاخصی هم وزن همسنگ مفید,Index,36002472163498476,12488,https://hamsang.mofidfund.com/,23,Nika,,0
 همگام,همگام آشنا ایرانیان,Fixed,49681831162536304,12216,https://hamgamfund.ir/,,RayanHamafza2,1,1
 همیان,پشتوانه طلای همیان سپهر,Commodity,50072269736641214,11273,https://hsfund.ir/,,RayanHamafza2,,1
 هوشمند,شاخصی شفق رابین,Index,37920364612147195,12388,https://rabindex.ir/,,MabnaDP2,,0
