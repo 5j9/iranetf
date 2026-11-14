@@ -217,13 +217,14 @@ class Nika(BaseSite):
         )
 
     _aa_keys = {
-        'STOCK_AND_RIGHT_ADVANCE',
+        'ACCOUNT_RECEIVABLE',
         'BOND',
         'CASH_AND_BANK',
+        'DEPOSIT_BROKER',
         'FUND',
-        'ACCOUNT_RECEIVABLE',
-        'OTHER_ASSET',
         'GOLD_AND_BAR',
+        'OTHER_ASSET',
+        'STOCK_AND_RIGHT_ADVANCE',
     }
 
     async def asset_allocation(self) -> dict[str, Any]:
@@ -242,7 +243,12 @@ class Nika(BaseSite):
         return (
             sum(
                 g(k, 0.0)
-                for k in ('CASH_AND_BANK', 'BOND', 'ACCOUNT_RECEIVABLE')
+                for k in (
+                    'CASH_AND_BANK',
+                    'BOND',
+                    'ACCOUNT_RECEIVABLE',
+                    'DEPOSIT_BROKER',
+                )
             )
             / 100.0
         )
