@@ -60,7 +60,6 @@
 اونیکس,در اوراق بهادار با درآمد ثابت کیمیا,Fixed,23498719713662118,12159,https://kimiafund.ir/,,TadbirPardaz,,1
 اکتان,بخشی صنایع مفید4,Sector,40374861063260484,12150,https://sector.mofidfund.com/,17,Nika,,
 اکستریم,آینده نگر دیاکو,Stock,17802352521411336,12561,https://diacofund.ir/,,TadbirPardaz,,1
-اکسیژن,سهامی اکسیژن,Stock,50094941173290382,12035,https://oxygen.o2am.ir/,,RayanHamafza2,,1
 بازبیمه,بخشی بازده صنعت بیمه,Sector,61483657213051835,12223,https://baazdehbakhshifund.ir/,1,RayanHamafza2,,
 بازده,بازده پایا,Fixed,34856765062083074,12042,https://baazdehpayafund.com/,,RayanHamafza2,,1
 بانکا,بخشی صنایع آگاه4,Sector,37120336886630649,12093,https://agahsectorfund.ir/,4,RayanHamafza2,,
@@ -92,7 +91,6 @@
 توسکا,در اوراق بهادار با درآمد ثابت توسعه فولاد,Fixed,56871139881800017,12155,https://tooskafund.ir/,,RayanHamafza2,,1
 تکپاد,مشترک ارزش پرداز آریان,Stock,1825060609227181,12227,https://aaiccofund.ir/,,RayanHamafza2,,1
 تیام,سهامی تیام,Stock,16578517055478811,12170,https://tiamfund.ir/,,RayanHamafza2,,1
-ثابت اکسیژن,در اوراق بهادار با درآمد ثابت اکسیژن,Fixed,44558786393585356,12171,https://nitrogen.o2am.ir/,,RayanHamafza2,,1
 ثبات,ثبات ویستا,Fixed,26780282166315918,11874,https://sobatvista.ir/,,RayanHamafza2,,1
 ثروت ساز,سهامی ثروت ساز دیبا,Stock,23609214278467198,12237,https://servatsazdiba.ir/,,MabnaDP2,,0
 ثروتم,ثروت آفرین پارسیان,Stock,71672399601682259,11327,https://sap-fund.com/,,RayanHamafza2,,1
@@ -136,7 +134,7 @@
 دیار,مشترک دیار,Stock,6279426571085158,12416,https://diarfund.ir/,2,MabnaDP2,,0
 دیبا,مختص اوراق دولتی بازده پایه بازار صبا,Fixed,70698996132397388,12045,https://payeh.sabaamc.ir/,,RayanHamafza2,,1
 رابین,توسعه افق رابین,Fixed,33527290777160784,12052,https://rabinetf.ir/,,RayanHamafza2,,1
-رادان,در سهام راد,Stock,59894184850560807,12485,https://radanfund.ir/,,MabnaDP2,,1
+رادان,در سهام راد,Stock,59894184850560807,12485,https://radanfund.ir/,,MabnaDP2,,0
 رایبد,صندوق س رایبد-ثابت,Fixed,25728853053886443,12494,https://raybodfixedincome.ir/,,RayanHamafza2,,1
 رایکا,نوع دوم رایکا,Fixed,66105959479616770,12024,https://raykaetf.com/,,RayanHamafza2,,1
 رخش,ثروت البرز,Stock,63886404454477678,12250,https://servatalborz.ir/,,MabnaDP2,,0
@@ -145,6 +143,8 @@
 رسانا,بخشی گستره فیروزه1,Sector,8961366473557410,12286,https://gostareh.fundz.ir/,2,TadbirPardazMultiNAV,,
 رشد,رشد پایدار آبان,Fixed,48287767791629523,11667,https://rpfund.ir/,,TadbirPardaz,,1
 رشدی کیان,آوای سهام کیان,Stock,4170494561477386,11477,https://kianfunds2.ir/,,RayanHamafza2,,1
+رواج,سهامی اکسیژن,Stock,50094941173290382,12035,https://oxygen.o2am.ir/,,RayanHamafza2,,1
+روال,در اوراق بهادار با درآمد ثابت اکسیژن,Fixed,44558786393585356,12171,https://nitrogen.o2am.ir/,,RayanHamafza2,,1
 رونق,رونق کسرا,Stock,24744049494761785,12367,https://ronagh.kasra-am.ir/,,MabnaDP2,,0
 رویش همراه,رویش همراه سرمایه,Stock,20119181940051841,12436,https://rooyeshetf.ir/,,MabnaDP2,,0
 رویین,بخشی فلزات رویین,Sector,53059909885484371,12179,https://surenasectorfund.ir/,2,TadbirPardazMultiNAV,,
@@ -287,6 +287,7 @@
 پاسارگاد,در اوراق بهادار با درآمد ثابت پاسارگاد,Fixed,61920683599787147,12365,https://pasargadetffund.ir/,,RayanHamafza2,,1
 پالایش,پالایشی یکم,Sector,67675656072510693,11745,https://p1fund.ir/,,RayanHamafza2,,1
 پایا,پایا ثروت پویا,Fixed,55070742656326885,12050,https://irpsf.ir/,,RayanHamafza2,,1
+پایدار,ص.س.درآمد ثابت رایا پایدار,Fixed,56650067865905863,12526,https://paydarfund.com/,,MabnaDP2,,0
 پایش,در اوراق بهادار با درآمد ثابت پایش,Fixed,58722731270352481,12245,https://dinafunds1.com/,,RayanHamafza2,,1
 پتروآبان,بخشی پترو آبان,Sector,18757639286384873,12198,https://apfund.ir/,2,TadbirPardazMultiNAV,,
 پتروآگاه,بخشی صنایع آگاه,Sector,37828981835497620,12093,https://agahsectorfund.ir/,1,RayanHamafza2,,
