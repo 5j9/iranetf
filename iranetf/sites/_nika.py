@@ -223,6 +223,7 @@ class Nika(BaseSite):
         'DEPOSIT_BROKER',
         'FUND',
         'GOLD_AND_BAR',
+        'OPTION',
         'OTHER_ASSET',
         'STOCK_AND_RIGHT_ADVANCE',
     }
